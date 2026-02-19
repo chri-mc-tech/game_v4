@@ -1,0 +1,7 @@
+-DVCPKG_TARGET_TRIPLET=x64-mingw-static
+
+pc fisso
+-DCMAKE_TOOLCHAIN_FILE=C:\Users\matte\.vcpkg-clion\scripts\buildsystems\vcpkg.cmake
+
+pc portatile
+-DCMAKE_TOOLCHAIN_FILE=C:\Users\chrim\.vcpkg-clion\vcpkg\scripts\buildsystems\vcpkg.cmake
