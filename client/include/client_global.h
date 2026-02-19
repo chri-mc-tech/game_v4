@@ -27,9 +27,14 @@ namespace global::sdl {
   inline int window_height = 720;
   inline float render_scale_x = 1.0f;
   inline float render_scale_y = 1.0f;
+}
 
-  // ttf
+namespace global::ttf {
   inline TTF_Font* font;
+  inline TTF_TextEngine* text_engine;
+
+  inline string input_text;
+
 }
 
 namespace config {}
