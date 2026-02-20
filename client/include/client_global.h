@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 namespace global {
+  inline string server_ip;
   inline bool debug = true;
   inline bool running;
   inline std::unordered_map<string, player> online_players;
