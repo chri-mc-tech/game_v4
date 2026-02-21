@@ -16,12 +16,16 @@ namespace ui {
     int t_width;
     int t_height;
     TTF_GetTextSize(ask_server_ip_text, &t_width, &t_height);
-    TTF_DrawRendererText(ask_server_ip_text, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 50);
+    TTF_DrawRendererText(ask_server_ip_text, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 300);
+
+
 
     TTF_Text* t_input_text = TTF_CreateText(text_engine, font, input_text.c_str(), 0);
     TTF_SetTextColor(t_input_text, 255, 255, 255, 255);
     TTF_GetTextSize(t_input_text, &t_width, &t_height);
-    TTF_DrawRendererText(t_input_text, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2));
+    TTF_DrawRendererText(t_input_text, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 250);
+
+
     if (input_text.ends_with("\n")) {
       input_text.erase(input_text.length() - 1, 1);
 

@@ -54,30 +54,21 @@ int connect_to_server(const string& ip, const string& port) {
   ENetAddress server_to_connect;
   enet_address_set_host(&server_to_connect, ip.c_str());
   server_to_connect.port = static_cast<enet_uint16>(std::stoul(port));
-
   global::enet::connected_server_peer = enet_host_connect(global::enet::enet_client, &server_to_connect, 2, 0);
-
   std::jthread wait_timeout(wait_6_seconds_timeout);
 
-  /*
-  // TODO: rifare questa parte in modo che sia non bloccante (forse gia fatto)
-
-  if ((enet_host_service(global::enet::enet_client, &global::enet::enet_event, 6000) > 0) && (global::enet::enet_event.type == ENET_EVENT_TYPE_CONNECT)) {
-    std::cout << "connected" << std::endl;
-  }
-  else {
-    std::cout << "connection failed" << std::endl;
-    enet_peer_reset(global::enet::connected_server_peer);
-    return 1;
-  }
-
-  */
-
+  wait_timeout.detach();
   return 0;
 }
 
+// TODO
+// ciao me del futuro,
+// non so neanche io a che punto sono arrivato
+// quindi rileggiti il codice e capisci da solo che cazzo devi fare,
+// io c'ho pure mal di pancia e vado a dormire, cazzi tuoi mo
+
 void wait_6_seconds_timeout() {
-  usleep(6000000);
+  std::this_thread::sleep_for(std::chrono::seconds(6));
   if (!global::enet::is_connected) {
     global::status = STATUS_ERROR_CONNECTING_TO_SERVER;
   }
