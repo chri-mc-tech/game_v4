@@ -5,56 +5,89 @@
 #include "client_global.h"
 #include "client_network.h"
 
+// call every tick ONLY dynamic text
+// static only once
+//
+// set:
+// text to render
+// text color
+
+// only create text object
+
+// save static text/ui in ui_cache_text and dynamic in ui_cache_dynamic_text
+
 namespace ui {
-  int ask_server_ip() {
+  TTF_Text* text_ask_server_ip;
+  TTF_Text* text_connecting;
+  TTF_Text* text_input;
+
+
+  // at game start
+  void create_text_objects() {
+    using namespace global::ttf;
+
+    text_ask_server_ip = TTF_CreateText(text_engine, font, "Server ip:", 0);
+    TTF_SetTextColor(text_ask_server_ip, 255, 255, 255, 255);
+
+    text_connecting = TTF_CreateText(text_engine, font, "connecting...", 0);
+    TTF_SetTextColor(text_connecting, 255, 255, 255, 255);
+    // modify with TTF_SetTextString()
+
+  }
+  // every tick (only if used)
+  void update_text_input() {
     using namespace global::ttf;
     using namespace global::sdl;
     using namespace global::enet;
 
-    TTF_Text* ask_server_ip_text = TTF_CreateText(text_engine, font, "Server ip:", 0);
-    TTF_SetTextColor(ask_server_ip_text, 255, 255, 255, 255);
+    TTF_DestroyText(text_input);
+
+    text_input = TTF_CreateText(text_engine, font, input_string.c_str(), 0);
+
+  }
+
+}
+
+
+
+// every tick, set location and render
+namespace ui::render {
+
+  void ask_server_ip() {
+    using namespace global::ttf;
+    using namespace global::sdl;
+    using namespace global::enet;
+
     int t_width;
     int t_height;
-    TTF_GetTextSize(ask_server_ip_text, &t_width, &t_height);
-    TTF_DrawRendererText(ask_server_ip_text, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 300);
+
+    TTF_GetTextSize(text_ask_server_ip, &t_width, &t_height);
+    TTF_DrawRendererText(text_ask_server_ip, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 300);
 
 
+    TTF_GetTextSize(text_input, &t_width, &t_height);
+    TTF_DrawRendererText(text_input, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 250);
 
-    TTF_Text* t_input_text = TTF_CreateText(text_engine, font, input_text.c_str(), 0);
-    TTF_SetTextColor(t_input_text, 255, 255, 255, 255);
-    TTF_GetTextSize(t_input_text, &t_width, &t_height);
-    TTF_DrawRendererText(t_input_text, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 250);
+    if (input_string.ends_with("\n")) {
+      input_string.erase(input_string.length() - 1, 1);
 
+      if (input_string.find(":") == std::string::npos) {connect_to_server(input_string);}
+      else {connect_to_server(input_string.substr(0, input_string.find(":")), input_string.substr(input_string.find(":") + 1));}
 
-    if (input_text.ends_with("\n")) {
-      input_text.erase(input_text.length() - 1, 1);
-
-      if (input_text.find(":") == std::string::npos) {connect_to_server(input_text);}
-      else {connect_to_server(input_text.substr(0, input_text.find(":")), input_text.substr(input_text.find(":") + 1));}
-
-      input_text.clear();
+      input_string.clear();
     }
-
-    return 0;
   }
 
-
-  int send_loading_screen_message() {
+  void connecting() {
     using namespace global::ttf;
     using namespace global::sdl;
     using namespace global::enet;
 
-    TTF_Text* text = TTF_CreateText(text_engine, font, loading_screen_text.c_str(), 0);
-    TTF_SetTextColor(text, 255, 255, 255, 255);
     int t_width;
     int t_height;
-    TTF_GetTextSize(text, &t_width, &t_height);
-    TTF_DrawRendererText(text, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 50);
 
-    return 0;
+    TTF_GetTextSize(text_connecting, &t_width, &t_height);
+    TTF_DrawRendererText(text_connecting, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2));
   }
-
-
-
 
 }

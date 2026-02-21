@@ -2,6 +2,14 @@
 #include <string>
 
 namespace ui {
-  int ask_server_ip();
-  int send_loading_screen_message();;
+  void create_text_objects();
+  void update_text_input();
+
+
+}
+
+namespace ui::render {
+  void ask_server_ip();
+  void connecting();
+
 }

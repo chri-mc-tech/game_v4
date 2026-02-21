@@ -36,17 +36,16 @@ namespace global::ttf {
   inline TTF_Font* font;
   inline TTF_TextEngine* text_engine;
 
-  inline string input_text;
-
-  inline string loading_screen_text;
+  inline string input_string;
 
 }
 
 namespace config {}
 
 enum status {
-  STATUS_WAITING_IP_INPUT = 0,
   STATUS_WAITING_TO_CONNECT = 1,
-  STATUS_CONNECTED_TO_SERVER = 2,
-  STATUS_ERROR_CONNECTING_TO_SERVER = 3,
+  STATUS_WAITING_IP_INPUT = 0,
+  STATUS_WAITING_ENCRYPTION = 2,
+  STATUS_CONNECTED_TO_SERVER = 3,
+  STATUS_ERROR_CONNECTING_TO_SERVER = 4,
 };

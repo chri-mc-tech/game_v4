@@ -39,13 +39,15 @@ int client_run() {
   global::ttf::font = TTF_OpenFont("main_font.ttf", 32);
   global::ttf::text_engine = TTF_CreateRendererTextEngine(global::sdl::renderer);
 
+  ui::create_text_objects();
+
   while (global::running) {
     enet_loop();
     sdl_poll_loop();
     sdl_loop();
 
-    if (global::ttf::input_text.ends_with("\n"))  {global::ttf::input_text.clear();}
-    if (!global::ttf::input_text.empty()) {std::cout << global::ttf::input_text << std::endl;}
+    if (global::ttf::input_string.ends_with("\n"))  {global::ttf::input_string.clear();}
+    if (!global::ttf::input_string.empty()) {std::cout << global::ttf::input_string << std::endl;}
   }
 
   return 0;
@@ -56,15 +58,15 @@ int sdl_poll_loop() {
     switch (global::sdl::sdl_event.type) {
       case SDL_EVENT_QUIT: global::running = false; break;
       case SDL_EVENT_WINDOW_RESIZED: SDL_GetWindowSize(global::sdl::window, &global::sdl::window_width, &global::sdl::window_height); break;
-      case SDL_EVENT_TEXT_INPUT: global::ttf::input_text += global::sdl::sdl_event.text.text; break;
+      case SDL_EVENT_TEXT_INPUT: global::ttf::input_string += global::sdl::sdl_event.text.text; break;
       case SDL_EVENT_KEY_DOWN: {
-        if (!global::ttf::input_text.empty()) {
+        if (!global::ttf::input_string.empty()) {
           if (global::sdl::sdl_event.key.key == SDLK_BACKSPACE) {
-            global::ttf::input_text.pop_back();
+            global::ttf::input_string.pop_back();
           }
           else if (global::sdl::sdl_event.key.key == SDLK_RETURN) {
-            if (!global::ttf::input_text.ends_with("\n")) {
-              global::ttf::input_text += "\n";
+            if (!global::ttf::input_string.ends_with("\n")) {
+              global::ttf::input_string += "\n";
             }
           }
         }
@@ -81,11 +83,17 @@ int sdl_loop() {
   SDL_SetRenderDrawColor(global::sdl::renderer, 0, 0, 0, 255);
   SDL_RenderClear(global::sdl::renderer);
   if (global::status == STATUS_WAITING_IP_INPUT) {
-    ui::ask_server_ip();
+    ui::render::ask_server_ip();
+    ui::update_text_input();
   }
 
+  if (global::status == STATUS_WAITING_TO_CONNECT) {
+    ui::render::connecting();
+  }
+
+  /*
   if (!global::ttf::loading_screen_text.empty()) {
-    ui::send_loading_screen_message();
+    //ui::send_loading_screen_message();
   }
 
   if (global::enet::is_connected && global::status == STATUS_WAITING_TO_CONNECT) {
@@ -98,6 +106,8 @@ int sdl_loop() {
     global::ttf::loading_screen_text = "error connecting to the server";
     global::status = STATUS_WAITING_IP_INPUT;
   }
+  */
+
 
   SDL_RenderPresent(global::sdl::renderer);
   SDL_Delay(10);

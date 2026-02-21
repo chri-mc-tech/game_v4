@@ -49,8 +49,6 @@ int enet_event_disconnected() {
 int connect_to_server(const string& ip, const string& port) {
   global::status = STATUS_WAITING_TO_CONNECT;
 
-  global::ttf::loading_screen_text = "connecting";
-
   ENetAddress server_to_connect;
   enet_address_set_host(&server_to_connect, ip.c_str());
   server_to_connect.port = static_cast<enet_uint16>(std::stoul(port));
@@ -60,12 +58,6 @@ int connect_to_server(const string& ip, const string& port) {
   wait_timeout.detach();
   return 0;
 }
-
-// TODO
-// ciao me del futuro,
-// non so neanche io a che punto sono arrivato
-// quindi rileggiti il codice e capisci da solo che cazzo devi fare,
-// io c'ho pure mal di pancia e vado a dormire, cazzi tuoi mo
 
 void wait_6_seconds_timeout() {
   std::this_thread::sleep_for(std::chrono::seconds(6));
