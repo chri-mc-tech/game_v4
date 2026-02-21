@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 bool initialize_libraries();
 int client_run();

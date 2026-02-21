@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 namespace global {
-  inline string server_ip;
+  inline int status = 0;
   inline bool debug = true;
   inline bool running;
   inline std::unordered_map<string, player> online_players;
@@ -17,6 +17,8 @@ namespace global {
 namespace global::enet {
   inline ENetEvent enet_event;
   inline ENetHost* enet_client = nullptr;
+  inline ENetPeer* connected_server_peer;
+  inline bool is_connected;
 }
 
 namespace global::sdl {
@@ -36,6 +38,15 @@ namespace global::ttf {
 
   inline string input_text;
 
+  inline string loading_screen_text;
+
 }
 
 namespace config {}
+
+enum status {
+  STATUS_WAITING_IP_INPUT = 0,
+  STATUS_WAITING_TO_CONNECT = 1,
+  STATUS_CONNECTED_TO_SERVER = 2,
+  STATUS_ERROR_CONNECTING_TO_SERVER = 3,
+};

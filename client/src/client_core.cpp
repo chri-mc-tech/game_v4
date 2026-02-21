@@ -46,7 +46,6 @@ int client_run() {
 
     if (global::ttf::input_text.ends_with("\n"))  {global::ttf::input_text.clear();}
     if (!global::ttf::input_text.empty()) {std::cout << global::ttf::input_text << std::endl;}
-
   }
 
   return 0;
@@ -81,17 +80,27 @@ int sdl_poll_loop() {
 int sdl_loop() {
   SDL_SetRenderDrawColor(global::sdl::renderer, 0, 0, 0, 255);
   SDL_RenderClear(global::sdl::renderer);
-  if (global::server_ip.empty()) {
+  if (global::status == STATUS_WAITING_IP_INPUT) {
     ui::ask_server_ip();
   }
-  else {
-    //TODO: fare che, dato ip:porta in input viene tentato il collegamento al server
+
+  if (!global::ttf::loading_screen_text.empty()) {
+    ui::send_loading_screen_message();
+  }
+
+  if (global::enet::is_connected && global::status == STATUS_WAITING_TO_CONNECT) {
+    global::status = STATUS_CONNECTED_TO_SERVER;
+    global::ttf::loading_screen_text.clear();
+
+  }
+
+  if (global::status == STATUS_ERROR_CONNECTING_TO_SERVER) {
+    global::ttf::loading_screen_text = "error connecting to the server";
+    global::status = STATUS_WAITING_IP_INPUT;
   }
 
   SDL_RenderPresent(global::sdl::renderer);
   SDL_Delay(10);
   return 0;
 }
-
-
 
