@@ -25,6 +25,7 @@ namespace global::sdl {
   inline SDL_Event sdl_event;
   inline SDL_Window* window;
   inline SDL_Renderer* renderer;
+  inline bool text_input_active;
 
   inline int window_width = 1280;
   inline int window_height = 720;
@@ -48,4 +49,5 @@ enum status {
   STATUS_WAITING_ENCRYPTION = 2,
   STATUS_CONNECTED_TO_SERVER = 3,
   STATUS_ERROR_CONNECTING_TO_SERVER = 4,
+  STATUS_DISCONNECTED_FROM_SERVER = 5,
 };

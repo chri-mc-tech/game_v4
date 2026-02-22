@@ -5,35 +5,35 @@
 #include "client_global.h"
 #include "client_network.h"
 
-// call every tick ONLY dynamic text
-// static only once
-//
-// set:
-// text to render
-// text color
-
-// only create text object
-
-// save static text/ui in ui_cache_text and dynamic in ui_cache_dynamic_text
-
 namespace ui {
-  TTF_Text* text_ask_server_ip;
-  TTF_Text* text_connecting;
-  TTF_Text* text_input;
+  // texts:
+  // set string and color
+
+  // static shapes:
+  // set location and dimension
+
+  // dynamic shapes:
+  // nothing
 
 
   // at game start
-  void create_text_objects() {
+  void create_objects_to_render() {
     using namespace global::ttf;
 
     text_ask_server_ip = TTF_CreateText(text_engine, font, "Server ip:", 0);
     TTF_SetTextColor(text_ask_server_ip, 255, 255, 255, 255);
 
-    text_connecting = TTF_CreateText(text_engine, font, "connecting...", 0);
-    TTF_SetTextColor(text_connecting, 255, 255, 255, 255);
-    // modify with TTF_SetTextString()
-
+    text_connection_status = TTF_CreateText(text_engine, font, NULL, 0);
+    TTF_SetTextColor(text_connection_status, 255, 255, 255, 255);
   }
+
+  void create_buttons() {
+    shape_continue_button = {static_cast<float>(global::sdl::window_width)/2 - 80, static_cast<float>(global::sdl::window_height)/2 + 30, 160, 50};
+    continue_on_error_connecting_to_server.rect = &shape_continue_button;
+    continue_on_error_connecting_to_server.target_status = STATUS_WAITING_IP_INPUT;
+  }
+
+
   // every tick (only if used)
   void update_text_input() {
     using namespace global::ttf;
@@ -50,7 +50,12 @@ namespace ui {
 
 
 
-// every tick, set location and render
+// every tick
+// texts:
+// set location and render
+
+// shapes:
+// only render
 namespace ui::render {
 
   void ask_server_ip() {
@@ -78,7 +83,7 @@ namespace ui::render {
     }
   }
 
-  void connecting() {
+  void connection_status() {
     using namespace global::ttf;
     using namespace global::sdl;
     using namespace global::enet;
@@ -86,8 +91,31 @@ namespace ui::render {
     int t_width;
     int t_height;
 
-    TTF_GetTextSize(text_connecting, &t_width, &t_height);
-    TTF_DrawRendererText(text_connecting, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2));
+    TTF_GetTextSize(text_connection_status, &t_width, &t_height);
+    TTF_DrawRendererText(text_connection_status, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2));
   }
+}
 
+
+
+void Button::handle_event(const SDL_Event &event) const {
+  if (event.button.button == SDL_BUTTON_LEFT) {
+    int mouse_x = event.button.x;
+    int mouse_y = event.button.y;
+
+    float x = rect->x;
+    float y = rect->y;
+    float w = rect->w;
+    float h = rect->h;
+
+    if (mouse_x >= x && mouse_x <= (x + w) && mouse_y >= y && mouse_y <= (y + h)) {
+      global::status = target_status;
+    }
+
+  }
+}
+
+void Button::render(const SDL_FRect rect) {
+  SDL_SetRenderDrawColor(global::sdl::renderer, 180, 180, 180, 200);
+  SDL_RenderFillRect(global::sdl::renderer, &rect);
 }

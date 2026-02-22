@@ -30,6 +30,7 @@ int enet_loop() {
 int enet_event_connected() {
   std::cout << "connected" << std::endl;
   global::enet::is_connected = true;
+  global::status = STATUS_CONNECTED_TO_SERVER;
 
   return 0;
 }
@@ -42,6 +43,8 @@ int enet_event_receive() {
 int enet_event_disconnected() {
   std::cout << "disconnected" << std::endl;
   global::enet::is_connected = false;
+  global::status = STATUS_DISCONNECTED_FROM_SERVER;
+
   return 0;
 }
 
@@ -63,5 +66,6 @@ void wait_6_seconds_timeout() {
   std::this_thread::sleep_for(std::chrono::seconds(6));
   if (!global::enet::is_connected) {
     global::status = STATUS_ERROR_CONNECTING_TO_SERVER;
+    enet_peer_reset(global::enet::connected_server_peer);
   }
 }
