@@ -97,19 +97,40 @@ namespace ui::render {
 }
 
 
+//TODO: fare che il pulsante, alla creazione, chiede dimensioni e testo
+//genera direttamente lui la forma e il testo, e al rendering la posizione
+class Button {
+public:
+  float loc_x;
+  float loc_y;
+  float width;
+  float height;
+  SDL_Color color = {};
+  string text_string;
+  SDL_FRect rect;
+  TTF_Text *text;
 
-void Button::handle_event(const SDL_Event &event) const {
+  // call once
+  void create_button();
+
+  // call every tick checking current status/ui
+  void handle_event(const SDL_Event &event, void (*function_to_execute)()) const;
+
+  static void render(SDL_FRect rect);
+};
+
+void Button::create_button() {
+  rect = {loc_x, loc_y, width, height};
+  text = TTF_CreateText(global::ttf::text_engine, global::ttf::font, text_string.c_str(), 0);
+}
+
+void Button::handle_event(const SDL_Event &event, void (*function_to_execute)()) const {
   if (event.button.button == SDL_BUTTON_LEFT) {
     int mouse_x = event.button.x;
     int mouse_y = event.button.y;
 
-    float x = rect->x;
-    float y = rect->y;
-    float w = rect->w;
-    float h = rect->h;
-
-    if (mouse_x >= x && mouse_x <= (x + w) && mouse_y >= y && mouse_y <= (y + h)) {
-      global::status = target_status;
+    if (mouse_x >= loc_x && mouse_x <= (loc_x + width) && mouse_y >= loc_y && mouse_y <= (loc_y + height)) {
+      function_to_execute();
     }
 
   }
