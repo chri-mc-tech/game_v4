@@ -105,7 +105,7 @@ public:
   float loc_y;
   float width;
   float height;
-  SDL_Color color = {};
+  SDL_Color color;
   string text_string;
   SDL_FRect rect;
   TTF_Text *text;
@@ -113,10 +113,11 @@ public:
   // call once
   void create_button();
 
-  // call every tick checking current status/ui
+  // call every tick in sdl polling loop in case: SDL_EVENT_MOUSE_BUTTON_DOWN checking current status/ui
   void handle_event(const SDL_Event &event, void (*function_to_execute)()) const;
 
-  static void render(SDL_FRect rect);
+  // call every tick in sdl loop checking current status/ui
+  void render() const;
 };
 
 void Button::create_button() {
@@ -124,6 +125,7 @@ void Button::create_button() {
   text = TTF_CreateText(global::ttf::text_engine, global::ttf::font, text_string.c_str(), 0);
 }
 
+// call every tick in sdl polling loop in case: SDL_EVENT_MOUSE_BUTTON_DOWN
 void Button::handle_event(const SDL_Event &event, void (*function_to_execute)()) const {
   if (event.button.button == SDL_BUTTON_LEFT) {
     int mouse_x = event.button.x;
@@ -136,7 +138,9 @@ void Button::handle_event(const SDL_Event &event, void (*function_to_execute)())
   }
 }
 
-void Button::render(const SDL_FRect rect) {
-  SDL_SetRenderDrawColor(global::sdl::renderer, 180, 180, 180, 200);
+// call every tick in sdl loop checking current status/ui
+void Button::render() const {
+  SDL_SetRenderDrawColor(global::sdl::renderer, color.r, color.g, color.b, color.a);
   SDL_RenderFillRect(global::sdl::renderer, &rect);
+  TTF_DrawRendererText()
 }
