@@ -103,8 +103,10 @@ class Button {
 public:
   float loc_x;
   float loc_y;
-  float width;
-  float height;
+  float button_width;
+  float button_height;
+  int text_width;
+  int text_height;
   SDL_Color color;
   string text_string;
   SDL_FRect rect;
@@ -121,8 +123,9 @@ public:
 };
 
 void Button::create_button() {
-  rect = {loc_x, loc_y, width, height};
+  rect = {loc_x, loc_y, button_width, button_height};
   text = TTF_CreateText(global::ttf::text_engine, global::ttf::font, text_string.c_str(), 0);
+  TTF_GetTextSize(text, &text_width, &text_height);
 }
 
 // call every tick in sdl polling loop in case: SDL_EVENT_MOUSE_BUTTON_DOWN
@@ -131,7 +134,7 @@ void Button::handle_event(const SDL_Event &event, void (*function_to_execute)())
     int mouse_x = event.button.x;
     int mouse_y = event.button.y;
 
-    if (mouse_x >= loc_x && mouse_x <= (loc_x + width) && mouse_y >= loc_y && mouse_y <= (loc_y + height)) {
+    if (mouse_x >= loc_x && mouse_x <= (loc_x + button_width) && mouse_y >= loc_y && mouse_y <= (loc_y + button_height)) {
       function_to_execute();
     }
 
@@ -142,5 +145,6 @@ void Button::handle_event(const SDL_Event &event, void (*function_to_execute)())
 void Button::render() const {
   SDL_SetRenderDrawColor(global::sdl::renderer, color.r, color.g, color.b, color.a);
   SDL_RenderFillRect(global::sdl::renderer, &rect);
-  TTF_DrawRendererText(text, );
+  TTF_DrawRendererText(text, (button_width - text_width) / 2, (button_height - text_height) / 2);
+
 }
