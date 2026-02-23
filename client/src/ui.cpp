@@ -142,5 +142,5 @@ void Button::handle_event(const SDL_Event &event, void (*function_to_execute)())
 void Button::render() const {
   SDL_SetRenderDrawColor(global::sdl::renderer, color.r, color.g, color.b, color.a);
   SDL_RenderFillRect(global::sdl::renderer, &rect);
-  TTF_DrawRendererText();
+  TTF_DrawRendererText(text, );
 }
