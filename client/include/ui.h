@@ -4,6 +4,8 @@
 
 #include "client_global.h"
 
+// TODO: fare che al rendering del pulsante venga risettata la posizione riprendendo window_width e window_height
+// aggiungere che si puo mettere BUTTON_CENTERED, BUTTON_CENTERED_HORIZONTAL, BUTTON_CENTERED_VERTICAL
 
 class Button {
 public:
