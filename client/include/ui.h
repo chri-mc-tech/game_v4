@@ -4,6 +4,30 @@
 
 #include "client_global.h"
 
+
+class Button {
+public:
+  float loc_x;
+  float loc_y;
+  float button_width;
+  float button_height;
+  int text_width;
+  int text_height;
+  SDL_Color color;
+  string text_string;
+  SDL_FRect rect;
+  TTF_Text *text;
+
+  // call once
+  void create_button();
+
+  // call every tick in sdl polling loop in case: SDL_EVENT_MOUSE_BUTTON_DOWN checking current status/ui
+  void handle_event(const SDL_Event &event, std::function<void()> function_to_execute) const;
+
+  // call every tick in sdl loop checking current status/ui
+  void render() const;
+};
+
 namespace ui {
   inline TTF_Text* text_ask_server_ip;
   inline TTF_Text* text_connection_status;
@@ -16,6 +40,8 @@ namespace ui {
   void create_buttons();
 
   // inline Button continue_on_error_connecting_to_server;
+
+  inline Button button_continue;
 
 }
 

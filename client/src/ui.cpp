@@ -28,9 +28,19 @@ namespace ui {
   }
 
   void create_buttons() {
-    shape_continue_button = {static_cast<float>(global::sdl::window_width)/2 - 80, static_cast<float>(global::sdl::window_height)/2 + 30, 160, 50};
-    continue_on_error_connecting_to_server.rect = &shape_continue_button;
-    continue_on_error_connecting_to_server.target_status = STATUS_WAITING_IP_INPUT;
+    // shape_continue_button = {static_cast<float>(global::sdl::window_width)/2 - 80, static_cast<float>(global::sdl::window_height)/2 + 30, 160, 50};
+    // continue_on_error_connecting_to_server.rect = &shape_continue_button;
+    // continue_on_error_connecting_to_server.target_status = STATUS_WAITING_IP_INPUT;
+
+    // Button button_continue;
+    button_continue.text_string = "Continue";
+    button_continue.loc_x = (global::sdl::window_width/2);
+    button_continue.loc_y = (global::sdl::window_height/2) - 100;
+    button_continue.button_width = 140;
+    button_continue.button_height = 60;
+    button_continue.color = {80, 80, 80, 255};
+    button_continue.create_button();
+
   }
 
 
@@ -47,8 +57,6 @@ namespace ui {
   }
 
 }
-
-
 
 // every tick
 // texts:
@@ -97,31 +105,6 @@ namespace ui::render {
 }
 
 
-//TODO: fare che il pulsante, alla creazione, chiede dimensioni e testo
-//genera direttamente lui la forma e il testo, e al rendering la posizione
-class Button {
-public:
-  float loc_x;
-  float loc_y;
-  float button_width;
-  float button_height;
-  int text_width;
-  int text_height;
-  SDL_Color color;
-  string text_string;
-  SDL_FRect rect;
-  TTF_Text *text;
-
-  // call once
-  void create_button();
-
-  // call every tick in sdl polling loop in case: SDL_EVENT_MOUSE_BUTTON_DOWN checking current status/ui
-  void handle_event(const SDL_Event &event, void (*function_to_execute)()) const;
-
-  // call every tick in sdl loop checking current status/ui
-  void render() const;
-};
-
 void Button::create_button() {
   rect = {loc_x, loc_y, button_width, button_height};
   text = TTF_CreateText(global::ttf::text_engine, global::ttf::font, text_string.c_str(), 0);
@@ -129,7 +112,7 @@ void Button::create_button() {
 }
 
 // call every tick in sdl polling loop in case: SDL_EVENT_MOUSE_BUTTON_DOWN
-void Button::handle_event(const SDL_Event &event, void (*function_to_execute)()) const {
+void Button::handle_event(const SDL_Event &event, std::function<void()> function_to_execute) const {
   if (event.button.button == SDL_BUTTON_LEFT) {
     int mouse_x = event.button.x;
     int mouse_y = event.button.y;
@@ -137,7 +120,6 @@ void Button::handle_event(const SDL_Event &event, void (*function_to_execute)())
     if (mouse_x >= loc_x && mouse_x <= (loc_x + button_width) && mouse_y >= loc_y && mouse_y <= (loc_y + button_height)) {
       function_to_execute();
     }
-
   }
 }
 
@@ -145,6 +127,6 @@ void Button::handle_event(const SDL_Event &event, void (*function_to_execute)())
 void Button::render() const {
   SDL_SetRenderDrawColor(global::sdl::renderer, color.r, color.g, color.b, color.a);
   SDL_RenderFillRect(global::sdl::renderer, &rect);
-  TTF_DrawRendererText(text, (button_width - text_width) / 2, (button_height - text_height) / 2);
+  TTF_DrawRendererText(text, (loc_x), (loc_y));
 
 }
