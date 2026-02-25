@@ -29,6 +29,15 @@ bool initialize_libraries() {
 }
 
 // TODO: controlli importanti come password e crittografia farli lato server per evitare exploit
+// fare che quando un player si collega non vene fatto nulla dal server ma il client manda un pacchetto con uuid
+// viene creato il player con uuid come PK e viene generata chiave privata server, chiave pubblica server
+// poi il client genera la chiave privata e pubblica del client e vengono scambiate le chiavi pubbliche
+// poi vengono generate le session key e dopo le encryption key sia su client che su server
+// avendo gia l'uuid, il server controlla se è salvato nel db locale
+// se l'utente esiste il server chiede la password per registrarsi e la salva nel db
+// senno chiede la pass di login e la confronta con quella salvata nel db
+
+// il server controlla l'hash col db e controlla se è del utente
 
 int client_run() {
   global::running = true;
@@ -98,7 +107,7 @@ int sdl_poll_loop() {
       }
 
       case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-        ui::button_continue.handle_event(sdl_event, [](){set_status(STATUS_WAITING_IP_INPUT);});
+        ui::button_continue.handle_event(sdl_event, [](){set_status(STATUS_WAITING_USER_INPUT_IP);});
       }
 
       default: break;
@@ -112,14 +121,14 @@ int sdl_poll_loop() {
 int sdl_loop() {
   SDL_SetRenderDrawColor(global::sdl::renderer, 0, 0, 0, 255);
   SDL_RenderClear(global::sdl::renderer);
-  if (global::status == STATUS_WAITING_IP_INPUT) {
+  if (global::status == STATUS_WAITING_USER_INPUT_IP) {
     activate_text_input();
     ui::render::ask_server_ip();
     ui::update_text_input();
 
   }
 
-  if (global::status == STATUS_WAITING_TO_CONNECT) {
+  if (global::status == STATUS_CONNECTING) {
     deactivate_text_input();
     TTF_SetTextString(ui::text_connection_status, "Connecting...", 0);
     ui::render::connection_status();
@@ -134,13 +143,16 @@ int sdl_loop() {
 
   }
 
-  if (global::status == STATUS_CONNECTED_TO_SERVER) {
-    TTF_SetTextString(ui::text_connection_status, "Connected", 0);
+  if (global::status == STATUS_ENCRYPTING) {
+    deactivate_text_input();
+    TTF_SetTextString(ui::text_connection_status, "Encrypting", 0);
     ui::render::connection_status();
   }
 
   if (global::status == STATUS_DISCONNECTED_FROM_SERVER) {
+    deactivate_text_input();
     TTF_SetTextString(ui::text_connection_status, "Disconnected from server", 0);
+    ui::button_continue.render();
     ui::render::connection_status();
   }
 

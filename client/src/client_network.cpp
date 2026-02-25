@@ -30,7 +30,7 @@ int enet_loop() {
 int enet_event_connected() {
   std::cout << "connected" << std::endl;
   global::enet::is_connected = true;
-  global::status = STATUS_WAITING_ENCRYPTION;
+  global::status = STATUS_ENCRYPTING;
 
   return 0;
 }
@@ -50,7 +50,7 @@ int enet_event_disconnected() {
 
 // return 0 if connected and 1 on error
 int connect_to_server(const string& ip, const string& port) {
-  global::status = STATUS_WAITING_TO_CONNECT;
+  global::status = STATUS_CONNECTING;
 
   ENetAddress server_to_connect;
   enet_address_set_host(&server_to_connect, ip.c_str());

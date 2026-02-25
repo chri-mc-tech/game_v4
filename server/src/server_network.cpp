@@ -4,6 +4,8 @@
 #include <server_logger.h>
 #include <enet/enet.h>
 
+#include "shared_crypto.h"
+
 int enet_loop() {
   while (enet_host_service(global::enet::enet_server, &global::enet::enet_event, 0) > 0) {
     switch (global::enet::enet_event.type) {
@@ -23,6 +25,9 @@ int enet_event_connected() {
 
 int enet_event_receive() {
   log_info("packet received");
+  player temp_player;
+  temp_player.private_key = shared::crypto::create_private_key();
+  temp_player.server_public_key = shared::crypto::create_public_key(temp_player.private_key);
   return 0;
 }
 
