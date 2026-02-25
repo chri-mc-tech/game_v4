@@ -104,9 +104,11 @@ namespace ui::render {
   }
 }
 
+// ------
+// button
+// ------
 
 void Button::create_button() {
-  rect = {loc_x, loc_y, button_width, button_height};
   text = TTF_CreateText(global::ttf::text_engine, global::ttf::font, text_string.c_str(), 0);
   TTF_GetTextSize(text, &text_width, &text_height);
 }
@@ -124,9 +126,16 @@ void Button::handle_event(const SDL_Event &event, std::function<void()> function
 }
 
 // call every tick in sdl loop checking current status/ui
-void Button::render() const {
+void Button::render() {
+  rect = {loc_x, loc_y, button_width, button_height};
   SDL_SetRenderDrawColor(global::sdl::renderer, color.r, color.g, color.b, color.a);
   SDL_RenderFillRect(global::sdl::renderer, &rect);
   TTF_DrawRendererText(text, (loc_x), (loc_y));
 
 }
+
+void Button::update_location(float new_loc_x, float new_loc_y) {
+  loc_x = new_loc_x;
+  loc_y = new_loc_y;
+}
+

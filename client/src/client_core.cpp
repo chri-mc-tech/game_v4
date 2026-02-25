@@ -122,8 +122,7 @@ int sdl_loop() {
   if (global::status == STATUS_ERROR_CONNECTING_TO_SERVER) {
     deactivate_text_input();
     TTF_SetTextString(ui::text_connection_status, "Error connecting to the server", 0);
-    // temp
-    // ui::shape_continue_button = {static_cast<float>(global::sdl::window_width)/2 - 80, static_cast<float>(global::sdl::window_height)/2 + 30, 160, 50};
+    ui::button_continue.update_location(global::sdl::window_width/2, global::sdl::window_height/2);
     ui::button_continue.render();
     ui::render::connection_status();
 
@@ -136,9 +135,6 @@ int sdl_loop() {
 
   if (global::status == STATUS_DISCONNECTED_FROM_SERVER) {
     TTF_SetTextString(ui::text_connection_status, "Disconnected from server", 0);
-    // temp
-    ui::shape_continue_button = {static_cast<float>(global::sdl::window_width)/2 - 80, static_cast<float>(global::sdl::window_height)/2 + 30, 160, 50};
-    // Button::render(ui::shape_continue_button);
     ui::render::connection_status();
   }
 
