@@ -36,8 +36,10 @@ namespace ui {
     button_continue.text_string = "Continue";
     button_continue.loc_x = (global::sdl::window_width/2);
     button_continue.loc_y = (global::sdl::window_height/2) - 100;
-    button_continue.button_width = 140;
-    button_continue.button_height = 60;
+    button_continue.padding_left = 10;
+    button_continue.padding_right = 10;
+    button_continue.padding_top = 10;
+    button_continue.padding_bottom = 10;
     button_continue.color = {80, 80, 80, 255};
     button_continue.create_button();
 
@@ -119,18 +121,28 @@ void Button::handle_event(const SDL_Event &event, std::function<void()> function
     int mouse_x = event.button.x;
     int mouse_y = event.button.y;
 
-    if (mouse_x >= loc_x && mouse_x <= (loc_x + button_width) && mouse_y >= loc_y && mouse_y <= (loc_y + button_height)) {
+    if (mouse_x >= (loc_x) && mouse_x <= (loc_x + padding_left + text_width + padding_right) && mouse_y >= (loc_y) && mouse_y <= (loc_y + padding_top + text_height + padding_bottom)) {
       function_to_execute();
     }
   }
 }
 
 // call every tick in sdl loop checking current status/ui
-void Button::render() {
-  rect = {loc_x, loc_y, button_width, button_height};
+void Button::render(int flag) {
+  float render_loc_x;
+  float render_loc_y;
+  if (flag == BUTTON_CENTERED_HORIZONTAL || flag == BUTTON_CENTERED) {
+    render_loc_x = loc_x - ((padding_left + text_width + padding_right) / 2);
+  }
+
+  if (flag == BUTTON_CENTERED_VERTICAL || flag == BUTTON_CENTERED) {
+    //TODO: continua
+  }
+
+  rect = {render_loc_x, render_loc_y, padding_left + text_width + padding_right, padding_top + text_height + padding_bottom};
   SDL_SetRenderDrawColor(global::sdl::renderer, color.r, color.g, color.b, color.a);
   SDL_RenderFillRect(global::sdl::renderer, &rect);
-  TTF_DrawRendererText(text, (loc_x), (loc_y));
+  TTF_DrawRendererText(text, (render_loc_x + padding_left), (render_loc_y + padding_top));
 
 }
 
