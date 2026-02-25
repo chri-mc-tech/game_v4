@@ -22,6 +22,7 @@ public:
   string text_string;
   SDL_FRect rect;
   TTF_Text *text;
+  int flag = 0;
 
   // call once
   void create_button();
@@ -30,7 +31,7 @@ public:
   void handle_event(const SDL_Event &event, std::function<void()> function_to_execute) const;
 
   // call every tick in sdl loop checking current status/ui
-  void render(int flag = 0);
+  void render();
 
   // call every tick if you want to update the location dynamically
   void update_location(float new_loc_x, float new_loc_y);

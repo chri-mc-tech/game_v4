@@ -35,12 +35,13 @@ namespace ui {
     // Button button_continue;
     button_continue.text_string = "Continue";
     button_continue.loc_x = (global::sdl::window_width/2);
-    button_continue.loc_y = (global::sdl::window_height/2) - 100;
-    button_continue.padding_left = 10;
-    button_continue.padding_right = 10;
-    button_continue.padding_top = 10;
-    button_continue.padding_bottom = 10;
-    button_continue.color = {80, 80, 80, 255};
+    button_continue.loc_y = (global::sdl::window_height/2) + 100;
+    button_continue.padding_left = 30;
+    button_continue.padding_right = 30;
+    button_continue.padding_top = 30;
+    button_continue.padding_bottom = 30;
+    button_continue.color = {40, 40, 40, 255};
+    button_continue.flag = BUTTON_CENTERED;
     button_continue.create_button();
 
   }
@@ -113,6 +114,14 @@ namespace ui::render {
 void Button::create_button() {
   text = TTF_CreateText(global::ttf::text_engine, global::ttf::font, text_string.c_str(), 0);
   TTF_GetTextSize(text, &text_width, &text_height);
+
+  if (flag == BUTTON_CENTERED_HORIZONTAL || flag == BUTTON_CENTERED) {
+    loc_x = loc_x - ((padding_left + text_width + padding_right) / 2);
+  }
+
+  if (flag == BUTTON_CENTERED_VERTICAL || flag == BUTTON_CENTERED) {
+    loc_y = loc_x - ((padding_top + text_height + padding_bottom) / 2);
+  }
 }
 
 // call every tick in sdl polling loop in case: SDL_EVENT_MOUSE_BUTTON_DOWN
@@ -128,26 +137,24 @@ void Button::handle_event(const SDL_Event &event, std::function<void()> function
 }
 
 // call every tick in sdl loop checking current status/ui
-void Button::render(int flag) {
-  float render_loc_x;
-  float render_loc_y;
+void Button::render() {
+
+  rect = {loc_x, loc_y, padding_left + text_width + padding_right, padding_top + text_height + padding_bottom};
+  SDL_SetRenderDrawColor(global::sdl::renderer, color.r, color.g, color.b, color.a);
+  SDL_RenderFillRect(global::sdl::renderer, &rect);
+  TTF_DrawRendererText(text, (loc_x + padding_left), (loc_y + padding_top));
+
+}
+
+// call every in sdl polling every time the window is resized
+void Button::update_location(float new_loc_x, float new_loc_y) {
   if (flag == BUTTON_CENTERED_HORIZONTAL || flag == BUTTON_CENTERED) {
-    render_loc_x = loc_x - ((padding_left + text_width + padding_right) / 2);
+    loc_x = new_loc_x - ((padding_left + text_width + padding_right) / 2);
   }
 
   if (flag == BUTTON_CENTERED_VERTICAL || flag == BUTTON_CENTERED) {
-    //TODO: continua
+    loc_y = new_loc_y - ((padding_top + text_height + padding_bottom) / 2);
   }
-
-  rect = {render_loc_x, render_loc_y, padding_left + text_width + padding_right, padding_top + text_height + padding_bottom};
-  SDL_SetRenderDrawColor(global::sdl::renderer, color.r, color.g, color.b, color.a);
-  SDL_RenderFillRect(global::sdl::renderer, &rect);
-  TTF_DrawRendererText(text, (render_loc_x + padding_left), (render_loc_y + padding_top));
-
 }
 
-void Button::update_location(float new_loc_x, float new_loc_y) {
-  loc_x = new_loc_x;
-  loc_y = new_loc_y;
-}
 

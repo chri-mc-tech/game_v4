@@ -75,7 +75,11 @@ int sdl_poll_loop() {
   while (SDL_PollEvent(&sdl_event)) {
     switch (sdl_event.type) {
       case SDL_EVENT_QUIT: global::running = false; break;
-      case SDL_EVENT_WINDOW_RESIZED: SDL_GetWindowSize(global::sdl::window, &global::sdl::window_width, &global::sdl::window_height); break;
+      case SDL_EVENT_WINDOW_RESIZED: {
+        SDL_GetWindowSize(global::sdl::window, &global::sdl::window_width, &global::sdl::window_height);
+        ui::button_continue.update_location(global::sdl::window_width/2, global::sdl::window_height/2 + 100);
+        break;
+      }
       case SDL_EVENT_TEXT_INPUT: global::ttf::input_string += sdl_event.text.text; break;
       case SDL_EVENT_KEY_DOWN: {
         if (sdl_event.key.key == SDLK_BACKSPACE) {
@@ -88,6 +92,7 @@ int sdl_poll_loop() {
             global::ttf::input_string += "\n";
           }
         }
+        break;
       }
 
       case SDL_EVENT_MOUSE_BUTTON_DOWN: {
@@ -122,7 +127,6 @@ int sdl_loop() {
   if (global::status == STATUS_ERROR_CONNECTING_TO_SERVER) {
     deactivate_text_input();
     TTF_SetTextString(ui::text_connection_status, "Error connecting to the server", 0);
-    ui::button_continue.update_location(global::sdl::window_width/2, global::sdl::window_height/2);
     ui::button_continue.render();
     ui::render::connection_status();
 
