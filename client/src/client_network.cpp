@@ -30,7 +30,7 @@ int enet_loop() {
 int enet_event_connected() {
   std::cout << "connected" << std::endl;
   global::enet::is_connected = true;
-  global::status = STATUS_CONNECTED_TO_SERVER;
+  global::status = STATUS_WAITING_ENCRYPTION;
 
   return 0;
 }
@@ -56,13 +56,13 @@ int connect_to_server(const string& ip, const string& port) {
   enet_address_set_host(&server_to_connect, ip.c_str());
   server_to_connect.port = static_cast<enet_uint16>(std::stoul(port));
   global::enet::connected_server_peer = enet_host_connect(global::enet::enet_client, &server_to_connect, 2, 0);
-  std::jthread wait_timeout(wait_6_seconds_timeout);
+  std::jthread thread_wait_server_connection(wait_server_connection);
 
-  wait_timeout.detach();
+  thread_wait_server_connection.detach();
   return 0;
 }
 
-void wait_6_seconds_timeout() {
+void wait_server_connection() {
   std::this_thread::sleep_for(std::chrono::seconds(6));
   if (!global::enet::is_connected) {
     global::status = STATUS_ERROR_CONNECTING_TO_SERVER;

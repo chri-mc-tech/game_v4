@@ -28,13 +28,15 @@ bool initialize_libraries() {
   return true;
 }
 
+// TODO: controlli importanti come password e crittografia farli lato server per evitare exploit
+
 int client_run() {
   global::running = true;
 
   global::sdl::window = SDL_CreateWindow("game", global::sdl::window_width, global::sdl::window_height, SDL_WINDOW_RESIZABLE);
   global::sdl::renderer = SDL_CreateRenderer(global::sdl::window, nullptr);
 
-  global::ttf::font = TTF_OpenFont("main_font.ttf", 32);
+  global::ttf::font = TTF_OpenFont("Archivo-SemiBold.ttf", 40);
   global::ttf::text_engine = TTF_CreateRendererTextEngine(global::sdl::renderer);
 
   ui::create_objects_to_render();
@@ -141,7 +143,6 @@ int sdl_loop() {
     TTF_SetTextString(ui::text_connection_status, "Disconnected from server", 0);
     ui::render::connection_status();
   }
-
 
   SDL_RenderPresent(global::sdl::renderer);
   // SDL_Delay(2);

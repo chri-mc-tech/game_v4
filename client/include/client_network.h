@@ -9,4 +9,4 @@ int enet_event_receive();
 int enet_event_disconnected();
 int create_enet_host();
 int connect_to_server(const string& ip, const string& port = "23234");
-void wait_6_seconds_timeout();
+void wait_server_connection();

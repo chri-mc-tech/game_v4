@@ -23,7 +23,7 @@ namespace ui {
     text_ask_server_ip = TTF_CreateText(text_engine, font, "Server ip:", 0);
     TTF_SetTextColor(text_ask_server_ip, 255, 255, 255, 255);
 
-    text_connection_status = TTF_CreateText(text_engine, font, NULL, 0);
+    text_connection_status = TTF_CreateText(text_engine, font, nullptr, 0);
     TTF_SetTextColor(text_connection_status, 255, 255, 255, 255);
   }
 
@@ -36,10 +36,10 @@ namespace ui {
     button_continue.text_string = "Continue";
     button_continue.loc_x = (global::sdl::window_width/2);
     button_continue.loc_y = (global::sdl::window_height/2) + 100;
-    button_continue.padding_left = 30;
-    button_continue.padding_right = 30;
-    button_continue.padding_top = 30;
-    button_continue.padding_bottom = 30;
+    button_continue.padding_left = 10;
+    button_continue.padding_right = 10;
+    button_continue.padding_top = 10;
+    button_continue.padding_bottom = 10;
     button_continue.color = {40, 40, 40, 255};
     button_continue.flag = BUTTON_CENTERED;
     button_continue.create_button();
@@ -120,7 +120,7 @@ void Button::create_button() {
   }
 
   if (flag == BUTTON_CENTERED_VERTICAL || flag == BUTTON_CENTERED) {
-    loc_y = loc_x - ((padding_top + text_height + padding_bottom) / 2);
+    loc_y = loc_y - ((padding_top + text_height + padding_bottom) / 2);
   }
 }
 
@@ -142,8 +142,7 @@ void Button::render() {
   rect = {loc_x, loc_y, padding_left + text_width + padding_right, padding_top + text_height + padding_bottom};
   SDL_SetRenderDrawColor(global::sdl::renderer, color.r, color.g, color.b, color.a);
   SDL_RenderFillRect(global::sdl::renderer, &rect);
-  TTF_DrawRendererText(text, (loc_x + padding_left), (loc_y + padding_top));
-
+  TTF_DrawRendererText(text, (int)(loc_x + padding_left), (int)(loc_y + padding_top));
 }
 
 // call every in sdl polling every time the window is resized
