@@ -87,7 +87,7 @@ namespace ui::render {
     if (input_string.ends_with("\n")) {
       input_string.erase(input_string.length() - 1, 1);
 
-      if (input_string.find(":") == std::string::npos) {connect_to_server(input_string);}
+      if (input_string.find(':') == std::string::npos) {connect_to_server(input_string);}
       else {connect_to_server(input_string.substr(0, input_string.find(":")), input_string.substr(input_string.find(":") + 1));}
 
       input_string.clear();

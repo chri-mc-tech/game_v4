@@ -148,6 +148,9 @@ int sdl_loop() {
     ui::render::connection_status();
   }
 
+  std::cout << ui::button_continue.loc_x << ", " << ui::button_continue.loc_y << std::endl;
+  std::cout << ui::button_continue.text_width << ", " << ui::button_continue.text_height << std::endl;
+
   SDL_RenderPresent(global::sdl::renderer);
   // SDL_Delay(2);
   return 0;
