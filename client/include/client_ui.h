@@ -34,6 +34,7 @@ public:
 
 namespace ui {
   inline TTF_Text* text_ask_server_ip;
+  inline TTF_Text* text_ask_new_name;
   inline TTF_Text* text_connection_status;
   inline TTF_Text* text_input;
 
@@ -51,6 +52,7 @@ namespace ui::render {
   void ask_server_ip();
   void connection_status();
   void continue_button();
+  string ask_new_name();
 
 }
 

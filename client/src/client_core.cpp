@@ -63,6 +63,7 @@ int client_run() {
       last_time = current_time;
 
       std::cout << "fps: " << fps << std::endl;
+      std::cout << global::status << std::endl;
     }
 
 
@@ -90,16 +91,22 @@ int sdl_poll_loop() {
             global::ttf::input_string.pop_back();
           }
         }
+
+        /*
         else if (sdl_event.key.key == SDLK_RETURN) {
           if (!global::ttf::input_string.ends_with("\n")) {
             global::ttf::input_string += "\n";
           }
         }
+        */
+
         break;
       }
 
       case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-        ui::button_continue.handle_event(sdl_event, [](){set_status(STATUS_WAITING_USER_INPUT_IP);});
+        if (global::status == STATUS_ERROR_CONNECTING_TO_SERVER) {
+          ui::button_continue.handle_event(sdl_event, [](){set_status(STATUS_WAITING_USER_INPUT_IP);});
+        }
       }
 
       default: break;
@@ -113,6 +120,13 @@ int sdl_poll_loop() {
 int sdl_loop() {
   SDL_SetRenderDrawColor(global::sdl::renderer, 0, 0, 0, 255);
   SDL_RenderClear(global::sdl::renderer);
+
+  if (global::status == STATUS_WAITING_USER_INPUT_NAME) {
+    activate_text_input();
+    ui::render::ask_new_name();
+    ui::update_text_input();
+  }
+
   if (global::status == STATUS_WAITING_USER_INPUT_IP) {
     activate_text_input();
     ui::render::ask_server_ip();
@@ -148,8 +162,8 @@ int sdl_loop() {
     ui::render::connection_status();
   }
 
-  std::cout << ui::button_continue.loc_x << ", " << ui::button_continue.loc_y << std::endl;
-  std::cout << ui::button_continue.text_width << ", " << ui::button_continue.text_height << std::endl;
+  // std::cout << ui::button_continue.loc_x << ", " << ui::button_continue.loc_y << std::endl;
+  // std::cout << ui::button_continue.text_width << ", " << ui::button_continue.text_height << std::endl;
 
   SDL_RenderPresent(global::sdl::renderer);
   // SDL_Delay(2);
@@ -212,9 +226,4 @@ bool load_config() {
   config::name = config["name"].as<string>();
 
   return true;
-}
-
-string ask_new_name() {
-  //todo: fare nuovo stato per input nome
-  return input;
 }

@@ -23,6 +23,9 @@ namespace ui {
     text_ask_server_ip = TTF_CreateText(text_engine, font, "Server ip:", 0);
     TTF_SetTextColor(text_ask_server_ip, 255, 255, 255, 255);
 
+    text_ask_new_name = TTF_CreateText(text_engine, font, "Nickname:", 0);
+    TTF_SetTextColor(text_ask_server_ip, 255, 255, 255, 255);
+
     text_connection_status = TTF_CreateText(text_engine, font, nullptr, 0);
     TTF_SetTextColor(text_connection_status, 255, 255, 255, 255);
   }
@@ -72,10 +75,8 @@ namespace ui::render {
   void ask_server_ip() {
     using namespace global::ttf;
     using namespace global::sdl;
-    using namespace global::enet;
 
-    int t_width;
-    int t_height;
+    int t_width, t_height;
 
     TTF_GetTextSize(text_ask_server_ip, &t_width, &t_height);
     TTF_DrawRendererText(text_ask_server_ip, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 300);
@@ -88,11 +89,30 @@ namespace ui::render {
       input_string.erase(input_string.length() - 1, 1);
 
       if (input_string.find(':') == std::string::npos) {connect_to_server(input_string);}
-      else {connect_to_server(input_string.substr(0, input_string.find(":")), input_string.substr(input_string.find(":") + 1));}
+      else {connect_to_server(input_string.substr(0, input_string.find(':')), input_string.substr(input_string.find(":") + 1));}
 
       input_string.clear();
     }
   }
+
+  string ask_new_name() {
+    using namespace global::ttf;
+    using namespace global::sdl;
+
+    int t_width, t_height;
+
+    TTF_GetTextSize(text_ask_new_name, &t_width, &t_height);
+    TTF_DrawRendererText(text_ask_new_name, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 300);
+
+
+    TTF_GetTextSize(text_input, &t_width, &t_height);
+    TTF_DrawRendererText(text_input, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 250);
+
+    string input;
+
+    return input;
+  }
+
 
   void connection_status() {
     using namespace global::ttf;
