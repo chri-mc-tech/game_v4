@@ -194,9 +194,9 @@ void create_config_file() {
   config["name"] = "";
   ofstream fout("config.yaml");
 
-  fout << "# Configuration file \n";
-  fout << "# all server data are saved based on uuid \n";
-  fout << "# DO NOT CHANGE THE UUID MANUALLY \n";
+  fout << "# Configuration file\n";
+  fout << "# all server data are saved based on uuid\n";
+  fout << "# DO NOT CHANGE THE UUID MANUALLY\n";
 
   fout << config;
   fout.close();
@@ -216,4 +216,5 @@ bool load_config() {
 
 string ask_new_name() {
   //todo: fare nuovo stato per input nome
+  return input;
 }
