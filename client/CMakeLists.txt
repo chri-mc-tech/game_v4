@@ -9,8 +9,8 @@ add_executable(client
         include/client_core.h
         src/client_network.cpp
         include/client_network.h
-        src/ui.cpp
-        include/ui.h
+        src/client_ui.cpp
+        include/client_ui.h
 )
 
 target_include_directories(client PRIVATE include)

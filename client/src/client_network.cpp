@@ -1,9 +1,9 @@
 #include "client_network.h"
 #include "client_global.h"
-#include "ui.h"
+#include "client_ui.h"
 
-#include <unistd.h>
 #include <thread>
+#include <unistd.h>
 
 int create_enet_host() {
   global::enet::enet_client = enet_host_create(nullptr, 1, 2, 0, 0);

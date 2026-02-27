@@ -41,7 +41,10 @@ namespace global::ttf {
 
 }
 
-namespace config {}
+namespace config {
+  inline string uuid;
+  inline string name;
+}
 
 enum status {
   STATUS_WAITING_USER_INPUT_IP = 0,

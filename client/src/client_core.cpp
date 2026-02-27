@@ -6,8 +6,11 @@
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <enet/enet.h>
+#include <yaml-cpp/yaml.h>
+#include <fstream>
 
-#include "ui.h"
+#include "shared_crypto.h"
+#include "client_ui.h"
 
 bool initialize_libraries() {
   // if !=0: error
@@ -27,17 +30,6 @@ bool initialize_libraries() {
 
   return true;
 }
-
-// TODO: controlli importanti come password e crittografia farli lato server per evitare exploit
-// fare che quando un player si collega non vene fatto nulla dal server ma il client manda un pacchetto con uuid
-// viene creato il player con uuid come PK e viene generata chiave privata server, chiave pubblica server
-// poi il client genera la chiave privata e pubblica del client e vengono scambiate le chiavi pubbliche
-// poi vengono generate le session key e dopo le encryption key sia su client che su server
-// avendo gia l'uuid, il server controlla se è salvato nel db locale
-// se l'utente esiste il server chiede la password per registrarsi e la salva nel db
-// senno chiede la pass di login e la confronta con quella salvata nel db
-
-// il server controlla l'hash col db e controlla se è del utente
 
 int client_run() {
   global::running = true;
@@ -177,4 +169,48 @@ void deactivate_text_input() {
 
 void set_status(const int status) {
   global::status = status;
+}
+
+bool config_exist() {
+  using namespace YAML;
+
+  try {
+    Node config = LoadFile("config.yaml");
+  } catch (const BadFile&) {
+    return false;
+  }
+  return true;
+}
+
+void create_config_file() {
+  using namespace YAML;
+  using std::ofstream;
+
+  Node config;
+  config["uuid"] = shared::crypto::generate_uuid();
+  config["name"] = "";
+  ofstream fout("config.yaml");
+
+  fout << "# Configuration file \n";
+  fout << "# all server data are saved based on uuid \n";
+  fout << "# DO NOT CHANGE THE UUID MANUALLY \n";
+
+  fout << config;
+  fout.close();
+  std::cout << "config file created" << std::endl;
+
+}
+
+bool load_config() {
+  using namespace YAML;
+
+  Node config = LoadFile("config.yaml");
+  config::uuid = config["uuid"].as<string>();
+  config::name = config["name"].as<string>();
+
+  return true;
+}
+
+string ask_new_name() {
+  //todo: fare nuovo stato per input nome
 }

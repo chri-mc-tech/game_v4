@@ -5,3 +5,31 @@ pc fisso
 
 pc portatile
 -DCMAKE_TOOLCHAIN_FILE=C:\Users\chrim\.vcpkg-clion\vcpkg\scripts\buildsystems\vcpkg.cmake
+
+------------------
+LOGICA PRINCIPALE
+------------------
+
+Appena un player apre il client viene generato un uuid casuale e salvato in un file di config
+tutti i dati nei server sono collegati al uuid, cosi che un player puo cambiare nome senza problemi
+
+Controlli importanti come password e crittografia farli lato server per evitare exploit
+fare che quando un player si collega non vene fatto nulla dal server ma il client manda un pacchetto con uuid
+viene creato il player con uuid come PK e viene generata chiave privata server, chiave pubblica server
+poi il client genera la chiave privata e pubblica del client e vengono scambiate le chiavi pubbliche
+poi vengono generate le session key e dopo le encryption key sia su client che su server
+avendo gia l'uuid, il server controlla se è salvato nel db locale
+se l'utente esiste il server chiede la password per registrarsi e la salva nel db
+senno chiede la pass di login e la confronta con quella salvata nel db
+il server controlla l'hash col db e controlla se è dell' utente
+
+
+------------------
+CODICI ERRORE
+------------------
+
+1 = general error
+3 = unable to initialize libraries
+4 = error creating config file
+5 = error loading config
+6 = error creating enet host
