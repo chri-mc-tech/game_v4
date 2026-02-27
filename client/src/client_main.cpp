@@ -1,10 +1,6 @@
 #include "client_core.h"
 #include "client_network.h"
 
-#include <iostream>
-
-using namespace std;
-
 int main() {
   if (!initialize_libraries()) {
     return 1;
