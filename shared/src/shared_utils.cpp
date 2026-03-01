@@ -13,4 +13,19 @@ namespace shared::utils {
     strftime(buf, sizeof(buf), "%H:%M:%S", now);
     return string(buf);
   }
-} // namespace shared::utils
+
+  bool is_valid_nickname(string t_string) {
+    for (int i = 0; i < t_string.length(); i++) {
+      if (!std::isalnum(t_string[i]) && t_string[i] != '_') {
+        std::cout << t_string[i] << std::endl;
+        return false;
+      }
+    }
+    return true;
+
+  }
+
+
+}
+
+

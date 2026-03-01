@@ -52,7 +52,7 @@ namespace ui::render {
   void ask_server_ip();
   void connection_status();
   void continue_button();
-  string ask_new_name();
+  void ask_new_name();
 
 }
 

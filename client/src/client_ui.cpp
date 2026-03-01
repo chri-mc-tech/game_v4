@@ -2,8 +2,10 @@
 
 #include <charconv>
 
+#include "client_core.h"
 #include "client_global.h"
 #include "client_network.h"
+#include "shared_utils.h"
 
 namespace ui {
   // texts:
@@ -97,7 +99,7 @@ namespace ui::render {
     }
   }
 
-  string ask_new_name() {
+  void ask_new_name() {
     using namespace global::ttf;
     using namespace global::sdl;
 
@@ -112,9 +114,18 @@ namespace ui::render {
     TTF_DrawRendererText(text_input, roundf(static_cast<float>(window_width - t_width) / 2),
                                      roundf(static_cast<float>(window_height - t_height) / 2) - 250);
 
-    string input;
-
-    return input;
+    if (input_string.ends_with("\n")) {
+      input_string.erase(input_string.length() - 1, 1);
+      string t_string = input_string;
+      input_string.clear();
+      if (shared::utils::is_valid_nickname(t_string)) {
+        set_status(STATUS_WAITING_USER_INPUT_IP);
+        save_new_nickname(t_string);
+      }
+      else {
+        std::cout << R"(only use "a-b", "A-B", "_")";
+      }
+    }
   }
 
 
