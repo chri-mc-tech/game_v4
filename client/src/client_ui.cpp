@@ -79,17 +79,19 @@ namespace ui::render {
     int t_width, t_height;
 
     TTF_GetTextSize(text_ask_server_ip, &t_width, &t_height);
-    TTF_DrawRendererText(text_ask_server_ip, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 300);
+    TTF_DrawRendererText(text_ask_server_ip, roundf(static_cast<float>(window_width - t_width) / 2),
+                                             roundf(static_cast<float>(window_height - t_height) / 2) - 300);
 
 
     TTF_GetTextSize(text_input, &t_width, &t_height);
-    TTF_DrawRendererText(text_input, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 250);
+    TTF_DrawRendererText(text_input, roundf(static_cast<float>(window_width - t_width) / 2),
+                                     roundf(static_cast<float>(window_height - t_height) / 2) - 250);
 
     if (input_string.ends_with("\n")) {
       input_string.erase(input_string.length() - 1, 1);
 
       if (input_string.find(':') == std::string::npos) {connect_to_server(input_string);}
-      else {connect_to_server(input_string.substr(0, input_string.find(':')), input_string.substr(input_string.find(":") + 1));}
+      else {connect_to_server(input_string.substr(0, input_string.find(':')), input_string.substr(input_string.find(':') + 1));}
 
       input_string.clear();
     }
@@ -102,11 +104,13 @@ namespace ui::render {
     int t_width, t_height;
 
     TTF_GetTextSize(text_ask_new_name, &t_width, &t_height);
-    TTF_DrawRendererText(text_ask_new_name, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 300);
+    TTF_DrawRendererText(text_ask_new_name, roundf(static_cast<float>(window_width - t_width) / 2),
+                                            roundf(static_cast<float>(window_height - t_height) / 2) - 300);
 
 
     TTF_GetTextSize(text_input, &t_width, &t_height);
-    TTF_DrawRendererText(text_input, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2) - 250);
+    TTF_DrawRendererText(text_input, roundf(static_cast<float>(window_width - t_width) / 2),
+                                     roundf(static_cast<float>(window_height - t_height) / 2) - 250);
 
     string input;
 
@@ -123,7 +127,8 @@ namespace ui::render {
     int t_height;
 
     TTF_GetTextSize(text_connection_status, &t_width, &t_height);
-    TTF_DrawRendererText(text_connection_status, (window_width / 2) - (t_width / 2), (window_height / 2) - (t_height / 2));
+    TTF_DrawRendererText(text_connection_status, roundf(static_cast<float>(window_width - t_width) / 2),
+                                                 roundf(static_cast<float>(window_height - t_height) / 2));
   }
 }
 
@@ -145,28 +150,35 @@ void Button::create_button() {
 }
 
 // call every tick in sdl polling loop in case: SDL_EVENT_MOUSE_BUTTON_DOWN
-void Button::handle_event(const SDL_Event &event, std::function<void()> function_to_execute) const {
+void Button::handle_event(const SDL_Event &event, const std::function<void()>&function_to_execute) const {
   if (event.button.button == SDL_BUTTON_LEFT) {
-    int mouse_x = event.button.x;
-    int mouse_y = event.button.y;
+    const float mouse_x = event.button.x;
+    const float mouse_y = event.button.y;
 
-    if (mouse_x >= (loc_x) && mouse_x <= (loc_x + padding_left + text_width + padding_right) && mouse_y >= (loc_y) && mouse_y <= (loc_y + padding_top + text_height + padding_bottom)) {
-      function_to_execute();
-    }
+    if (mouse_x >= static_cast<float>(loc_x) &&
+        mouse_x <= static_cast<float>(loc_x + padding_left + text_width + padding_right) &&
+        mouse_y >= static_cast<float>(loc_y) &&
+        mouse_y <= static_cast<float>(loc_y + padding_top + text_height + padding_bottom))
+      {function_to_execute();}
   }
 }
 
 // call every tick in sdl loop checking current status/ui
 void Button::render() {
 
-  rect = {loc_x, loc_y, padding_left + text_width + padding_right, padding_top + text_height + padding_bottom};
+  rect = {static_cast<float>(loc_x),
+            static_cast<float>(loc_y),
+         static_cast<float>(padding_left + text_width + padding_right),
+         static_cast<float>(padding_top + text_height + padding_bottom)};
+
   SDL_SetRenderDrawColor(global::sdl::renderer, color.r, color.g, color.b, color.a);
   SDL_RenderFillRect(global::sdl::renderer, &rect);
-  TTF_DrawRendererText(text, (int)(loc_x + padding_left), (int)(loc_y + padding_top));
+  TTF_DrawRendererText(text, roundf(static_cast<float>(loc_x + padding_left)),
+                             roundf(static_cast<float>(loc_y + padding_top)));
 }
 
 // call every in sdl polling every time the window is resized
-void Button::update_location(float new_loc_x, float new_loc_y) {
+void Button::update_location(const int new_loc_x, const int new_loc_y) {
   if (flag == BUTTON_CENTERED_HORIZONTAL || flag == BUTTON_CENTERED) {
     loc_x = new_loc_x - ((padding_left + text_width + padding_right) / 2);
   }

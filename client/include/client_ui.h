@@ -6,11 +6,11 @@
 
 class Button {
 public:
-  float loc_x;
-  float loc_y;
+  int loc_x;
+  int loc_y;
   // float button_width;
   // float button_height;
-  float padding_left, padding_right, padding_top, padding_bottom;
+  int padding_left, padding_right, padding_top, padding_bottom;
   int text_width;
   int text_height;
   SDL_Color color;
@@ -23,13 +23,13 @@ public:
   void create_button();
 
   // call every tick in sdl polling loop in case: SDL_EVENT_MOUSE_BUTTON_DOWN checking current status/ui
-  void handle_event(const SDL_Event &event, std::function<void()> function_to_execute) const;
+  void handle_event(const SDL_Event &event, const std::function<void()>& function_to_execute) const;
 
   // call every tick in sdl loop checking current status/ui
   void render();
 
   // call every tick if you want to update the location dynamically
-  void update_location(float new_loc_x, float new_loc_y);
+  void update_location(int new_loc_x, int new_loc_y);
 };
 
 namespace ui {
