@@ -5,8 +5,10 @@
 #include <thread>
 #include <unistd.h>
 
+#include "shared_crypto.h"
 #include "shared_global.h"
 #include "shared_network.h"
+#include "shared_utils.h"
 
 int create_enet_host() {
   global::enet::enet_client = enet_host_create(nullptr, 1, 2, 0, 0);
@@ -44,14 +46,37 @@ int enet_event_connected() {
 
 int enet_event_receive() {
   std::cout << "received" << std::endl;
+  string pkt_data_string = shared::utils::packet_to_string(global::enet::enet_event.packet);
 
-  /*
-  todo: on packet receive tipo public key from server controlla tipo pacchetto e status.
-  crea key privata, pubblica, e shared, manda pubblica
+  std::cout << "packet: " + pkt_data_string << std::endl;
 
-  global::client_private_key = shared::crypto::create_private_key();
-  global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
-  */
+  // not encrypted
+  if (global::enet::enet_event.channelID == 0) {
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
+      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+
+      if (global::status == STATUS_ENCRYPTING) {
+        global::client_private_key = shared::crypto::create_private_key();
+        global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
+        global::server_public_key = Integer(pkt_data_string.c_str());
+        global::shared_key = shared::crypto::calculate_session_key(global::client_private_key, global::server_public_key);
+
+      }
+      /*
+      todo: on packet receive tipo public key from server controlla tipo pacchetto e status.
+      crea key privata, pubblica, e shared, manda pubblica
+
+      global::client_private_key = shared::crypto::create_private_key();
+      global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
+      */
+    }
+  }
+
+  // encrypted
+  else {
+
+  }
   return 0;
 }
 

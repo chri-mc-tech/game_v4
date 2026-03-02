@@ -47,13 +47,13 @@ void enet_event_receive() {
       if (shared::utils::is_valid_nickname(name)) {
         log_debug("name valid");
       }
-      else {log_debug("name NOT valid");}
+      else {log_debug("name NOT valid"); return;}
 
       log_debug(uuid);
       if (shared::utils::is_valid_uuid(uuid)) {
         log_debug("uuid valid");
       }
-      else {log_debug("uuid NOT valid");}
+      else {log_debug("uuid NOT valid"); return;}
 
       if (global::online_players.contains(uuid)) {
         log_warn("player with uuid " + uuid + " already online");
@@ -64,9 +64,14 @@ void enet_event_receive() {
         temp_player.uuid = uuid; // uuid dal pacchetto
         temp_player.server_private_key = shared::crypto::create_private_key();
         temp_player.server_public_key = shared::crypto::create_public_key(temp_player.server_private_key);
+        temp_player.peer = global::enet::enet_event.peer;
 
         global::online_players.emplace(uuid, std::move(temp_player));
-        global::peer_to_uuid.emplace(global::enet::enet_event.peer, uuid);
+        global::peer_to_uuid.emplace(temp_player.peer, uuid);
+
+        string to_send = shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY) + IntToString(temp_player.server_public_key);
+        ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
+        enet_peer_send(temp_player.peer, 0, temp_packet);
       }
     }
   }
