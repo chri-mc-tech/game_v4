@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#include "client_config.h"
 #include "client_global.h"
 #include "shared_crypto.h"
 
@@ -14,19 +15,19 @@ int main() {
     return 3;
   }
 
-  if (!config_exist()) {
+  if (!config::check()) {
     cout << "no config file found" << endl;
-    create_config_file();
-    if (!config_exist()) {
+    config::create_config_file();
+    if (!config::check()) {
       return 4;
     }
   }
 
-  if (!load_config()) {
+  if (!config::load_config()) {
     return 5;
   }
-  cout << config::uuid << endl;
-  cout << config::name << endl;
+  cout << global::config::uuid << endl;
+  cout << global::config::name << endl;
 
   if (create_enet_host() != 0) {
     return 6;

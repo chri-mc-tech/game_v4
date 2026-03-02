@@ -2,6 +2,7 @@
 
 #include <charconv>
 
+#include "client_config.h"
 #include "client_core.h"
 #include "client_global.h"
 #include "client_network.h"
@@ -120,7 +121,7 @@ namespace ui::render {
       input_string.clear();
       if (shared::utils::is_valid_nickname(t_string)) {
         set_status(STATUS_WAITING_USER_INPUT_IP);
-        save_new_nickname(t_string);
+        config::save_new_nickname(t_string);
       }
       else {
         std::cout << R"(only use "a-b", "A-B", "_")";

@@ -12,6 +12,8 @@ namespace global {
   inline bool debug = true;
   inline bool running;
   inline std::unordered_map<string, player> online_players;
+  inline int frames;
+  inline float fps;
 }
 
 namespace global::enet {
@@ -41,7 +43,7 @@ namespace global::ttf {
 
 }
 
-namespace config {
+namespace global::config {
   inline string uuid;
   inline string name;
 }
