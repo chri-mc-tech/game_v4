@@ -39,5 +39,5 @@ CODICI ERRORE
 CANALI
 ------------------
 
-0 = criptati
-1 = non criptati
+0 = pacchetti non cifrati
+1 = pacchetti cifrati

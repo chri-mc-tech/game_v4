@@ -1,6 +1,7 @@
 #include "shared_utils.h"
 
 #include <chrono>
+#include <enet/enet.h>
 #include <iostream>
 
 using std::string;
@@ -25,6 +26,10 @@ namespace shared::utils {
 
   }
 
+  string packet_to_string(const ENetPacket *packet) {
+    string string(reinterpret_cast<char*>(packet->data), packet->dataLength);
+    return string;
+  }
 
 }
 

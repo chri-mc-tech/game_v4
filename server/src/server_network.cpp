@@ -5,6 +5,8 @@
 #include <enet/enet.h>
 
 #include "shared_crypto.h"
+#include "shared_global.h"
+#include "shared_utils.h"
 
 int enet_loop() {
   while (enet_host_service(global::enet::enet_server, &global::enet::enet_event, 0) > 0) {
@@ -26,12 +28,34 @@ int enet_event_connected() {
 
 int enet_event_receive() {
   log_info("packet received");
-  // todo: controlla validita nome player e uuid, crea player, manda key pubblica
+  string pkt_data_string = shared::utils::packet_to_string(global::enet::enet_event.packet);
+
+  // not encrypted
+  if (global::enet::enet_event.channelID == 0) {
+
+    if (pkt_data_string.starts_with(PKT_FROM_CLIENT_NAME_AND_UUID)) {
+      // todo: controlla validita nome player e uuid, crea player, manda key pubblica
+      pkt_data_string.erase(0, 3);
+
+      string name = pkt_data_string.substr(0, pkt_data_string.find(' '));
+      string uuid = pkt_data_string.substr(pkt_data_string.find(' ') + 1);
+
+      std::cout << name << std::endl;
+      std::cout << uuid << std::endl;
+    }
+  }
+
+  // encrypted
+  else if (global::enet::enet_event.channelID == 1) {
+
+  }
+
   player temp_player;
   temp_player.name = ""; // nome dal pacchetto
   temp_player.uuid = ""; // uuid dal pacchetto
   temp_player.server_private_key = shared::crypto::create_private_key();
   temp_player.server_public_key = shared::crypto::create_public_key(temp_player.server_private_key);
+  global::online_players.insert(uuid, temp_player);
   return 0;
 }
 
