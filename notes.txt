@@ -33,3 +33,11 @@ CODICI ERRORE
 4 = error creating config file
 5 = error loading config
 6 = error creating enet host
+
+
+------------------
+CANALI
+------------------
+
+0 = criptati
+1 = non criptati
