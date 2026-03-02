@@ -21,17 +21,16 @@ int enet_loop() {
   return 0;
 }
 
-int enet_event_connected() {
+void enet_event_connected() {
   log_info("player connected");
 
-  return 0;
 }
 
-int enet_event_receive() {
+void enet_event_receive() {
   log_info("packet received");
   string pkt_data_string = shared::utils::packet_to_string(global::enet::enet_event.packet);
 
-  std::cout << "packet: " << pkt_data_string << std::endl;
+  log_debug("packet: " + pkt_data_string);
 
   // not encrypted
   if (global::enet::enet_event.channelID == 0) {
@@ -39,31 +38,36 @@ int enet_event_receive() {
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID))) {
 
       // todo: controlla validità nome player e uuid, crea player, manda key pubblica
-      pkt_data_string.erase(0, 3);
+      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
       string name = pkt_data_string.substr(0, pkt_data_string.find(' '));
       string uuid = pkt_data_string.substr(pkt_data_string.find(' ') + 1);
 
-      std::cout << name << std::endl;
+      log_debug(name);
       if (shared::utils::is_valid_nickname(name)) {
-        std::cout << "name valid" << std::endl;
+        log_debug("name valid");
       }
-      else {std::cout << "name NOT valid" << std::endl;}
+      else {log_debug("name NOT valid");}
 
-      std::cout << uuid << std::endl;
+      log_debug(uuid);
       if (shared::utils::is_valid_uuid(uuid)) {
-        std::cout << "uuid valid" << std::endl;
+        log_debug("uuid valid");
       }
-      else {std::cout << "uuid NOT valid" << std::endl;}
+      else {log_debug("uuid NOT valid");}
 
-      /*
-      player temp_player;
-      temp_player.name = name; // nome dal pacchetto
-      temp_player.uuid = uuid; // uuid dal pacchetto
-      temp_player.server_private_key = shared::crypto::create_private_key();
-      temp_player.server_public_key = shared::crypto::create_public_key(temp_player.server_private_key);
-      global::online_players.insert(uuid, temp_player);
-      */
+      if (global::online_players.contains(uuid)) {
+        log_warn("player with uuid " + uuid + " already online");
+      }
+      else {
+        player temp_player;
+        temp_player.name = name; // nome dal pacchetto
+        temp_player.uuid = uuid; // uuid dal pacchetto
+        temp_player.server_private_key = shared::crypto::create_private_key();
+        temp_player.server_public_key = shared::crypto::create_public_key(temp_player.server_private_key);
+
+        global::online_players.emplace(uuid, std::move(temp_player));
+        global::peer_to_uuid.emplace(global::enet::enet_event.peer, uuid);
+      }
     }
   }
 
@@ -71,12 +75,14 @@ int enet_event_receive() {
   else if (global::enet::enet_event.channelID == 1) {
 
   }
-  return 0;
 }
 
-int enet_event_disconnected() {
+void enet_event_disconnected() {
   log_info("player disconnected");
-  return 0;
+  string uuid = get_uuid_from_peer();
+  global::peer_to_uuid.erase(global::enet::enet_event.peer);
+  global::online_players.erase(uuid);
+
 }
 
 int create_enet_host() {
@@ -89,4 +95,12 @@ int create_enet_host() {
   }
 
   return 0;
+}
+
+string get_uuid_from_peer() {
+  auto peer_entry = global::peer_to_uuid.find(global::enet::enet_event.peer);
+  if (peer_entry == global::peer_to_uuid.end())
+    return "";
+
+  return peer_entry->second;
 }

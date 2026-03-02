@@ -9,6 +9,7 @@ namespace global {
   inline bool debug = true;
   inline bool running;
   inline std::unordered_map<string, player> online_players;
+  inline std::unordered_map<ENetPeer*, string> peer_to_uuid;
 }
 
 namespace global::enet {

@@ -15,4 +15,5 @@ namespace shared::network {
     string string_type = "[" + std::to_string(int_type) + "]";
     return string_type;
   }
+
 } // namespace shared::network
