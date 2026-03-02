@@ -11,19 +11,8 @@ namespace shared::network {
     return string;
   }
 
-  int get_packet_type(ENetPacket t_packet) {
-    string t_text = from_packet_to_string(&t_packet);
-
-    t_text = t_text.substr(1, t_text.find("]"));
-    t_text.erase(t_text.length() - 1, t_text.length());
-    std::cout << t_text << std::endl;
-    int type = stoi(t_text);
-    if (!type) {
-      return -1;
-    }
-
-    return type;
+  string pkt_type(int int_type) {
+    string string_type = "[" + std::to_string(int_type) + "]";
+    return string_type;
   }
-
-
 } // namespace shared::network

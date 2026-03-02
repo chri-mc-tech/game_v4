@@ -5,6 +5,9 @@
 #include <thread>
 #include <unistd.h>
 
+#include "shared_global.h"
+#include "shared_network.h"
+
 int create_enet_host() {
   global::enet::enet_client = enet_host_create(nullptr, 1, 2, 0, 0);
 
@@ -32,6 +35,10 @@ int enet_event_connected() {
   global::enet::is_connected = true;
   global::status = STATUS_ENCRYPTING;
 
+  string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID) + global::config::name + " " + global::config::uuid;
+  ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
+  enet_peer_send(global::enet::connected_server_peer, 0, temp_packet);
+  std::cout << to_send << std::endl;
   return 0;
 }
 

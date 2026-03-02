@@ -23,7 +23,16 @@ namespace shared::utils {
       }
     }
     return true;
+  }
 
+  bool is_valid_uuid(string t_string) {
+    for (int i = 0; i < t_string.length(); i++) {
+      if (!std::isalnum(t_string[i]) && t_string[i] != '-') {
+        std::cout << t_string[i] << std::endl;
+        return false;
+      }
+    }
+    return true;
   }
 
   string packet_to_string(const ENetPacket *packet) {
