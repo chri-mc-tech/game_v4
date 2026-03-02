@@ -20,14 +20,16 @@ int enet_loop() {
 
 int enet_event_connected() {
   log_info("player connected");
+
   return 0;
 }
 
 int enet_event_receive() {
   log_info("packet received");
+  // todo: controlla validita nome player e uuid, crea player, manda key pubblica
   player temp_player;
-  temp_player.private_key = shared::crypto::create_private_key();
-  temp_player.server_public_key = shared::crypto::create_public_key(temp_player.private_key);
+  temp_player.server_private_key = shared::crypto::create_private_key();
+  temp_player.server_public_key = shared::crypto::create_public_key(temp_player.server_private_key);
   return 0;
 }
 

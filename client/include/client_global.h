@@ -14,6 +14,11 @@ namespace global {
   inline std::unordered_map<string, player> online_players;
   inline int frames;
   inline float fps;
+  inline Integer client_private_key;
+  inline Integer client_public_key;
+  inline Integer server_public_key;
+  inline Integer shared_key;
+  inline SecByteBlock encryption_key;
 }
 
 namespace global::enet {

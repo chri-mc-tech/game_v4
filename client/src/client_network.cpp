@@ -37,6 +37,14 @@ int enet_event_connected() {
 
 int enet_event_receive() {
   std::cout << "received" << std::endl;
+
+  /*
+  todo: on packet receive tipo public key from server controlla tipo pacchetto e status.
+  crea key privata, pubblica, e shared, manda pubblica
+
+  global::client_private_key = shared::crypto::create_private_key();
+  global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
+  */
   return 0;
 }
 

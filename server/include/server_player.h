@@ -15,7 +15,7 @@ public:
   float location_x = 0.0f;
   float location_y = 0.0f;
   ENetPeer* peer;
-  Integer private_key;
+  Integer server_private_key;
   Integer server_public_key;
   Integer client_public_key;
   Integer session_key;

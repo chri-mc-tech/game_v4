@@ -143,7 +143,6 @@ int sdl_loop() {
     deactivate_text_input();
     TTF_SetTextString(ui::text_connection_status, "Encrypting", 0);
     ui::render::connection_status();
-    // todo: crea chiave privata e pubblica, aspetta dal server la pubblica ecc.
   }
 
   if (global::status == STATUS_DISCONNECTED_FROM_SERVER) {
