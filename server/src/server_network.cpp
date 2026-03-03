@@ -70,9 +70,11 @@ void enet_event_receive() {
         global::online_players.emplace(uuid, std::move(temp_player));
         global::peer_to_uuid.emplace(temp_player.peer, uuid);
 
-        string to_send = shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY) + IntToString(temp_player.server_public_key);
-        ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
-        enet_peer_send(temp_player.peer, 0, temp_packet);
+        shared::network::send_packet(temp_player.peer,
+          PKT_FROM_SERVER_PUBLIC_KEY,
+          IntToString(temp_player.server_public_key),
+          0,
+          ENET_PACKET_FLAG_RELIABLE);
       }
     }
 

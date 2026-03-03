@@ -28,10 +28,17 @@ namespace shared::utils {
   bool is_valid_uuid(string t_string) {
     for (int i = 0; i < t_string.length(); i++) {
       if (!std::isalnum(t_string[i]) && t_string[i] != '-') {
-        std::cout << t_string[i] << std::endl;
         return false;
       }
+        std::cout << i << ": " << t_string[i] << std::endl;
     }
+    std::cout << t_string.length() << std::endl;
+    if (t_string.length() != 29) {return false;}
+
+    if (t_string[8] != '-') {return false;}
+    if (t_string[17] != '-') {return false;}
+    if (t_string[26] != '-') {return false;}
+
     return true;
   }
 

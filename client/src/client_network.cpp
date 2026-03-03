@@ -71,21 +71,10 @@ int enet_event_receive() {
           global::enet::connected_server_peer,
           PKT_FROM_CLIENT_PUBLIC_KEY,
           IntToString(global::client_public_key),
-          0, ENET_PACKET_FLAG_RELIABLE);
+          0,
+          ENET_PACKET_FLAG_RELIABLE);
 
-          /*
-        string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_PUBLIC_KEY) + IntToString(global::client_public_key);
-        ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
-        enet_peer_send(global::enet::connected_server_peer, 0, temp_packet);
-        */
       }
-      /*
-      todo: on packet receive tipo public key from server controlla tipo pacchetto e status.
-      crea key privata, pubblica, e shared, manda pubblica
-
-      global::client_private_key = shared::crypto::create_private_key();
-      global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
-      */
     }
   }
 
@@ -104,7 +93,6 @@ int enet_event_disconnected() {
   return 0;
 }
 
-// return 0 if connected and 1 on error
 int connect_to_server(const string& ip, const string& port) {
   global::status = STATUS_CONNECTING;
 
@@ -118,6 +106,7 @@ int connect_to_server(const string& ip, const string& port) {
   return 0;
 }
 
+// async function
 void wait_server_connection() {
   std::this_thread::sleep_for(std::chrono::seconds(6));
   if (!global::enet::is_connected) {

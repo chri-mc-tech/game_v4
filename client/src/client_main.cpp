@@ -6,6 +6,7 @@
 #include "client_config.h"
 #include "client_global.h"
 #include "shared_crypto.h"
+#include "shared_utils.h"
 
 using std::cout;
 using std::endl;
@@ -26,6 +27,15 @@ int main() {
   if (!config::load_config()) {
     return 5;
   }
+
+  if (!shared::utils::is_valid_nickname(global::config::name)) {
+    return 7;
+  }
+
+  if (!shared::utils::is_valid_uuid(global::config::uuid)) {
+    return 8;
+  }
+
   cout << global::config::uuid << endl;
   cout << global::config::name << endl;
 

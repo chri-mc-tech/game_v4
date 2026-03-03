@@ -18,10 +18,10 @@ namespace shared::network {
     return string_type;
   }
 
-  bool send_packet(ENetPeer* peer, const int pkt_type, const string &input_string, const int channel, const int flag) {
+  bool send_packet(ENetPeer* peer, const int pkt_type, const string input_string, const int channel, const int flag) {
     string to_send = network::pkt_type(pkt_type) + input_string;
     ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), flag);
-    if (enet_peer_send(peer, channel, temp_packet)) {return true;}
+    if (enet_peer_send(peer, channel, temp_packet) == 0) {return true;}
     else {
       enet_packet_destroy(temp_packet);
       return false;
