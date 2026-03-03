@@ -1,6 +1,7 @@
 #pragma once
 
 #include "server_player.h"
+#include "shared_global.h"
 
 #include <enet/enet.h>
 #include <unordered_map>
@@ -18,8 +19,8 @@ namespace global::enet {
   inline ENetAddress address;
 }
 
-namespace config {
-  inline int port = 23234;
+namespace global::config {
+  inline int port = DEFAULT_PORT;
   inline int host = 0;
   inline int max_players = 5;
 }

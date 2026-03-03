@@ -8,6 +8,8 @@ add_executable(server
         src/server_network.cpp
         include/server_network.h
         include/server_player.h
+        src/server_config.cpp
+        include/server_config.h
 )
 
 target_include_directories(server PRIVATE include)

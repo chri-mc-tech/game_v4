@@ -11,7 +11,7 @@
 #include "shared_utils.h"
 
 int create_enet_host() {
-  global::enet::enet_client = enet_host_create(nullptr, 1, 2, 0, 0);
+  global::enet::enet_client = enet_host_create(nullptr, 1, 3, 0, 0);
 
   if (global::enet::enet_client == nullptr) {
     return 1;
@@ -47,8 +47,6 @@ int enet_event_connected() {
 int enet_event_receive() {
   std::cout << "received" << std::endl;
   string pkt_data_string = shared::utils::packet_to_string(global::enet::enet_event.packet);
-
-  std::cout << "packet: " + pkt_data_string << std::endl;
 
   // not encrypted
   if (global::enet::enet_event.channelID == 0) {

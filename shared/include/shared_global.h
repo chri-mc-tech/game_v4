@@ -31,3 +31,7 @@ enum packet_type {
   PKT_FROM_CLIENT_HASHED_LOGIN_PASSWORD = 205,
   PKT_FROM_CLIENT_PUBLIC_KEY = 206,
 };
+
+enum shared_global {
+  DEFAULT_PORT = 23234
+};

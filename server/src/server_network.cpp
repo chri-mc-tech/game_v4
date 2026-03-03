@@ -31,7 +31,7 @@ void enet_event_receive() {
   log_info("packet received");
   string pkt_data_string = shared::utils::packet_to_string(global::enet::enet_event.packet);
 
-  log_debug("packet: " + pkt_data_string);
+  // log_debug("packet: " + pkt_data_string);
 
   // not encrypted
   if (global::enet::enet_event.channelID == 0) {
@@ -98,6 +98,11 @@ void enet_event_receive() {
   // encrypted
   else if (global::enet::enet_event.channelID == 1) {
 
+    const auto it = global::online_players.find(get_uuid_from_peer());
+    if (it == global::online_players.end()) {return;}
+    player* temp_player = &it->second;
+
+    string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);
   }
 }
 
@@ -110,9 +115,9 @@ void enet_event_disconnected() {
 }
 
 int create_enet_host() {
-  global::enet::address.port = config::port;
-  global::enet::address.host = config::host;
-  global::enet::enet_server = enet_host_create(&global::enet::address, config::max_players, 2, 0, 0);
+  global::enet::address.port = global::config::port;
+  global::enet::address.host = global::config::host;
+  global::enet::enet_server = enet_host_create(&global::enet::address, global::config::max_players, 3, 0, 0);
 
   if (global::enet::enet_server == nullptr) {
     return 1;
