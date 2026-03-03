@@ -1,8 +1,9 @@
 #include "server_network.h"
 #include "server_global.h"
 
-#include <server_logger.h>
+#include <cryptopp/algparam.h>
 #include <enet/enet.h>
+#include <server_logger.h>
 
 #include "shared_crypto.h"
 #include "shared_global.h"
@@ -73,6 +74,21 @@ void enet_event_receive() {
         ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
         enet_peer_send(temp_player.peer, 0, temp_packet);
       }
+    }
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_PUBLIC_KEY))) {
+      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+      const auto it = global::online_players.find(get_uuid_from_peer());
+      if (it == global::online_players.end()) {return;}
+      player* temp_player = &it->second;
+      temp_player->client_public_key = Integer(pkt_data_string.c_str());
+      temp_player->session_key = shared::crypto::calculate_session_key(temp_player->server_private_key, temp_player->client_public_key);
+      temp_player->encryption_key = shared::crypto::create_encryption_key_from_session_key(temp_player->session_key);
+      log_debug("server public key " + IntToString(temp_player->server_public_key));
+      log_debug("client public key " + IntToString(temp_player->client_public_key));
+      log_debug("shared key " + IntToString(temp_player->session_key));
+      // log_debug("encryption key " + (temp_player->encryption_key));
+
     }
   }
 
