@@ -87,7 +87,9 @@ void enet_event_receive() {
       log_debug("server public key " + IntToString(temp_player->server_public_key));
       log_debug("client public key " + IntToString(temp_player->client_public_key));
       log_debug("shared key " + IntToString(temp_player->session_key));
-      // log_debug("encryption key " + (temp_player->encryption_key));
+
+      const std::string temp_key(reinterpret_cast<const char*>(temp_player->encryption_key.data()), temp_player->encryption_key.size());
+      log_debug("encryption key " + temp_key);
 
     }
   }
