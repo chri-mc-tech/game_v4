@@ -5,6 +5,7 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/osrng.h>
+#include <cryptopp/hex.h>
 #include <string>
 
 using std::string;
@@ -43,7 +44,7 @@ namespace shared::crypto {
     t_session_key.Encode(StringSink(raw).Ref(), t_session_key.MinEncodedSize());
 
     SecByteBlock key(32);
-    SHA256().CalculateDigest(key, (const CryptoPP::byte *) raw.data(), raw.size());
+    SHA256().CalculateDigest(key, reinterpret_cast<const CryptoPP::byte *>(raw.data()), raw.size());
     return key;
   }
 
@@ -64,13 +65,13 @@ namespace shared::crypto {
     CBC_Mode<AES>::Encryption enc(t_encryption_key, t_encryption_key.size(), iv);
     StringSource(t_string, true, new StreamTransformationFilter(enc, new StringSink(cipher)));
 
-    return string((char *) iv, AES::BLOCKSIZE) + cipher;
+    return string(reinterpret_cast<char *>(iv), AES::BLOCKSIZE) + cipher;
   }
 
   string decrypt_string_with_key(const string &t_string, const CryptoPP::SecByteBlock &t_encryption_key) {
     using namespace CryptoPP;
 
-    const CryptoPP::byte *iv = (const CryptoPP::byte *) t_string.data();
+    const CryptoPP::byte *iv = reinterpret_cast<const CryptoPP::byte *>(t_string.data());
     string cipher = t_string.substr(AES::BLOCKSIZE);
     string plaintext;
 
@@ -81,7 +82,7 @@ namespace shared::crypto {
   }
 
   // copy-paste from Google, sorry
-  std::string generate_uuid() {
+  string generate_uuid() {
     CryptoPP::AutoSeededRandomPool r;
     CryptoPP::byte b[16];
     r.GenerateBlock(b, 16);
@@ -101,4 +102,19 @@ namespace shared::crypto {
     return uuid;
   }
 
-} // namespace shared::crypto
+  // copy-paste from Google, sorry
+  string secByteBlock_to_hex(const CryptoPP::SecByteBlock& block) {
+    std::string hex_output;
+
+    CryptoPP::HexEncoder encoder(
+        new CryptoPP::StringSink(hex_output),
+        false
+    );
+
+    encoder.Put(block.data(), block.size());
+    encoder.MessageEnd();
+
+    return hex_output;
+  }
+
+}

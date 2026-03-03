@@ -62,11 +62,10 @@ int enet_event_receive() {
         global::server_public_key = Integer(pkt_data_string.c_str());
         global::shared_key = shared::crypto::calculate_session_key(global::client_private_key, global::server_public_key);
         global::encryption_key = shared::crypto::create_encryption_key_from_session_key(global::shared_key);
-        std::cout << "server public key" + IntToString(global::server_public_key) << std::endl;
-        std::cout << "client public key" + IntToString(global::client_public_key) << std::endl;
-        std::cout << "shared key" + IntToString(global::shared_key) << std::endl;
-        const std::string temp_key(reinterpret_cast<const char*>(global::encryption_key.data()), global::encryption_key.size());
-        std::cout << "encryption key " + temp_key << std::endl;
+        std::cout << "server public key: " + IntToString(global::server_public_key) << std::endl;
+        std::cout << "client public key: " + IntToString(global::client_public_key) << std::endl;
+        std::cout << "shared key: " + IntToString(global::shared_key) << std::endl;
+        std::cout << "hex encryption key: " + shared::crypto::secByteBlock_to_hex(global::encryption_key) << std::endl;
 
         string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_PUBLIC_KEY) + IntToString(global::client_public_key);
         ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);

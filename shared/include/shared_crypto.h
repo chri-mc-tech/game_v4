@@ -13,4 +13,5 @@ namespace shared::crypto {
   std::string encrypt_string_with_key(const string &t_string, const CryptoPP::SecByteBlock &t_encryption_key);
   std::string decrypt_string_with_key(const string &t_string, const CryptoPP::SecByteBlock &t_encryption_key);
   std::string generate_uuid();
+  string secByteBlock_to_hex(const CryptoPP::SecByteBlock& block);
 }
