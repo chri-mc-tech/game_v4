@@ -67,9 +67,17 @@ int enet_event_receive() {
         std::cout << "shared key: " + IntToString(global::shared_key) << std::endl;
         std::cout << "hex encryption key: " + shared::crypto::secByteBlock_to_hex(global::encryption_key) << std::endl;
 
+        shared::network::send_packet(
+          global::enet::connected_server_peer,
+          PKT_FROM_CLIENT_PUBLIC_KEY,
+          IntToString(global::client_public_key),
+          0, ENET_PACKET_FLAG_RELIABLE);
+
+          /*
         string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_PUBLIC_KEY) + IntToString(global::client_public_key);
         ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
         enet_peer_send(global::enet::connected_server_peer, 0, temp_packet);
+        */
       }
       /*
       todo: on packet receive tipo public key from server controlla tipo pacchetto e status.
