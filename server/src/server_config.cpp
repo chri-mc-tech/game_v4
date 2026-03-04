@@ -25,6 +25,7 @@ namespace config {
     using std::ofstream;
 
     Node config;
+    config["debug"] = false;
     config["port"] = static_cast<int>(DEFAULT_PORT);
     config["max_players"] = 5;
     ofstream file_out("config.yaml");
@@ -41,6 +42,7 @@ namespace config {
     using namespace YAML;
 
     Node config = LoadFile("config.yaml");
+    global::config::debug = config["debug"].as<bool>();
     global::config::port = config["port"].as<int>();
     global::config::max_players = config["max_players"].as<int>();
 
@@ -49,7 +51,7 @@ namespace config {
 
   void add_config_comment(std::ofstream &file_out) {
     using std::ofstream;
-    file_out << "# Configuration file\n";
+    file_out << "# Configuration file\n\n";
 
   }
 }

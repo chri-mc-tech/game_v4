@@ -33,7 +33,7 @@ void enet_event_receive() {
 
   // log_debug("packet: " + pkt_data_string);
 
-  // not encrypted
+  // initial packets (not encrypted)
   if (global::enet::enet_event.channelID == 0) {
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID))) {
@@ -86,6 +86,7 @@ void enet_event_receive() {
       temp_player->client_public_key = Integer(pkt_data_string.c_str());
       temp_player->session_key = shared::crypto::calculate_session_key(temp_player->server_private_key, temp_player->client_public_key);
       temp_player->encryption_key = shared::crypto::create_encryption_key_from_session_key(temp_player->session_key);
+
       log_debug("server public key: " + IntToString(temp_player->server_public_key));
       log_debug("client public key: " + IntToString(temp_player->client_public_key));
       log_debug("shared key: " + IntToString(temp_player->session_key));
@@ -95,15 +96,25 @@ void enet_event_receive() {
     }
   }
 
-  // encrypted
+  // not encrypted (coords, ecc)
   else if (global::enet::enet_event.channelID == 1) {
+
+
+  }
+
+  // encrypted (password hash, chat messages, ecc)
+  else if (global::enet::enet_event.channelID == 2) {
 
     const auto it = global::online_players.find(get_uuid_from_peer());
     if (it == global::online_players.end()) {return;}
     player* temp_player = &it->second;
 
-    string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);
+    if (!temp_player->encryption_key.empty()) {
+      string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);
+    }
+
   }
+
 }
 
 void enet_event_disconnected() {

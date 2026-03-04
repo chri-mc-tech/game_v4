@@ -26,7 +26,7 @@ void log_error(const string& text) {
 }
 
 void log_debug(const string& text) {
-    if (global::debug) {
+    if (global::config::debug) {
         cout << "[" << shared::utils::get_current_time() << COLOR_CYAN " DEBUG" << COLOR_RESET << "]: " << COLOR_CYAN << text << COLOR_RESET << endl;
     }
 }
