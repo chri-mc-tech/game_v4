@@ -3,13 +3,8 @@
 #include <string>
 #include <unordered_set>
 
+#include "server_global.h"
 #include "server_logger.h"
-
-enum command_permission {
-  COMMAND_PERMISSION_USER = 0,
-  COMMAND_PERMISSION_ADMIN = 1,
-  COMMAND_PERMISSION_CONSOLE = 2
-};
 
 namespace commands {
   std::unordered_map<string, Command> command_list;
@@ -28,16 +23,44 @@ namespace commands {
 
   }
 
-  void process_command(const std::string &command) {
-    command_list.find(command);
+  void process_command(const std::string &command, int input_permission) {
+    if (command_list.contains(command)) {
+      command_list.find(command)->second.execute(input_permission);
+    }
+    else {
+      log_error("command not found \"" + command + "\"");
+    }
 
   }
 
   void cmd_help() {
-
+    string temp;
+    for (auto i : command_list) {
+      if (temp.empty()) {
+        temp = i.first;
+      }
+      else {
+        temp += ", " + i.first;
+      }
+    }
+    log_info(temp);
   }
 
   void cmd_list() {
-
+    string temp;
+    for (auto i : global::online_players) {
+      if (temp.empty()) {
+        temp = i.second.name;
+      }
+      else {
+        temp += ", " + i.first;
+      }
+    }
+    if (temp.empty()) {
+      log_info("none");
+    }
+    else {
+      log_info(temp);
+    }
   }
 }

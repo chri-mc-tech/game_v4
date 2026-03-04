@@ -5,6 +5,7 @@
 #include <iostream>
 #include <thread>
 
+#include "server_commands.h"
 #include "server_config.h"
 #include "server_console.h"
 #include "server_global.h"
@@ -38,6 +39,8 @@ int main() {
   if (create_enet_host() != 0) {
     return 1;
   }
+
+  commands::register_commands();
 
   /*
   log_info("info_test");

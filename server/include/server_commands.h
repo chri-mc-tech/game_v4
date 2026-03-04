@@ -6,7 +6,8 @@
 #include "server_logger.h"
 
 namespace commands {
-  void process_command(const std::string &command);
+  void register_commands();
+  void process_command(const std::string &command, int input_permission);
 
   void cmd_help();
   void cmd_list();
@@ -24,4 +25,10 @@ public:
     }
     command();
   }
+};
+
+enum command_permission {
+  COMMAND_PERMISSION_USER = 0,
+  COMMAND_PERMISSION_ADMIN = 1,
+  COMMAND_PERMISSION_CONSOLE = 2
 };
