@@ -3,10 +3,12 @@
 #include "shared_network.h"
 
 #include <iostream>
+#include <thread>
 
+#include "server_config.h"
+#include "server_console.h"
 #include "server_global.h"
 #include "server_network.h"
-#include "server_config.h"
 
 using namespace std;
 
@@ -47,5 +49,6 @@ int main() {
 
   // log_debug(to_string(shared::network::get_packet_type("[1]ciao")));
 
+  jthread thread_console(console::console);
   server_run();
 }

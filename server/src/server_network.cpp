@@ -28,7 +28,7 @@ void enet_event_connected() {
 }
 
 void enet_event_receive() {
-  log_info("packet received");
+  // log_info("packet received");
   string pkt_data_string = shared::utils::packet_to_string(global::enet::enet_event.packet);
 
   // log_debug("packet: " + pkt_data_string);
@@ -87,11 +87,12 @@ void enet_event_receive() {
       temp_player->session_key = shared::crypto::calculate_session_key(temp_player->server_private_key, temp_player->client_public_key);
       temp_player->encryption_key = shared::crypto::create_encryption_key_from_session_key(temp_player->session_key);
 
+      /*
       log_debug("server public key: " + IntToString(temp_player->server_public_key));
       log_debug("client public key: " + IntToString(temp_player->client_public_key));
       log_debug("shared key: " + IntToString(temp_player->session_key));
       log_debug("hex encryption key: " + shared::crypto::secByteBlock_to_hex(temp_player->encryption_key));
-
+      */
 
     }
   }
