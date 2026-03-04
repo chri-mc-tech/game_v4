@@ -7,7 +7,7 @@ using std::string;
 using CryptoPP::Integer;
 using CryptoPP::SecByteBlock;
 
-class player {
+class Player {
 public:
   string uuid;
   string name;

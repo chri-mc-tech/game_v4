@@ -60,7 +60,7 @@ void enet_event_receive() {
         log_warn("player with uuid " + uuid + " already online");
       }
       else {
-        player temp_player;
+        Player temp_player;
         temp_player.name = name; // nome dal pacchetto
         temp_player.uuid = uuid; // uuid dal pacchetto
         temp_player.server_private_key = shared::crypto::create_private_key();
@@ -82,7 +82,7 @@ void enet_event_receive() {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
       const auto it = global::online_players.find(get_uuid_from_peer());
       if (it == global::online_players.end()) {return;}
-      player* temp_player = &it->second;
+      Player* temp_player = &it->second;
       temp_player->client_public_key = Integer(pkt_data_string.c_str());
       temp_player->session_key = shared::crypto::calculate_session_key(temp_player->server_private_key, temp_player->client_public_key);
       temp_player->encryption_key = shared::crypto::create_encryption_key_from_session_key(temp_player->session_key);
@@ -108,7 +108,7 @@ void enet_event_receive() {
 
     const auto it = global::online_players.find(get_uuid_from_peer());
     if (it == global::online_players.end()) {return;}
-    player* temp_player = &it->second;
+    Player* temp_player = &it->second;
 
     if (!temp_player->encryption_key.empty()) {
       string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);

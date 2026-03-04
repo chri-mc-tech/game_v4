@@ -11,7 +11,7 @@ namespace global {
   inline int status = 0;
   inline bool debug = true;
   inline bool running;
-  inline std::unordered_map<string, player> online_players;
+  inline std::unordered_map<string, Player> online_players;
   inline int frames;
   inline float fps;
   inline Integer client_private_key;
