@@ -5,6 +5,7 @@
 #include <enet/enet.h>
 #include <server_logger.h>
 
+#include "server_utils.h"
 #include "shared_crypto.h"
 #include "shared_global.h"
 #include "shared_network.h"
@@ -37,8 +38,6 @@ void enet_event_receive() {
   if (global::enet::enet_event.channelID == 0) {
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID))) {
-
-      // todo: controlla validità nome player e uuid, crea player, manda key pubblica
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
       string name = pkt_data_string.substr(0, pkt_data_string.find(' '));
@@ -136,12 +135,4 @@ int create_enet_host() {
   }
 
   return 0;
-}
-
-string get_uuid_from_peer() {
-  auto peer_entry = global::peer_to_uuid.find(global::enet::enet_event.peer);
-  if (peer_entry == global::peer_to_uuid.end())
-    return "";
-
-  return peer_entry->second;
 }

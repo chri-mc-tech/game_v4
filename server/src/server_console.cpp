@@ -14,8 +14,15 @@ namespace console {
       std::cout << ">> ";
       std::getline(std::cin, input_string);
       if (!input_string.empty()) {
-        commands::process_command(input_string, COMMAND_PERMISSION_CONSOLE);
-        input_string.clear();
+        if (input_string.find(' ') != string::npos) {
+          string command = input_string.substr(0, input_string.find(' '));
+          string args = input_string.substr(input_string.find(' ') + 1);
+          commands::process_command(command, args);
+        }
+        else {
+          commands::process_command(input_string);
+          input_string.clear();
+        }
       }
     }
   }
