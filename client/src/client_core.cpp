@@ -61,7 +61,7 @@ int client_run() {
     global::frames ++;
 
     if (global::ttf::input_string.ends_with("\n")) {global::ttf::input_string.clear();}
-    if (!global::ttf::input_string.empty()) {std::cout << global::ttf::input_string << std::endl;}
+    // if (!global::ttf::input_string.empty()) {std::cout << global::ttf::input_string << std::endl;}
   }
 
   return 0;
@@ -94,7 +94,7 @@ int sdl_poll_loop() {
       }
 
       case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-        if (global::status == STATUS_ERROR_CONNECTING_TO_SERVER) {
+        if (global::status == STATUS_ERROR_CONNECTING_TO_SERVER || global::status == STATUS_DISCONNECTED_FROM_SERVER) {
           ui::button_continue.handle_event(sdl_event, [](){set_status(STATUS_WAITING_USER_INPUT_IP);});
         }
       }

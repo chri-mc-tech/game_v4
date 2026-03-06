@@ -28,9 +28,11 @@ int main() {
     return 5;
   }
 
+  /*
   if (!shared::utils::is_valid_nickname(global::config::name)) {
     return 7;
   }
+  */
 
   if (!shared::utils::is_valid_uuid(global::config::uuid)) {
     return 8;

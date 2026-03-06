@@ -83,9 +83,9 @@ namespace commands {
     else {
       Player* temp_player = get_player_from_name(args);
       if (temp_player) {
-        enet_peer_disconnect_now(temp_player->peer, 0);
         global::peer_to_uuid.erase(temp_player->peer);
         global::online_players.erase(temp_player->uuid);
+        enet_peer_disconnect_now(temp_player->peer, 0);
         log_info("player \"" + args + "\" kicked");
       }
       else {

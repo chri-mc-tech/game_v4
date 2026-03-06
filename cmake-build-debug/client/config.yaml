@@ -1,0 +1,9 @@
+# Client configuration file
+# Player identity on servers is based on the UUID stored here
+# Changing the username will not change the UUID
+# Editing this file manually may cause data loss on servers
+# To generate a new UUID, delete this file and restart the client
+# WARNING: Doing so will lose access to previous server data
+
+uuid: dngv4v5z-4wh8q2an-t2ktmbre-v6
+name: chri_mc_tech

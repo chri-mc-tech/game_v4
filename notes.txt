@@ -33,7 +33,7 @@ CODICI ERRORE
 4 = error creating config file
 5 = error loading config
 6 = error creating enet host
-7 = nickname not valid
+// 7 = nickname not valid
 8 = uuid not valid
 
 
