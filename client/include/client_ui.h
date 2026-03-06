@@ -36,6 +36,10 @@ namespace ui {
   inline TTF_Text* text_ask_server_ip;
   inline TTF_Text* text_ask_new_name;
   inline TTF_Text* text_connection_status;
+  inline TTF_Text* text_fps;
+  inline TTF_Text* text_debug;
+
+
   inline TTF_Text* text_input;
 
   void create_objects_to_render();

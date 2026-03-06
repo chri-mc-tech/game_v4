@@ -5,5 +5,7 @@
 # To generate a new UUID, delete this file and restart the client
 # WARNING: Doing so will lose access to previous server data
 
-uuid: dngv4v5z-4wh8q2an-t2ktmbre-v6
+uuid: w5fbrebm-i6u3p5z6-pnxug243-k2
 name: chri_mc_tech
+show_fps: true
+debug: true

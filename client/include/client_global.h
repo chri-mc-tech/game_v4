@@ -13,7 +13,7 @@ namespace global {
   inline bool running;
   inline std::unordered_map<string, Player> online_players;
   inline int frames;
-  inline float fps;
+  inline int fps;
   inline Integer client_private_key;
   inline Integer client_public_key;
   inline Integer server_public_key;
@@ -51,6 +51,8 @@ namespace global::ttf {
 namespace global::config {
   inline string uuid;
   inline string name;
+  inline bool show_fps;
+  inline bool debug;
 }
 
 enum status {

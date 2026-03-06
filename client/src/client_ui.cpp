@@ -31,6 +31,12 @@ namespace ui {
 
     text_connection_status = TTF_CreateText(text_engine, font, nullptr, 0);
     TTF_SetTextColor(text_connection_status, 255, 255, 255, 255);
+
+    text_fps = TTF_CreateText(text_engine, font, nullptr, 0);
+    TTF_SetTextColor(text_fps, 255, 255, 255, 255);
+
+    text_debug = TTF_CreateText(text_engine, font, nullptr, 0);
+    TTF_SetTextColor(text_debug, 150, 150, 255, 255);
   }
 
   void create_buttons() {

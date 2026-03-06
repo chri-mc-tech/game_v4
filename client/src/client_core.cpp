@@ -152,15 +152,22 @@ int sdl_loop() {
     ui::render::connection_status();
   }
 
-  // std::cout << ui::button_continue.loc_x << ", " << ui::button_continue.loc_y << std::endl;
-  // std::cout << ui::button_continue.text_width << ", " << ui::button_continue.text_height << std::endl;
+  if (global::config::show_fps) {
+    int temp_text_width;
+
+    TTF_GetTextSize(ui::text_fps, &temp_text_width, nullptr);
+    TTF_DrawRendererText(ui::text_fps,
+      static_cast<float>(global::sdl::window_width - temp_text_width), 0);
+  }
+
+  if (global::config::debug) {
+
+  }
 
   SDL_RenderPresent(global::sdl::renderer);
-  /*
   if (global::status == STATUS_WAITING_USER_INPUT_IP || global::status == STATUS_WAITING_USER_INPUT_NAME) {
     SDL_Delay(16);
   }
-  */
   return 0;
 }
 
@@ -190,12 +197,15 @@ void count_frames() {
     Uint32 delta = current_time - last_time;
 
     if (delta >= 1000) {
-      global::fps = static_cast<float>(global::frames) / (static_cast<float>(delta) / 1000);
+      global::fps = static_cast<int>(static_cast<float>(global::frames) / (static_cast<float>(delta) / 1000));
       global::frames = 0;
       last_time = current_time;
 
-      std::cout << "fps: " << global::fps << std::endl;
-      std::cout << global::status << std::endl;
+      TTF_SetTextString(ui::text_fps, std::to_string(global::fps).c_str(), 0);
+
+      // std::cout << "fps: " << global::fps << std::endl;
+      // std::cout << global::status << std::endl;
     }
   }
 }
+

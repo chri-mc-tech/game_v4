@@ -44,3 +44,4 @@ CANALI
 0 = pacchetti iniziali (prima di Diffie Hellman) (non cifrati)
 1 = pacchetti non cifrati
 2 = pacchetti cifrati
+

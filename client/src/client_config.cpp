@@ -26,6 +26,9 @@ namespace config {
     Node config;
     config["uuid"] = shared::crypto::generate_uuid();
     config["name"] = "";
+    config["show_fps"] = false;
+    config["debug"] = false;
+
     ofstream file_out("config.yaml");
 
     add_config_comment(file_out);
@@ -42,6 +45,8 @@ namespace config {
     Node config = LoadFile("config.yaml");
     global::config::uuid = config["uuid"].as<string>();
     global::config::name = config["name"].as<string>();
+    global::config::show_fps = config["show_fps"].as<bool>();
+    global::config::debug = config["debug"].as<bool>();
 
     return true;
   }
