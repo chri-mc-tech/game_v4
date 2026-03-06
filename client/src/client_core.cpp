@@ -157,11 +157,12 @@ int sdl_loop() {
 
     TTF_GetTextSize(ui::text_fps, &temp_text_width, nullptr);
     TTF_DrawRendererText(ui::text_fps,
-      static_cast<float>(global::sdl::window_width - temp_text_width), 0);
+      static_cast<float>(global::sdl::window_width - temp_text_width - 30), 10);
   }
 
   if (global::config::debug) {
-
+    TTF_SetTextString(ui::text_debug, ("status: " + std::to_string(global::status)).c_str(), 0);
+    TTF_DrawRendererText(ui::text_debug, 30, 10);
   }
 
   SDL_RenderPresent(global::sdl::renderer);

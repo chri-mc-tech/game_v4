@@ -36,7 +36,7 @@ namespace ui {
     TTF_SetTextColor(text_fps, 255, 255, 255, 255);
 
     text_debug = TTF_CreateText(text_engine, font, nullptr, 0);
-    TTF_SetTextColor(text_debug, 150, 150, 255, 255);
+    TTF_SetTextColor(text_debug, 50, 100, 180, 255);
   }
 
   void create_buttons() {
