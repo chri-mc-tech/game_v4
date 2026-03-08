@@ -111,46 +111,55 @@ int sdl_loop() {
   SDL_SetRenderDrawColor(global::sdl::renderer, 0, 0, 0, 255);
   SDL_RenderClear(global::sdl::renderer);
 
-  if (global::status == STATUS_WAITING_USER_INPUT_NAME) {
-    activate_text_input();
-    ui::render::ask_new_name();
-    ui::update_text_input();
+  switch (global::status) {
+    case STATUS_WAITING_USER_INPUT_NAME: {
+      activate_text_input();
+      ui::render::ask_new_name();
+      ui::update_text_input();
+      break;
+    }
 
+    case STATUS_WAITING_USER_INPUT_IP: {
+      activate_text_input();
+      ui::render::ask_server_ip();
+      ui::update_text_input();
+      break;
+    }
+
+    case STATUS_CONNECTING: {
+      deactivate_text_input();
+      TTF_SetTextString(ui::text_connection_status, "Connecting...", 0);
+      ui::render::connection_status();
+      break;
+    }
+
+    case STATUS_ERROR_CONNECTING_TO_SERVER: {
+      deactivate_text_input();
+      TTF_SetTextString(ui::text_connection_status, "Error connecting to the server", 0);
+      ui::button_continue.render();
+      ui::render::connection_status();
+      break;
+    }
+
+    case STATUS_ENCRYPTING: {
+      deactivate_text_input();
+      TTF_SetTextString(ui::text_connection_status, "Encrypting", 0);
+      ui::render::connection_status();
+      break;
+    }
+
+    case STATUS_DISCONNECTED_FROM_SERVER: {
+      deactivate_text_input();
+      TTF_SetTextString(ui::text_connection_status, "Disconnected from server", 0);
+      ui::button_continue.render();
+      ui::render::connection_status();
+      break;
+    }
+
+    default: break;
   }
 
-  if (global::status == STATUS_WAITING_USER_INPUT_IP) {
-    activate_text_input();
-    ui::render::ask_server_ip();
-    ui::update_text_input();
 
-  }
-
-  if (global::status == STATUS_CONNECTING) {
-    deactivate_text_input();
-    TTF_SetTextString(ui::text_connection_status, "Connecting...", 0);
-    ui::render::connection_status();
-  }
-
-
-  if (global::status == STATUS_ERROR_CONNECTING_TO_SERVER) {
-    deactivate_text_input();
-    TTF_SetTextString(ui::text_connection_status, "Error connecting to the server", 0);
-    ui::button_continue.render();
-    ui::render::connection_status();
-  }
-
-  if (global::status == STATUS_ENCRYPTING) {
-    deactivate_text_input();
-    TTF_SetTextString(ui::text_connection_status, "Encrypting", 0);
-    ui::render::connection_status();
-  }
-
-  if (global::status == STATUS_DISCONNECTED_FROM_SERVER) {
-    deactivate_text_input();
-    TTF_SetTextString(ui::text_connection_status, "Disconnected from server", 0);
-    ui::button_continue.render();
-    ui::render::connection_status();
-  }
 
   if (global::config::show_fps) {
     int temp_text_width;

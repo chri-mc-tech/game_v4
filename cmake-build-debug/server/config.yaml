@@ -1,5 +1,5 @@
 # Configuration file
 
 debug: true
-port: 23234
+port: 55555
 max_players: 5
