@@ -19,8 +19,7 @@ namespace shared::network {
     return string_type;
   }
 
-  bool send_packet(ENetPeer* peer, const int pkt_type, const string input_string, const int channel, const int flag,
-                   CryptoPP::SecByteBlock* key) {
+  bool send_packet(ENetPeer* peer, const int pkt_type, const string input_string, const int channel, const int flag, CryptoPP::SecByteBlock* key) {
     string to_send = network::pkt_type(pkt_type) + input_string;
     if (channel == 2) {
       to_send = crypto::encrypt_string_with_key(to_send, *key);

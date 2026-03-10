@@ -136,8 +136,6 @@ void enet_event_receive() {
 
   // encrypted (password hash, chat messages, ecc)
   else if (global::enet::enet_event.channelID == 2) {
-    log_error("aa");
-
     const auto it = global::online_players.find(get_uuid_from_peer());
     if (it == global::online_players.end()) {return;}
     Player* temp_player = &it->second;

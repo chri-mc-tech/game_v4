@@ -5,7 +5,6 @@
 #include <thread>
 #include <unistd.h>
 
-#include "../../server/include/server_logger.h"
 #include "shared_crypto.h"
 #include "shared_global.h"
 #include "shared_network.h"
@@ -98,10 +97,11 @@ int enet_event_receive() {
       std::cout << decrypted_string.substr(0, decrypted_string.find(']') + 1) << std::endl;
       if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
         if (shared::utils::is_valid_hash(decrypted_string)) {
-          log_debug("hash valid");
+          std::cout << "hash valid" << std::endl;
+
         }
         else {
-          log_debug("hash NOT valid");
+          std::cout << "hash NOT valid" << std::endl;
 
         }
       }

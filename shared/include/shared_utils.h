@@ -10,6 +10,6 @@ namespace shared::utils {
   bool is_valid_nickname(string t_string);
   bool is_valid_uuid(string t_string);
   bool is_valid_password(string t_string);
-  bool is_valid_hash(const string& hash);
+  bool is_valid_hash(const string hash);
   string packet_to_string(const ENetPacket *packet);
 }
