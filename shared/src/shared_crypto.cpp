@@ -117,4 +117,15 @@ namespace shared::crypto {
     return hex_output;
   }
 
+  string hash_password(const string &password) {
+    using namespace CryptoPP;
+    string digest;
+    SHA256 hash;
+
+    StringSource(password, true, new HashFilter(hash, new HexEncoder(new StringSink(digest))));
+
+    return digest;
+
+  }
+
 }

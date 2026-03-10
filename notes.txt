@@ -42,6 +42,6 @@ CANALI
 ------------------
 
 0 = pacchetti iniziali (prima di Diffie Hellman) (non cifrati)
-1 = pacchetti non cifrati
-2 = pacchetti cifrati
+1 = pacchetti non cifrati (es: coordinate)
+2 = pacchetti cifrati (es: hash password)
 

@@ -19,7 +19,6 @@ namespace shared::utils {
     if (t_string.length() < 4) {return false;}
     for (int i = 0; i < t_string.length(); i++) {
       if (!std::isalnum(t_string[i]) && t_string[i] != '_') {
-        std::cout << t_string[i] << std::endl;
         return false;
       }
     }
@@ -33,6 +32,16 @@ namespace shared::utils {
     if (t_string[17] != '-') {return false;}
     if (t_string[26] != '-') {return false;}
 
+    return true;
+  }
+
+  bool is_valid_password(string t_string) {
+    if (t_string.length() < 4) {return false;}
+    for (int i = 0; i < t_string.length(); i++) {
+      if (!std::isalnum(t_string[i]) && t_string[i] != '$' && t_string[i] != '@') {
+        return false;
+      }
+    }
     return true;
   }
 

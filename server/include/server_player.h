@@ -21,3 +21,8 @@ public:
   Integer session_key;
   SecByteBlock encryption_key;
 };
+
+namespace player_data {
+  bool create_player_data_file(const Player& player);
+
+}

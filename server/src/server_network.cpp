@@ -1,9 +1,14 @@
 #include "server_network.h"
+
+#include <fstream>
+
 #include "server_global.h"
 
+#include <bits/fs_fwd.h>
 #include <cryptopp/algparam.h>
 #include <enet/enet.h>
 #include <server_logger.h>
+#include <yaml-cpp/yaml.h>
 
 #include "server_utils.h"
 #include "shared_crypto.h"
@@ -36,6 +41,7 @@ void enet_event_receive() {
 
   // initial packets (not encrypted)
   if (global::enet::enet_event.channelID == 0) {
+    log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
@@ -66,6 +72,12 @@ void enet_event_receive() {
         temp_player.server_public_key = shared::crypto::create_public_key(temp_player.server_private_key);
         temp_player.peer = global::enet::enet_event.peer;
 
+        string file_string = ("data/players/" + temp_player.uuid + ".yaml");
+        std::ifstream file(file_string);
+
+        if (file.bad()) {
+          player_data::create_player_data_file(temp_player);
+        }
         global::online_players.emplace(uuid, std::move(temp_player));
         global::peer_to_uuid.emplace(temp_player.peer, uuid);
 
@@ -86,6 +98,23 @@ void enet_event_receive() {
       temp_player->session_key = shared::crypto::calculate_session_key(temp_player->server_private_key, temp_player->client_public_key);
       temp_player->encryption_key = shared::crypto::create_encryption_key_from_session_key(temp_player->session_key);
 
+      string file_string = ("data/players/" + temp_player->uuid + ".yaml");
+      std::ifstream file(file_string);
+
+      if (file.good()) {
+        log_debug("player file found");
+        YAML::Node player_file = YAML::LoadFile(file_string);
+        if (player_file["password_hash"].as<string>().empty()) {
+          log_debug("player still NOT registered");
+          shared::network::send_packet(temp_player->peer, PKT_FROM_SERVER_ASK_REGISTER_PASSWORD, "", 1, 0);
+        }
+        else {
+          log_debug("player already registered");
+          shared::network::send_packet(temp_player->peer, PKT_FROM_SERVER_ASK_LOGIN_PASSWORD, "", 1, 0);
+        }
+      }
+
+
       /*
       log_debug("server public key: " + IntToString(temp_player->server_public_key));
       log_debug("client public key: " + IntToString(temp_player->client_public_key));
@@ -98,6 +127,8 @@ void enet_event_receive() {
 
   // not encrypted (coords, ecc)
   else if (global::enet::enet_event.channelID == 1) {
+    log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
+
 
 
   }
@@ -111,6 +142,8 @@ void enet_event_receive() {
 
     if (!temp_player->encryption_key.empty()) {
       string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);
+      log_debug(decrypted_string.substr(0, decrypted_string.find(']') + 1));
+
     }
 
   }

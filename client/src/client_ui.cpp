@@ -6,6 +6,9 @@
 #include "client_core.h"
 #include "client_global.h"
 #include "client_network.h"
+#include "shared_crypto.h"
+#include "shared_global.h"
+#include "shared_network.h"
 #include "shared_utils.h"
 
 namespace ui {
@@ -27,7 +30,10 @@ namespace ui {
     TTF_SetTextColor(text_ask_server_ip, 255, 255, 255, 255);
 
     text_ask_new_name = TTF_CreateText(text_engine, font, "Nickname:", 0);
-    TTF_SetTextColor(text_ask_server_ip, 255, 255, 255, 255);
+    TTF_SetTextColor(text_ask_new_name, 255, 255, 255, 255);
+
+    text_ask_register_password = TTF_CreateText(text_engine, font, "Register password:", 0);
+    TTF_SetTextColor(text_ask_register_password, 255, 255, 255, 255);
 
     text_connection_status = TTF_CreateText(text_engine, font, nullptr, 0);
     TTF_SetTextColor(text_connection_status, 255, 255, 255, 255);
@@ -37,6 +43,7 @@ namespace ui {
 
     text_debug = TTF_CreateText(text_engine, font, nullptr, 0);
     TTF_SetTextColor(text_debug, 50, 100, 180, 255);
+
   }
 
   void create_buttons() {
@@ -131,6 +138,38 @@ namespace ui::render {
       }
       else {
         std::cout << R"(only use "a-b", "A-B", "_")";
+      }
+    }
+  }
+
+
+  void ask_register_password() {
+    using namespace global::ttf;
+    using namespace global::sdl;
+
+    int t_width, t_height;
+
+    TTF_GetTextSize(text_ask_register_password, &t_width, &t_height);
+    TTF_DrawRendererText(text_ask_register_password, roundf(static_cast<float>(window_width - t_width) / 2),
+                                            roundf(static_cast<float>(window_height - t_height) / 2) - 300);
+
+
+    TTF_GetTextSize(text_input, &t_width, &t_height);
+    TTF_DrawRendererText(text_input, roundf(static_cast<float>(window_width - t_width) / 2),
+                                     roundf(static_cast<float>(window_height - t_height) / 2) - 250);
+
+    if (input_string.ends_with("\n")) {
+      input_string.erase(input_string.length() - 1, 1);
+      string t_string = input_string;
+      input_string.clear();
+      if (shared::utils::is_valid_password(t_string)) {
+        global::status = STATUS_CHECKING_REGISTER_PASSWORD;
+        string hashed_password = shared::crypto::hash_password(t_string);
+        string crypted_string = shared::crypto::encrypt_string_with_key(hashed_password, global::encryption_key);
+        shared::network::send_packet(global::enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_REGISTER_PASSWORD, crypted_string, 2, ENET_PACKET_FLAG_RELIABLE);
+      }
+      else {
+        std::cout << R"(only use "a-b", "A-B", "@", "$")";
       }
     }
   }

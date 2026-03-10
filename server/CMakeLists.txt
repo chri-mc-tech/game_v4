@@ -14,6 +14,7 @@ add_executable(server
         include/server_commands.h
         src/server_utils.cpp
         include/server_utils.h
+        src/server_player.cpp
 )
 
 target_include_directories(server PRIVATE include)

@@ -40,7 +40,7 @@ int enet_event_connected() {
   string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID) + global::config::name + " " + global::config::uuid;
   ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
   enet_peer_send(global::enet::connected_server_peer, 0, temp_packet);
-  std::cout << to_send << std::endl;
+  // std::cout << to_send << std::endl;
   return 0;
 }
 
@@ -48,8 +48,10 @@ int enet_event_receive() {
   std::cout << "received" << std::endl;
   string pkt_data_string = shared::utils::packet_to_string(global::enet::enet_event.packet);
 
-  // not encrypted
+  // initial packets (not encrypted)
   if (global::enet::enet_event.channelID == 0) {
+    std::cout << pkt_data_string.substr(0, pkt_data_string.find(']') + 1) << std::endl;
+
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
@@ -60,10 +62,12 @@ int enet_event_receive() {
         global::server_public_key = Integer(pkt_data_string.c_str());
         global::shared_key = shared::crypto::calculate_session_key(global::client_private_key, global::server_public_key);
         global::encryption_key = shared::crypto::create_encryption_key_from_session_key(global::shared_key);
+        /*
         std::cout << "server public key: " + IntToString(global::server_public_key) << std::endl;
         std::cout << "client public key: " + IntToString(global::client_public_key) << std::endl;
         std::cout << "shared key: " + IntToString(global::shared_key) << std::endl;
         std::cout << "hex encryption key: " + shared::crypto::secByteBlock_to_hex(global::encryption_key) << std::endl;
+        */
 
         shared::network::send_packet(
           global::enet::connected_server_peer,
@@ -76,10 +80,26 @@ int enet_event_receive() {
     }
   }
 
-  // encrypted
-  else {
+  // not encrypted (coords, ecc)
+  else if (global::enet::enet_event.channelID == 1) {
+    std::cout << pkt_data_string.substr(0, pkt_data_string.find(']') + 1) << std::endl;
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_ASK_REGISTER_PASSWORD))) {
+      global::status = STATUS_WAITING_USER_INPUT_REGISTER_PASSWORD;
+    }
 
   }
+
+  // encrypted (password hash, chat messages, ecc)
+  else if (global::enet::enet_event.channelID == 2) {
+
+    if (!global::encryption_key.empty()) {
+      string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, global::encryption_key);
+      std::cout << decrypted_string.substr(0, decrypted_string.find(']') + 1) << std::endl;
+    }
+
+  }
+
   return 0;
 }
 
