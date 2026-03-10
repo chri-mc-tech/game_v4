@@ -29,8 +29,7 @@ int enet_loop() {
 }
 
 void enet_event_connected() {
-  log_info("player connected");
-  log_debug("channel count: " + std::to_string(global::enet::enet_event.peer->channelCount));
+  log_info("player connected: " + enet_ip_to_string(global::enet::enet_event.peer->address.host));
 
 }
 

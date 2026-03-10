@@ -4,3 +4,4 @@
 
 std::string get_uuid_from_peer();
 Player* get_player_from_name(const std::string& name);
+string enet_ip_to_string(enet_uint32 ip);

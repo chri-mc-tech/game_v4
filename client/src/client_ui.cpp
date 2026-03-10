@@ -106,6 +106,7 @@ namespace ui::render {
     if (input_string.ends_with("\n")) {
       input_string.erase(input_string.length() - 1, 1);
       if (input_string == "1") {connect_to_server("localhost");}
+      else if (input_string == "2") {connect_to_server("147.185.221.17", "24611");}
       else if (input_string.find(':') == std::string::npos) {connect_to_server(input_string);}
       else {connect_to_server(input_string.substr(0, input_string.find(':')), input_string.substr(input_string.find(':') + 1));}
 
