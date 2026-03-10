@@ -165,8 +165,12 @@ namespace ui::render {
       if (shared::utils::is_valid_password(t_string)) {
         global::status = STATUS_CHECKING_REGISTER_PASSWORD;
         string hashed_password = shared::crypto::hash_password(t_string);
-        string crypted_string = shared::crypto::encrypt_string_with_key(hashed_password, global::encryption_key);
-        shared::network::send_packet(global::enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_REGISTER_PASSWORD, crypted_string, 2, ENET_PACKET_FLAG_RELIABLE);
+        // std::cout << "password: " + t_string << std::endl;
+        std::cout << "hashed_password: " + hashed_password << std::endl;
+        // std::cout << "crypted_hashed_password: " + crypted_string << std::endl;
+        if (!shared::network::send_packet(global::enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_REGISTER_PASSWORD, hashed_password, 2, ENET_PACKET_FLAG_RELIABLE, &global::encryption_key)) {
+          std::cout << "error sending packet" << std::endl;
+        }
       }
       else {
         std::cout << R"(only use "a-b", "A-B", "@", "$")";

@@ -5,6 +5,7 @@
 #include <thread>
 #include <unistd.h>
 
+#include "../../server/include/server_logger.h"
 #include "shared_crypto.h"
 #include "shared_global.h"
 #include "shared_network.h"
@@ -63,10 +64,10 @@ int enet_event_receive() {
         global::shared_key = shared::crypto::calculate_session_key(global::client_private_key, global::server_public_key);
         global::encryption_key = shared::crypto::create_encryption_key_from_session_key(global::shared_key);
         /*
-        std::cout << "server public key: " + IntToString(global::server_public_key) << std::endl;
-        std::cout << "client public key: " + IntToString(global::client_public_key) << std::endl;
-        std::cout << "shared key: " + IntToString(global::shared_key) << std::endl;
-        std::cout << "hex encryption key: " + shared::crypto::secByteBlock_to_hex(global::encryption_key) << std::endl;
+        // std::cout << "server public key: " + IntToString(global::server_public_key) << std::endl;
+        // std::cout << "client public key: " + IntToString(global::client_public_key) << std::endl;
+        // std::cout << "shared key: " + IntToString(global::shared_key) << std::endl;
+        // std::cout << "hex encryption key: " + shared::crypto::secByteBlock_to_hex(global::encryption_key) << std::endl;
         */
 
         shared::network::send_packet(
@@ -90,12 +91,20 @@ int enet_event_receive() {
 
   }
 
-  // encrypted (password hash, chat messages, ecc)
+  // encrypted (chat messages, ecc)
   else if (global::enet::enet_event.channelID == 2) {
-
     if (!global::encryption_key.empty()) {
       string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, global::encryption_key);
       std::cout << decrypted_string.substr(0, decrypted_string.find(']') + 1) << std::endl;
+      if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
+        if (shared::utils::is_valid_hash(decrypted_string)) {
+          log_debug("hash valid");
+        }
+        else {
+          log_debug("hash NOT valid");
+
+        }
+      }
     }
 
   }
@@ -117,7 +126,7 @@ int connect_to_server(const string& ip, const string& port) {
   ENetAddress server_to_connect;
   enet_address_set_host(&server_to_connect, ip.c_str());
   server_to_connect.port = static_cast<enet_uint16>(std::stoul(port));
-  global::enet::connected_server_peer = enet_host_connect(global::enet::enet_client, &server_to_connect, 2, 0);
+  global::enet::connected_server_peer = enet_host_connect(global::enet::enet_client, &server_to_connect, 3, 0);
   std::jthread thread_wait_server_connection(wait_server_connection);
 
   thread_wait_server_connection.detach();

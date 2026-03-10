@@ -30,6 +30,7 @@ int enet_loop() {
 
 void enet_event_connected() {
   log_info("player connected");
+  log_debug("channel count: " + std::to_string(global::enet::enet_event.peer->channelCount));
 
 }
 
@@ -75,7 +76,7 @@ void enet_event_receive() {
         string file_string = ("data/players/" + temp_player.uuid + ".yaml");
         std::ifstream file(file_string);
 
-        if (file.bad()) {
+        if (!file.good()) {
           player_data::create_player_data_file(temp_player);
         }
         global::online_players.emplace(uuid, std::move(temp_player));
@@ -135,6 +136,7 @@ void enet_event_receive() {
 
   // encrypted (password hash, chat messages, ecc)
   else if (global::enet::enet_event.channelID == 2) {
+    log_error("aa");
 
     const auto it = global::online_players.find(get_uuid_from_peer());
     if (it == global::online_players.end()) {return;}
@@ -143,6 +145,8 @@ void enet_event_receive() {
     if (!temp_player->encryption_key.empty()) {
       string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);
       log_debug(decrypted_string.substr(0, decrypted_string.find(']') + 1));
+      log_debug(decrypted_string);
+
 
     }
 

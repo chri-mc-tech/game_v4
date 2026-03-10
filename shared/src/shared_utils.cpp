@@ -45,6 +45,16 @@ namespace shared::utils {
     return true;
   }
 
+  bool is_valid_hash(const string& hash) {
+    if (hash.length() != 64) return false;
+
+    for (char c : hash) {
+      if (!std::isxdigit(c)) return false;
+    }
+
+    return true;
+  }
+
   string packet_to_string(const ENetPacket *packet) {
     string string(reinterpret_cast<char*>(packet->data), packet->dataLength);
     return string;

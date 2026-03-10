@@ -188,7 +188,9 @@ int sdl_loop() {
   }
 
   SDL_RenderPresent(global::sdl::renderer);
-  if (global::status == STATUS_WAITING_USER_INPUT_IP || global::status == STATUS_WAITING_USER_INPUT_NAME) {
+  if (global::status == STATUS_WAITING_USER_INPUT_IP ||
+      global::status == STATUS_WAITING_USER_INPUT_NAME ||
+      global::status == STATUS_ENCRYPTING) {
     SDL_Delay(16);
   }
   return 0;
