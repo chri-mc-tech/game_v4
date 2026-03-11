@@ -36,6 +36,7 @@ namespace ui {
   inline TTF_Text* text_ask_server_ip;
   inline TTF_Text* text_ask_new_name;
   inline TTF_Text* text_ask_register_password;
+  inline TTF_Text* text_ask_login_password;
   inline TTF_Text* text_connection_status;
   inline TTF_Text* text_fps;
   inline TTF_Text* text_debug;
@@ -59,6 +60,7 @@ namespace ui::render {
   void continue_button();
   void ask_new_name();
   void ask_register_password();
+  void ask_login_password();
 
 }
 

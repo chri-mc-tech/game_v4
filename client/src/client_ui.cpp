@@ -35,6 +35,9 @@ namespace ui {
     text_ask_register_password = TTF_CreateText(text_engine, font, "Register password:", 0);
     TTF_SetTextColor(text_ask_register_password, 255, 255, 255, 255);
 
+    text_ask_login_password = TTF_CreateText(text_engine, font, "Login password:", 0);
+    TTF_SetTextColor(text_ask_register_password, 255, 255, 255, 255);
+
     text_connection_status = TTF_CreateText(text_engine, font, nullptr, 0);
     TTF_SetTextColor(text_connection_status, 255, 255, 255, 255);
 
@@ -106,7 +109,7 @@ namespace ui::render {
     if (input_string.ends_with("\n")) {
       input_string.erase(input_string.length() - 1, 1);
       if (input_string == "1") {connect_to_server("localhost");}
-      else if (input_string == "2") {connect_to_server("147.185.221.17", "24611");}
+      // else if (input_string == "2") {connect_to_server("147.185.221.17", "24611");}
       else if (input_string.find(':') == std::string::npos) {connect_to_server(input_string);}
       else {connect_to_server(input_string.substr(0, input_string.find(':')), input_string.substr(input_string.find(':') + 1));}
 
@@ -170,6 +173,41 @@ namespace ui::render {
         std::cout << "hashed_password: " + hashed_password << std::endl;
         // std::cout << "crypted_hashed_password: " + crypted_string << std::endl;
         if (!shared::network::send_packet(global::enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_REGISTER_PASSWORD, hashed_password, 2, ENET_PACKET_FLAG_RELIABLE, &global::encryption_key)) {
+          std::cout << "error sending packet" << std::endl;
+        }
+      }
+      else {
+        std::cout << R"(only use "a-b", "A-B", "@", "$")";
+      }
+    }
+  }
+
+
+
+  void ask_login_password() {
+    using namespace global::ttf;
+    using namespace global::sdl;
+
+    int t_width, t_height;
+
+    TTF_GetTextSize(text_ask_login_password, &t_width, &t_height);
+    TTF_DrawRendererText(text_ask_login_password, roundf(static_cast<float>(window_width - t_width) / 2),
+                                            roundf(static_cast<float>(window_height - t_height) / 2) - 300);
+
+
+    TTF_GetTextSize(text_input, &t_width, &t_height);
+    TTF_DrawRendererText(text_input, roundf(static_cast<float>(window_width - t_width) / 2),
+                                     roundf(static_cast<float>(window_height - t_height) / 2) - 250);
+
+    if (input_string.ends_with("\n")) {
+      input_string.erase(input_string.length() - 1, 1);
+      string t_string = input_string;
+      input_string.clear();
+      if (shared::utils::is_valid_password(t_string)) {
+        global::status = STATUS_CHECKING_LOGIN_PASSWORD;
+        string hashed_password = shared::crypto::hash_password(t_string);
+        std::cout << "hashed_password: " + hashed_password << std::endl;
+        if (!shared::network::send_packet(global::enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_LOGIN_PASSWORD, hashed_password, 2, ENET_PACKET_FLAG_RELIABLE, &global::encryption_key)) {
           std::cout << "error sending packet" << std::endl;
         }
       }

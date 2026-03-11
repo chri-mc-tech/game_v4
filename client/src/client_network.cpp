@@ -88,6 +88,30 @@ int enet_event_receive() {
       global::status = STATUS_WAITING_USER_INPUT_REGISTER_PASSWORD;
     }
 
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_ASK_LOGIN_PASSWORD))) {
+      global::status = STATUS_WAITING_USER_INPUT_LOGIN_PASSWORD;
+    }
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_CONFIRM_REGISTER_PASSWORD))) {
+      global::status = STATUS_AUTHENTICATED;
+    }
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_CONFIRM_LOGIN_PASSWORD))) {
+      global::status = STATUS_AUTHENTICATED;
+    }
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_DENY_REGISTER_PASSWORD))) {
+      global::status = STATUS_WAITING_USER_INPUT_IP;
+      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+      std::cout << pkt_data_string << std::endl;
+    }
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_DENY_LOGIN_PASSWORD))) {
+      global::status = STATUS_WAITING_USER_INPUT_IP;
+      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+      std::cout << pkt_data_string << std::endl;
+    }
+
   }
 
   // encrypted (chat messages, ecc)
@@ -95,16 +119,7 @@ int enet_event_receive() {
     if (!global::encryption_key.empty()) {
       string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, global::encryption_key);
       std::cout << decrypted_string.substr(0, decrypted_string.find(']') + 1) << std::endl;
-      if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
-        if (shared::utils::is_valid_hash(decrypted_string)) {
-          std::cout << "hash valid" << std::endl;
 
-        }
-        else {
-          std::cout << "hash NOT valid" << std::endl;
-
-        }
-      }
     }
 
   }
@@ -137,7 +152,9 @@ int connect_to_server(const string& ip, const string& port) {
 void wait_server_connection() {
   std::this_thread::sleep_for(std::chrono::seconds(6));
   if (!global::enet::is_connected) {
-    global::status = STATUS_ERROR_CONNECTING_TO_SERVER;
-    enet_peer_reset(global::enet::connected_server_peer);
+    if (global::status == STATUS_CONNECTING) {
+      global::status = STATUS_ERROR_CONNECTING_TO_SERVER;
+      enet_peer_reset(global::enet::connected_server_peer);
+    }
   }
 }

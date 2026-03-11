@@ -204,6 +204,7 @@ void enet_event_receive() {
               1,
               ENET_PACKET_FLAG_RELIABLE
               );
+            enet_peer_disconnect_later(global::enet::enet_event.peer, 0);
           }
         }
 

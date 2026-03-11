@@ -167,6 +167,21 @@ int sdl_loop() {
       deactivate_text_input();
       TTF_SetTextString(ui::text_connection_status, "Checking password", 0);
       ui::render::connection_status();
+      break;
+    }
+
+    case STATUS_WAITING_USER_INPUT_LOGIN_PASSWORD: {
+      activate_text_input();
+      ui::render::ask_login_password();
+      ui::update_text_input();
+      break;
+    }
+
+    case STATUS_CHECKING_LOGIN_PASSWORD: {
+      deactivate_text_input();
+      TTF_SetTextString(ui::text_connection_status, "Checking password", 0);
+      ui::render::connection_status();
+      break;
     }
 
     default: break;
