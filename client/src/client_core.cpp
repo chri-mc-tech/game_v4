@@ -48,6 +48,8 @@ int client_run() {
   ui::create_objects_to_render();
   ui::create_buttons();
 
+  SDL_SetRenderVSync(global::sdl::renderer, SDL_RENDERER_VSYNC_DISABLED);
+
   if (!global::config::name.empty()) {
     global::status = STATUS_WAITING_USER_INPUT_IP;
   }
@@ -243,8 +245,6 @@ void count_frames() {
 
       TTF_SetTextString(ui::text_fps, std::to_string(global::fps).c_str(), 0);
 
-      // std::cout << "fps: " << global::fps << std::endl;
-      // std::cout << global::status << std::endl;
     }
   }
 }

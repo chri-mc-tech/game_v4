@@ -101,13 +101,11 @@ int enet_event_receive() {
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_DENY_REGISTER_PASSWORD))) {
-      global::status = STATUS_WAITING_USER_INPUT_IP;
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
       std::cout << pkt_data_string << std::endl;
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_DENY_LOGIN_PASSWORD))) {
-      global::status = STATUS_WAITING_USER_INPUT_IP;
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
       std::cout << pkt_data_string << std::endl;
     }
@@ -142,8 +140,8 @@ int connect_to_server(const string& ip, const string& port) {
   enet_address_set_host(&server_to_connect, ip.c_str());
   server_to_connect.port = static_cast<enet_uint16>(std::stoul(port));
   global::enet::connected_server_peer = enet_host_connect(global::enet::enet_client, &server_to_connect, 3, 0);
-  std::jthread thread_wait_server_connection(wait_server_connection);
 
+  std::jthread thread_wait_server_connection(wait_server_connection);
   thread_wait_server_connection.detach();
   return 0;
 }
