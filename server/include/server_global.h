@@ -24,3 +24,9 @@ namespace global::config {
   inline int host = 0;
   inline int max_players = 5;
 }
+
+enum player_status {
+  PLAYER_STATUS_CONNECTED,
+  PLAYER_STATUS_ENCRYPTING,
+  PLAYER_STATUS_AUTHENTICATED,
+};

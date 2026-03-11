@@ -147,8 +147,6 @@ void enet_event_receive() {
       if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_HASHED_REGISTER_PASSWORD))) {
         using namespace YAML;
         using std::ofstream;
-        //todo: mandare pacchetto di conferma pass, anche poi per il login
-        // pero controllo finale sempre lato server, cambiare stato player lato server da 0 (o quello attuale) a 1 (autenticato)
         decrypted_string.erase(0, decrypted_string.find(']') + 1);
         if (shared::utils::is_valid_hash(decrypted_string)) {
           string file = ("data/players/" + temp_player->uuid + ".yaml");
@@ -159,8 +157,67 @@ void enet_event_receive() {
 
           file_out << player_file;
           file_out.close();
+          shared::network::send_packet(
+            global::enet::enet_event.peer,
+            PKT_FROM_SERVER_CONFIRM_REGISTER_PASSWORD,
+            "",
+            1,
+            ENET_PACKET_FLAG_RELIABLE
+            );
+        }
+
+        else {
+          shared::network::send_packet(
+            global::enet::enet_event.peer,
+            PKT_FROM_SERVER_DENY_LOGIN_PASSWORD,
+            "hash not valid",
+            1,
+            ENET_PACKET_FLAG_RELIABLE
+            );
         }
       }
+      if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_HASHED_LOGIN_PASSWORD))) {
+        using namespace YAML;
+        using std::ofstream;
+        decrypted_string.erase(0, decrypted_string.find(']') + 1);
+        if (shared::utils::is_valid_hash(decrypted_string)) {
+          string file = ("data/players/" + temp_player->uuid + ".yaml");
+
+          Node player_file = LoadFile(file);
+          string saved_hash = player_file["password_hash"].as<string>();
+          if (decrypted_string == saved_hash) {
+            shared::network::send_packet(
+              global::enet::enet_event.peer,
+              PKT_FROM_SERVER_CONFIRM_LOGIN_PASSWORD,
+              "",
+              1,
+              ENET_PACKET_FLAG_RELIABLE
+              );
+            temp_player->player_status = PLAYER_STATUS_AUTHENTICATED;
+          }
+
+          else {
+            shared::network::send_packet(
+              global::enet::enet_event.peer,
+              PKT_FROM_SERVER_DENY_LOGIN_PASSWORD,
+              "not correct",
+              1,
+              ENET_PACKET_FLAG_RELIABLE
+              );
+          }
+        }
+
+        else {
+          shared::network::send_packet(
+            global::enet::enet_event.peer,
+            PKT_FROM_SERVER_DENY_LOGIN_PASSWORD,
+            "hash not valid",
+            1,
+            ENET_PACKET_FLAG_RELIABLE
+            );
+        }
+      }
+
 
     }
   }
