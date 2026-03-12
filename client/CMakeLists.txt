@@ -1,4 +1,4 @@
-add_executable(client
+add_executable(client WIN32
         src/client_main.cpp
         ../shared/src/shared_utils.cpp
         ../shared/include/shared_utils.h
@@ -13,6 +13,12 @@ add_executable(client
         include/client_ui.h
         src/client_config.cpp
         include/client_config.h
+)
+
+target_link_options(client PRIVATE
+        -static
+        -static-libgcc
+        -static-libstdc++
 )
 
 target_include_directories(client PRIVATE include)

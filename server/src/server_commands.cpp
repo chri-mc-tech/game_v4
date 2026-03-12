@@ -65,7 +65,7 @@ namespace commands {
         temp = i.second.name;
       }
       else {
-        temp += ", " + i.first;
+        temp += ", " + i.second.name;
       }
     }
     if (temp.empty()) {

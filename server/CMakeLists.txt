@@ -17,5 +17,11 @@ add_executable(server
         src/server_player.cpp
 )
 
+target_link_options(server PRIVATE
+        -static
+        -static-libgcc
+        -static-libstdc++
+)
+
 target_include_directories(server PRIVATE include)
 target_link_libraries(server PRIVATE shared)
