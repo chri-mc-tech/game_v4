@@ -55,10 +55,29 @@ int client_run() {
   }
   std::jthread thread_count_frames(count_frames);
 
+  const double TICK_RATE = 40.0;
+  const double TICK_TIME = 1.0 / TICK_RATE;
+
+  double accumulator = 0.0;
+
+  auto last = std::chrono::high_resolution_clock::now();
+
   while (global::running) {
+    auto now = std::chrono::high_resolution_clock::now();
+    double delta = std::chrono::duration<double>(now - last).count();
+    last = now;
+
+    accumulator += delta;
+
     enet_loop();
     sdl_poll_loop();
     sdl_loop();
+
+    while (accumulator >= TICK_TIME)
+    {
+      // 40 TPS functions
+      accumulator -= TICK_TIME;
+    }
 
     global::frames ++;
 
