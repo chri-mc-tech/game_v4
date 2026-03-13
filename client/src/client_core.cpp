@@ -98,7 +98,12 @@ int sdl_poll_loop() {
         ui::button_continue.update_location(global::sdl::window_width/2, global::sdl::window_height/2 + 100);
         break;
       }
-      case SDL_EVENT_TEXT_INPUT: global::ttf::input_string += sdl_event.text.text; break;
+      case SDL_EVENT_TEXT_INPUT: {
+        if (!global::ttf::input_string.ends_with('\n')) {
+          global::ttf::input_string += sdl_event.text.text;
+        }
+        break;
+      }
       case SDL_EVENT_KEY_DOWN: {
         if (sdl_event.key.key == SDLK_BACKSPACE) {
           if (!global::ttf::input_string.empty()) {
