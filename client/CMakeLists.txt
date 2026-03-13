@@ -1,4 +1,4 @@
-add_executable(client WIN32
+add_executable(client
         src/client_main.cpp
         ../shared/src/shared_utils.cpp
         ../shared/include/shared_utils.h

@@ -19,6 +19,7 @@ namespace global {
   inline Integer server_public_key;
   inline Integer shared_key;
   inline SecByteBlock encryption_key;
+  inline Player main_player;
 }
 
 namespace global::enet {

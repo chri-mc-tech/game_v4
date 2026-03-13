@@ -129,6 +129,9 @@ void enet_event_receive() {
   else if (global::enet::enet_event.channelID == 1) {
     log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
 
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_COORDS))) {
+      log_debug(pkt_data_string);
+    }
 
 
   }

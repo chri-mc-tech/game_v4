@@ -54,6 +54,11 @@ int client_run() {
     global::status = STATUS_WAITING_USER_INPUT_IP;
   }
 
+  global::main_player.name = global::config::name;
+  global::main_player.uuid = global::config::uuid;
+  global::main_player.location_x = 0;
+  global::main_player.location_y = 0;
+
   std::jthread thread_count_frames(count_frames);
 
   const double TICK_RATE = 40.0;
@@ -76,7 +81,9 @@ int client_run() {
 
     while (accumulator >= TICK_TIME)
     {
-      // 40 TPS functions
+      // {TICK_RATE} TPS functions
+      update_location();
+      send_location();
       accumulator -= TICK_TIME;
     }
 
@@ -273,3 +280,22 @@ void count_frames() {
   }
 }
 
+void update_location() {
+  const bool *key_states = SDL_GetKeyboardState(nullptr);
+
+  if (key_states[SDL_SCANCODE_W]) {
+    global::main_player.location_y --;
+  }
+
+  if (key_states[SDL_SCANCODE_S]) {
+    global::main_player.location_y ++;
+  }
+
+  if (key_states[SDL_SCANCODE_A]) {
+    global::main_player.location_x --;
+  }
+
+  if (key_states[SDL_SCANCODE_D]) {
+    global::main_player.location_x ++;
+  }
+}

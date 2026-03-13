@@ -156,3 +156,13 @@ void wait_server_connection() {
     }
   }
 }
+
+void send_location() {
+  if (global::enet::is_connected) {
+    shared::network::send_packet(
+      global::enet::connected_server_peer,
+      PKT_FROM_CLIENT_COORDS,
+      (std::to_string(global::main_player.location_x) + " " + std::to_string(global::main_player.location_y)),
+      1, 0);
+  }
+}
