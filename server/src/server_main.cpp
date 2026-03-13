@@ -15,7 +15,7 @@ using namespace std;
 
 int main() {
   if (!initialize_libraries()) {
-    return 1;
+    return 3;
   }
 
   if (!config::check()) {
@@ -37,7 +37,7 @@ int main() {
   log_info("Server configuration loaded successfully");
 
   if (create_enet_host() != 0) {
-    return 1;
+    return 6;
   }
 
   commands::register_commands();
@@ -53,5 +53,5 @@ int main() {
   // log_debug(to_string(shared::network::get_packet_type("[1]ciao")));
 
   jthread thread_console(console::console);
-  server_run();
+  return server_run();
 }

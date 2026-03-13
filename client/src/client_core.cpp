@@ -53,6 +53,7 @@ int client_run() {
   if (!global::config::name.empty()) {
     global::status = STATUS_WAITING_USER_INPUT_IP;
   }
+
   std::jthread thread_count_frames(count_frames);
 
   const double TICK_RATE = 40.0;
@@ -82,7 +83,6 @@ int client_run() {
     global::frames ++;
 
     if (global::ttf::input_string.ends_with("\n")) {global::ttf::input_string.clear();}
-    // if (!global::ttf::input_string.empty()) {std::cout << global::ttf::input_string << std::endl;}
   }
 
   return 0;

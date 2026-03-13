@@ -47,5 +47,5 @@ int main() {
 
   // log_debug(to_string(shared::network::get_packet_type("[1]ciao")));
 
-  client_run();
+  return client_run();
 }
