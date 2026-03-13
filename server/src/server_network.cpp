@@ -130,7 +130,18 @@ void enet_event_receive() {
     log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_COORDS))) {
-      log_debug(pkt_data_string);
+      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+
+      Player* temp_player = get_player_from_uuid(get_uuid_from_peer());
+      float loc_x = stof(pkt_data_string.substr(0, pkt_data_string.find(' ')));
+      float loc_y = stof(pkt_data_string.substr(pkt_data_string.find(' ') + 1));
+
+      temp_player->location_x = loc_x;
+      temp_player->location_y = loc_y;
+
+      // log_debug(std::to_string(loc_x));
+      // log_debug(std::to_string(loc_y));
+
     }
 
 
@@ -138,9 +149,8 @@ void enet_event_receive() {
 
   // encrypted (password hash, chat messages, ecc)
   else if (global::enet::enet_event.channelID == 2) {
-    const auto it = global::online_players.find(get_uuid_from_peer());
-    if (it == global::online_players.end()) {return;}
-    Player* temp_player = &it->second;
+
+    Player* temp_player = get_player_from_uuid(get_uuid_from_peer());
 
     if (!temp_player->encryption_key.empty()) {
       string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);

@@ -19,6 +19,14 @@ Player* get_player_from_name(const string& name) {
   return nullptr;
 }
 
+Player* get_player_from_uuid(const string& uuid) {
+  const auto it = global::online_players.find(uuid);
+  if (it != global::online_players.end()) {
+    return &it->second;
+  }
+  return nullptr;
+}
+
 string enet_ip_to_string(enet_uint32 ip) {
   uint8_t b1 = (ip >> 24) & 0xFF;
   uint8_t b2 = (ip >> 16) & 0xFF;
