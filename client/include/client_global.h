@@ -7,6 +7,9 @@
 #include <enet/enet.h>
 #include <unordered_map>
 
+using CryptoPP::Integer;
+using CryptoPP::SecByteBlock;
+
 namespace global {
   inline int status = 0;
   inline bool debug = true;

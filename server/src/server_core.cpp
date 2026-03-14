@@ -28,12 +28,13 @@ int server_run()
   {
     auto start = std::chrono::steady_clock::now();
 
+    // {TICK_RATE} TPS functions
     enet_loop();
+    send_players_location();
 
     auto end = std::chrono::steady_clock::now();
 
-    auto elapsed =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
     if (elapsed < TICK_TIME_MS)
     {

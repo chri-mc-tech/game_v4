@@ -256,3 +256,29 @@ int create_enet_host() {
 
   return 0;
 }
+
+// Separare "uuid x y;uuid2 x2 y2;uuid3 x3 y3" ecc
+// uuid x y;
+void send_players_location() {
+  using std::to_string;
+
+  string packet_string;
+  bool first = true;
+
+  for (const auto& temp_player : global::online_players) {
+    if (!first) {
+      packet_string += ";";
+    }
+
+    string uuid = temp_player.first;
+    string str_x = to_string(temp_player.second.location_x);
+    string str_y = to_string(temp_player.second.location_y);
+
+    packet_string += uuid + " " + str_x.substr(0, str_x.find('.') + 3) + " " + str_y.substr(0, str_y.find('.') + 3);
+
+    first = false;
+  }
+
+  log_debug(packet_string);
+
+}

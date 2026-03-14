@@ -11,6 +11,7 @@
 
 #include "client_ui.h"
 #include "shared_crypto.h"
+#include "shared_utils.h"
 
 bool initialize_libraries() {
   // if !=0: error

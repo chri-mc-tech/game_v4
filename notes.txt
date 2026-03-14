@@ -56,3 +56,34 @@ CANALI
 1 = pacchetti non cifrati (es: coordinate)
 2 = pacchetti cifrati (es: hash password)
 
+
+
+// TEMP
+
+Limita decimali coordinate a 2
+Separare "uuid x y;uuid2 x2 y2;uuid3 x3 y3" ecc
+
+
+
+---------------------
+BUG DA FIXARE
+---------------------
+
+Nel client se tengo/muovo col mouse la finestra per piu di qualche secondo smette di eseguire il polling di enet (e di mandare pacchetti) e quindi si scollega dal server
+
+Il server crasha se mi collego con 2 client con stesso uuid e nome (problema puo essere nel controllo uuid o nel controllo nome)
+
+
+---------------------
+COSE DA AGGIUNGERE
+---------------------
+
+Quando un player si collega manda lista player e uuid al player (RELIABLE)
+manda un pacchetto a tutti quando un player si collega o scollega per dire chi (uuid) si è collegato o scollegato (RELIABLE)
+es:
+
+online ci sono test1, test2, e test3
+uuid rispettivi ab1, cd2, ef3
+player si collega (uuid pl1)
+mando a player "[9]ab1 test1;ab2 test2;ab3 test3"
+mando a tutti "[10]pl1 player"

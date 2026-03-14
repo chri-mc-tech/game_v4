@@ -17,6 +17,7 @@ namespace shared::utils {
 
   bool is_valid_nickname(string t_string) {
     if (t_string.length() < 4) {return false;}
+    if (t_string.length() > 24) {return false;}
     for (int i = 0; i < t_string.length(); i++) {
       if (!std::isalnum(t_string[i]) && t_string[i] != '_') {
         return false;
@@ -30,8 +31,24 @@ namespace shared::utils {
 
     if (t_string[8] != '-') {return false;}
     if (t_string[17] != '-') {return false;}
-    if (t_string[26] != '-') {return false;}
+    if (t_string[26] != '-') {return false;
+    }
 
+    string temp2 = t_string;
+    temp2.erase(26, 1);
+    temp2.erase(17, 1);
+    temp2.erase(8, 1);
+
+    for (const char c : temp2) {
+      if (!std::isalnum(c)) {
+        return false;
+      }
+      if (std::isalpha(c)) {
+        if (!islower(c)) {
+          return false;
+        }
+      }
+    }
     return true;
   }
 
