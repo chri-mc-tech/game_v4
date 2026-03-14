@@ -1,0 +1,47 @@
+name: Build Linux Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-server:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Cache CMake and vcpkg
+        uses: actions/cache@v3
+        with:
+          path: |
+            build
+            ./.vcpkg
+          key: ${{ runner.os }}-build-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Install dependencies
+        run: sudo apt update && sudo apt install -y cmake g++ make unzip
+
+      - name: Bootstrap vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git .vcpkg
+          ./.vcpkg/bootstrap-vcpkg.sh
+
+      - name: Configure CMake
+        run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./.vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build server
+        run: cmake --build build --target server -j$(nproc)
+
+      - name: Package server build
+        run: |
+          cd build
+          zip -r ../server-linux.zip server
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-linux
+          path: server-linux.zip
