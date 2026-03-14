@@ -29,10 +29,18 @@ jobs:
       - name: Bootstrap vcpkg
         run: |
           git clone https://github.com/microsoft/vcpkg.git .vcpkg
-          ./.vcpkg/bootstrap-vcpkg.sh
+          ./.vcpkg/bootstrap-vcpkg.sh -disableMetrics
+
+      - name: Install vcpkg packages
+        run: |
+          ./.vcpkg/vcpkg install sdl3:x64-linux sdl3-image:x64-linux sdl3-ttf:x64-linux yaml-cpp:x64-linux enet:x64-linux cryptopp:x64-linux
 
       - name: Configure CMake
-        run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./.vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Debug
+        run: |
+          cmake -B build -S . \
+            -DCMAKE_TOOLCHAIN_FILE=./.vcpkg/scripts/buildsystems/vcpkg.cmake \
+            -DVCPKG_TARGET_TRIPLET=x64-linux \
+            -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build server
         run: cmake --build build --target server -j$(nproc)
