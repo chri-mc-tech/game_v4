@@ -22,7 +22,7 @@ jobs:
             ${{ runner.os }}-build-
 
       - name: Install dependencies
-        run: sudo apt update && sudo apt install -y cmake g++ make unzip
+        run: sudo apt update && sudo apt install -y cmake g++ make unzip autoconf autoconf-archive automake libtool
 
       - name: Bootstrap vcpkg
         run: |
