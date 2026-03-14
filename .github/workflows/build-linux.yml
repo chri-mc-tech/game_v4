@@ -33,7 +33,7 @@ jobs:
 
       - name: Install vcpkg packages
         run: |
-          ./.vcpkg/vcpkg install sdl3:x64-linux sdl3-image:x64-linux sdl3-ttf:x64-linux yaml-cpp:x64-linux enet:x64-linux cryptopp:x64-linux
+          ./.vcpkg/vcpkg install sdl3:x64-linux sdl3-image:x64-linux sdl3-ttf:x64-linux yaml-cpp:x64-linux enet:x64-linux cryptopp:x64-linux --classic
 
       - name: Configure CMake
         run: |
