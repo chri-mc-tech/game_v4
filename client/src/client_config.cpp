@@ -5,6 +5,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "client_global.h"
+#include "client_logger.h"
 #include "shared_crypto.h"
 
 namespace config {
@@ -28,6 +29,8 @@ namespace config {
     config["name"] = "";
     config["show_fps"] = false;
     config["debug"] = false;
+    config["debug_console"] = false;
+
 
     ofstream file_out("config.yaml");
 
@@ -35,7 +38,7 @@ namespace config {
 
     file_out << config;
     file_out.close();
-    std::cout << "config file created" << std::endl;
+    log_info("config file created");
 
   }
 
@@ -47,6 +50,7 @@ namespace config {
     global::config::name = config["name"].as<string>();
     global::config::show_fps = config["show_fps"].as<bool>();
     global::config::debug = config["debug"].as<bool>();
+    global::config::debug_console = config["debug_console"].as<bool>();
 
     return true;
   }

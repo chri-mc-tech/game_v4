@@ -5,6 +5,7 @@
 #include <thread>
 #include <unistd.h>
 
+#include "client_logger.h"
 #include "shared_crypto.h"
 #include "shared_global.h"
 #include "shared_network.h"
@@ -33,25 +34,23 @@ int enet_loop() {
 }
 
 int enet_event_connected() {
-  std::cout << "connected" << std::endl;
+  log_debug("connected");
   global::enet::is_connected = true;
   global::status = STATUS_ENCRYPTING;
 
   string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID) + global::config::name + " " + global::config::uuid;
   ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
   enet_peer_send(global::enet::connected_server_peer, 0, temp_packet);
-  // std::cout << to_send << std::endl;
   return 0;
 }
 
 int enet_event_receive() {
-  std::cout << "received" << std::endl;
+  log_debug("received");
   string pkt_data_string = shared::utils::packet_to_string(global::enet::enet_event.packet);
 
   // initial packets (not encrypted)
   if (global::enet::enet_event.channelID == 0) {
-    std::cout << pkt_data_string.substr(0, pkt_data_string.find(']') + 1) << std::endl;
-
+    log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
@@ -62,12 +61,6 @@ int enet_event_receive() {
         global::server_public_key = Integer(pkt_data_string.c_str());
         global::shared_key = shared::crypto::calculate_session_key(global::client_private_key, global::server_public_key);
         global::encryption_key = shared::crypto::create_encryption_key_from_session_key(global::shared_key);
-        /*
-        // std::cout << "server public key: " + IntToString(global::server_public_key) << std::endl;
-        // std::cout << "client public key: " + IntToString(global::client_public_key) << std::endl;
-        // std::cout << "shared key: " + IntToString(global::shared_key) << std::endl;
-        // std::cout << "hex encryption key: " + shared::crypto::secByteBlock_to_hex(global::encryption_key) << std::endl;
-        */
 
         shared::network::send_packet(
           global::enet::connected_server_peer,
@@ -82,7 +75,7 @@ int enet_event_receive() {
 
   // not encrypted (coords, ecc)
   else if (global::enet::enet_event.channelID == 1) {
-    std::cout << pkt_data_string.substr(0, pkt_data_string.find(']') + 1) << std::endl;
+    log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_ASK_REGISTER_PASSWORD))) {
       global::status = STATUS_WAITING_USER_INPUT_REGISTER_PASSWORD;
@@ -102,13 +95,26 @@ int enet_event_receive() {
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_DENY_REGISTER_PASSWORD))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
-      std::cout << pkt_data_string << std::endl;
+      log_warn(pkt_data_string);
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_DENY_LOGIN_PASSWORD))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
-      std::cout << pkt_data_string << std::endl;
+      log_warn(pkt_data_string);
     }
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PLAYER_LIST))) {
+      // todo: crea player object per ogni player e aggiungi a online players
+    }
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_A_PLAYER_HAS_CONNECTED))) {
+      // todo: crea player object per player collegato e aggiungi a online players
+    }
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED))) {
+      // todo: togli player da online players
+    }
+
 
   }
 
@@ -116,17 +122,14 @@ int enet_event_receive() {
   else if (global::enet::enet_event.channelID == 2) {
     if (!global::encryption_key.empty()) {
       string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, global::encryption_key);
-      std::cout << decrypted_string.substr(0, decrypted_string.find(']') + 1) << std::endl;
-
+      log_debug(decrypted_string.substr(0, decrypted_string.find(']') + 1));
     }
-
   }
-
   return 0;
 }
 
 int enet_event_disconnected() {
-  std::cout << "disconnected" << std::endl;
+  log_debug("disconnected");
   global::enet::is_connected = false;
   global::status = STATUS_DISCONNECTED_FROM_SERVER;
 
@@ -156,6 +159,13 @@ void wait_server_connection() {
     }
   }
 }
+
+// async function
+void every_second_log_debug(const string& text) {
+
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
 
 void send_location() {
   if (global::enet::is_connected) {

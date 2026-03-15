@@ -13,6 +13,8 @@ add_executable(client
         include/client_ui.h
         src/client_config.cpp
         include/client_config.h
+        src/client_logger.cpp
+        include/client_logger.h
 )
 
 target_link_options(client PRIVATE

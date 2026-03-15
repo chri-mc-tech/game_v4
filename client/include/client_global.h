@@ -12,7 +12,6 @@ using CryptoPP::SecByteBlock;
 
 namespace global {
   inline int status = 0;
-  inline bool debug = true;
   inline bool running;
   inline std::unordered_map<string, Player> online_players;
   inline int frames;
@@ -23,6 +22,8 @@ namespace global {
   inline Integer shared_key;
   inline SecByteBlock encryption_key;
   inline Player main_player;
+
+  inline string log_file;
 
   inline int modifier;
 
@@ -62,6 +63,7 @@ namespace global::config {
   inline string name;
   inline bool show_fps;
   inline bool debug;
+  inline bool debug_console;
 }
 
 enum status {

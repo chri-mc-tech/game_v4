@@ -167,13 +167,7 @@ void enet_event_receive() {
 
           player_data::save_hashed_password(temp_player->uuid, decrypted_string);
 
-          shared::network::send_packet(
-            enet_event.peer,
-            PKT_FROM_SERVER_CONFIRM_REGISTER_PASSWORD,
-            "",
-            1,
-            ENET_PACKET_FLAG_RELIABLE
-            );
+          shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_REGISTER_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
         }
 
         else {
@@ -259,9 +253,10 @@ void send_players_location() {
 
   // send the string to all players
   for (const auto& temp_player : global::online_players) {
-    shared::network::send_packet(temp_player.second.peer, PKT_FROM_SERVER_COORDS, packet_string, 1, 0);
+    if (temp_player.second.player_status == PLAYER_STATUS_AUTHENTICATED) {
+      shared::network::send_packet(temp_player.second.peer, PKT_FROM_SERVER_COORDS, packet_string, 1, 0);
+    }
   }
-
 }
 
 void send_player_list(ENetPeer* peer) {
@@ -284,6 +279,6 @@ void send_a_player_has_connected(Player* connected_player) {
   string packet_string = connected_player->uuid + " " + connected_player->name;
 
   for (const auto& temp_loop_player : global::online_players) {
-    shared::network::send_packet(temp_loop_player.second.peer, PKT_FROM_SERVER_A_PLAYER_HAS_CONNECTED, packet_string, 1, ENET_PACKET_FLAG_RELIABLE);
+      shared::network::send_packet(temp_loop_player.second.peer, PKT_FROM_SERVER_A_PLAYER_HAS_CONNECTED, packet_string, 1, ENET_PACKET_FLAG_RELIABLE);
   }
 }

@@ -5,6 +5,7 @@
 #include "client_config.h"
 #include "client_core.h"
 #include "client_global.h"
+#include "client_logger.h"
 #include "client_network.h"
 #include "shared_crypto.h"
 #include "shared_global.h"
@@ -141,7 +142,7 @@ namespace ui::render {
         config::save_new_nickname(t_string);
       }
       else {
-        std::cout << R"(only use "a-b", "A-B", "_")";
+        log_warn(R"(only use "a-b", "A-B", "_")");
       }
     }
   }
@@ -169,15 +170,13 @@ namespace ui::render {
       if (shared::utils::is_valid_password(t_string)) {
         global::status = STATUS_CHECKING_REGISTER_PASSWORD;
         string hashed_password = shared::crypto::hash_password(t_string);
-        // std::cout << "password: " + t_string << std::endl;
-        std::cout << "hashed_password: " + hashed_password << std::endl;
-        // std::cout << "crypted_hashed_password: " + crypted_string << std::endl;
+        log_debug("hashed_password: " + hashed_password);
         if (!shared::network::send_packet(global::enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_REGISTER_PASSWORD, hashed_password, 2, ENET_PACKET_FLAG_RELIABLE, &global::encryption_key)) {
-          std::cout << "error sending packet" << std::endl;
+          log_error("error sending packet");
         }
       }
       else {
-        std::cout << R"(only use "a-b", "A-B", "@", "$")";
+        log_warn(R"(only use "a-b", "A-B", "@", "$")");
       }
     }
   }
@@ -206,13 +205,13 @@ namespace ui::render {
       if (shared::utils::is_valid_password(t_string)) {
         global::status = STATUS_CHECKING_LOGIN_PASSWORD;
         string hashed_password = shared::crypto::hash_password(t_string);
-        std::cout << "hashed_password: " + hashed_password << std::endl;
+        log_debug("hashed_password: " + hashed_password);
         if (!shared::network::send_packet(global::enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_LOGIN_PASSWORD, hashed_password, 2, ENET_PACKET_FLAG_RELIABLE, &global::encryption_key)) {
-          std::cout << "error sending packet" << std::endl;
+          log_error("error sending packet");
         }
       }
       else {
-        std::cout << R"(only use "a-b", "A-B", "@", "$")";
+        log_warn(R"(only use "a-b", "A-B", "@", "$")");
       }
     }
   }

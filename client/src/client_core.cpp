@@ -9,6 +9,7 @@
 #include <thread>
 #include <yaml-cpp/yaml.h>
 
+#include "client_logger.h"
 #include "client_ui.h"
 #include "shared_crypto.h"
 #include "shared_utils.h"
@@ -37,11 +38,6 @@ int client_run() {
 
   global::sdl::window = SDL_CreateWindow("game", global::sdl::window_width, global::sdl::window_height, SDL_WINDOW_RESIZABLE);
   global::sdl::renderer = SDL_CreateRenderer(global::sdl::window, "direct3d11");
-  /*
-  for (int i = 0; i < SDL_GetNumRenderDrivers(); i++) {
-    std::cout << SDL_GetRenderDriver(i) << std::endl;
-  }
-  */
 
   global::ttf::font = TTF_OpenFont("Archivo-SemiBold.ttf", 40);
   global::ttf::text_engine = TTF_CreateRendererTextEngine(global::sdl::renderer);
@@ -264,7 +260,7 @@ int sdl_loop() {
                                      roundf(static_cast<float>(window_height - t_height) / 2) - 250);
 
     if (input_string == "/ping\n") {
-      std::cout << global::enet::connected_server_peer->roundTripTime << std::endl;
+      log_info("ping: " + std::to_string(global::enet::connected_server_peer->roundTripTime));
     }
 
 
