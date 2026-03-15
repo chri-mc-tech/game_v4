@@ -124,6 +124,18 @@ int sdl_poll_loop() {
           }
         }
 
+        // if (sdl_event.key.key == SDLK_P) {
+        //   std::cout << global::enet::connected_server_peer->roundTripTime << std::endl;
+        // }
+        if (sdl_event.key.key == SDLK_T) {
+          if (global::chat_open) {
+            global::chat_open = false;
+          }
+          else {
+            global::chat_open = true;
+          }
+        }
+
         break;
       }
 
@@ -219,6 +231,28 @@ int sdl_loop() {
     }
 
     default: break;
+  }
+
+  if (global::chat_open) {
+    using namespace global::ttf;
+    using namespace global::sdl;
+
+    activate_text_input();
+    ui::update_text_input();
+
+    int t_width, t_height;
+    TTF_GetTextSize(ui::text_input, &t_width, &t_height);
+    TTF_DrawRendererText(ui::text_input, roundf(static_cast<float>(window_width - t_width) / 2),
+                                     roundf(static_cast<float>(window_height - t_height) / 2) - 250);
+
+    if (input_string == "/ping\n") {
+      std::cout << global::enet::connected_server_peer->roundTripTime << std::endl;
+    }
+
+
+    if (input_string.ends_with('\n')) {
+      global::chat_open = false;
+    }
   }
 
 

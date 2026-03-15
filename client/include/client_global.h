@@ -23,6 +23,9 @@ namespace global {
   inline Integer shared_key;
   inline SecByteBlock encryption_key;
   inline Player main_player;
+
+  inline bool chat_open;
+  inline bool inv_open;
 }
 
 namespace global::enet {
