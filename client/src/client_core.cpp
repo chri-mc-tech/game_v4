@@ -150,7 +150,6 @@ int sdl_poll_loop() {
               pasted_text.erase(pasted_text.find('\n'));
             }
             global::ttf::input_string += pasted_text;
-            pasted_text = "";
           }
         }
 

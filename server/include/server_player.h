@@ -24,5 +24,7 @@ public:
 
 namespace player_data {
   bool create_player_data_file(const Player& player);
+  void save_hashed_password(const string& uuid, const string& hash);
+  bool is_hash_correct(const string& uuid, const string& hash);
 
 }

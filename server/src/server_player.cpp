@@ -35,4 +35,32 @@ namespace player_data {
 
   }
 
+  void save_hashed_password(const string& uuid, const string& hash) {
+    using std::ofstream;
+    using namespace YAML;
+
+    string file = ("data/players/" + uuid + ".yaml");
+
+    Node player_file = LoadFile(file);
+    player_file["password_hash"] = hash;
+    ofstream file_out(file);
+
+    file_out << player_file;
+    file_out.close();
+  }
+
+  bool is_hash_correct(const string& uuid, const string& hash) {
+    using std::ofstream;
+    using namespace YAML;
+
+    string file = ("data/players/" + uuid + ".yaml");
+
+    Node player_file = LoadFile(file);
+    string saved_hash = player_file["password_hash"].as<string>();
+    if (hash == saved_hash) {
+      return true;
+    }
+    return false;
+  }
+
 }
