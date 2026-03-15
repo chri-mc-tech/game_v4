@@ -24,6 +24,8 @@ namespace global {
   inline SecByteBlock encryption_key;
   inline Player main_player;
 
+  inline int modifier;
+
   inline bool chat_open;
   inline bool inv_open;
 }

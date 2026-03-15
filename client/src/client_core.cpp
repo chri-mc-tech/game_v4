@@ -80,6 +80,16 @@ int client_run() {
     sdl_poll_loop();
     sdl_loop();
 
+    if (SDL_GetModState() & SDL_KMOD_CTRL) {
+      global::modifier = SDL_KMOD_CTRL;
+    }
+    else if (SDL_GetModState() & SDL_KMOD_SHIFT) {
+      global::modifier = SDL_KMOD_SHIFT;
+    }
+    else {
+      global::modifier = 0;
+    }
+
     while (accumulator >= TICK_TIME)
     {
       // {TICK_RATE} TPS functions
@@ -124,10 +134,7 @@ int sdl_poll_loop() {
           }
         }
 
-        // if (sdl_event.key.key == SDLK_P) {
-        //   std::cout << global::enet::connected_server_peer->roundTripTime << std::endl;
-        // }
-        if (sdl_event.key.key == SDLK_T) {
+        else if (sdl_event.key.key == SDLK_T) {
           if (global::chat_open) {
             global::chat_open = false;
           }
@@ -135,6 +142,18 @@ int sdl_poll_loop() {
             global::chat_open = true;
           }
         }
+
+        else if (sdl_event.key.key == SDLK_V) {
+          if (global::modifier == SDL_KMOD_CTRL) {
+            string pasted_text = SDL_GetClipboardText();
+            if (pasted_text.find('\n') != string::npos) {
+              pasted_text.erase(pasted_text.find('\n'));
+            }
+            global::ttf::input_string += pasted_text;
+            pasted_text = "";
+          }
+        }
+
 
         break;
       }
