@@ -1,57 +1,51 @@
 name: Build Linux Server
 
 on:
-  workflow_dispatch:
+workflow_dispatch:
 
 jobs:
-  build-server:
-    runs-on: ubuntu-latest
+build-server:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout repo
+    uses: actions/checkout@v4
 
-      - name: Cache CMake and vcpkg
-        uses: actions/cache@v3
-        with:
-          path: |
-            build
-            ./.vcpkg
-          key: ${{ runner.os }}-build-${{ hashFiles('**/vcpkg.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-
+  - name: Cache build and vcpkg
+    uses: actions/cache@v3
+    with:
+      path: |
+        build
+        .vcpkg
+        ~/.cache/vcpkg
+      key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+      restore-keys: |
+        ${{ runner.os }}-vcpkg-
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y cmake g++ make unzip autoconf autoconf-archive automake libtool libltdl-dev
+  - name: Install dependencies
+    run: |
+      sudo apt update
+      sudo apt install -y cmake g++ make unzip autoconf autoconf-archive automake libtool libltdl-dev
 
-      - name: Bootstrap vcpkg
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git .vcpkg
-          ./.vcpkg/bootstrap-vcpkg.sh -disableMetrics
+  - name: Clone vcpkg
+    run: git clone https://github.com/microsoft/vcpkg.git .vcpkg
 
-      - name: Install vcpkg packages
-        run: |
-          ./.vcpkg/vcpkg install sdl3:x64-linux sdl3-image:x64-linux sdl3-ttf:x64-linux yaml-cpp:x64-linux enet:x64-linux cryptopp:x64-linux --classic
+  - name: Bootstrap vcpkg
+    run: ./.vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
-      - name: Configure CMake
-        run: |
-          cmake -B build -S . \
-            -DCMAKE_TOOLCHAIN_FILE=./.vcpkg/scripts/buildsystems/vcpkg.cmake \
-            -DVCPKG_TARGET_TRIPLET=x64-linux \
-            -DCMAKE_BUILD_TYPE=Debug
+  - name: Configure CMake
+    run: |
+      cmake -B build -S . \
+      -DCMAKE_TOOLCHAIN_FILE=./.vcpkg/scripts/buildsystems/vcpkg.cmake \
+      -DVCPKG_TARGET_TRIPLET=x64-linux \
+      -DCMAKE_BUILD_TYPE=Debug \
+      -DBUILD_CLIENT=OFF
 
-      - name: Build server
-        run: cmake --build build --target server -j$(nproc)
+  - name: Build server
+    run: cmake --build build --target server -j$(nproc)
 
-      - name: Package server build
-        run: |
-          cd build
-          zip -r ../server-linux.zip server
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: server-linux
-          path: server-linux.zip
+  - name: Upload server binary
+    uses: actions/upload-artifact@v4
+    with:
+      name: server-linux
+      path: build/server
