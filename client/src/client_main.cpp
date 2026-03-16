@@ -45,7 +45,7 @@ int main() {
   if (global::config::debug_console) {
     console_init();
   }
-    create_log_file();
+  create_log_file();
 
   return client_run();
 }

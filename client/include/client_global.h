@@ -1,5 +1,8 @@
 #pragma once
 
+#include <fstream>
+
+
 #include "client_player.h"
 
 #include <SDL3/SDL.h>
@@ -23,7 +26,7 @@ namespace global {
   inline SecByteBlock encryption_key;
   inline Player main_player;
 
-  inline string log_file;
+  inline std::ofstream log_file;
 
   inline int modifier;
 

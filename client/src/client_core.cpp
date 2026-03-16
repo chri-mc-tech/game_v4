@@ -244,10 +244,17 @@ int sdl_loop() {
       break;
     }
 
+    case STATUS_AUTHENTICATED: {
+      if (!global::chat_open) {
+        deactivate_text_input();
+      }
+    }
+
     default: break;
   }
 
   if (global::chat_open) {
+    activate_text_input();
     using namespace global::ttf;
     using namespace global::sdl;
 
@@ -268,8 +275,6 @@ int sdl_loop() {
       global::chat_open = false;
     }
   }
-
-
 
   if (global::config::show_fps) {
     int temp_text_width;
