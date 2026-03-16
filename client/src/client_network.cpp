@@ -105,17 +105,56 @@ int enet_event_receive() {
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PLAYER_LIST))) {
       // todo: crea player object per ogni player e aggiungi a online players
+
+      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+
+      size_t start = 0;
+
+      while (start < pkt_data_string.size()) {
+        size_t end = pkt_data_string.find(';', start);
+
+        if (end == std::string::npos)
+          end = pkt_data_string.size();
+        string player_object = pkt_data_string.substr(start, end - start);
+
+        size_t space = player_object.find(' ');
+
+        string uuid = player_object.substr(0, space);
+        string name = player_object.substr(space + 1);
+        // log_debug(uuid + "|" + name);
+        if (uuid != global::config::uuid) {
+          Player temp_player;
+          temp_player.name = name;
+          temp_player.uuid = uuid;
+
+          global::online_players.emplace(uuid, std::move(temp_player));
+        }
+        start = end + 1;
+      }
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_A_PLAYER_HAS_CONNECTED))) {
       // todo: crea player object per player collegato e aggiungi a online players
+
+      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+
+      size_t space = pkt_data_string.find(' ');
+
+      string uuid = pkt_data_string.substr(0, space);
+      string name = pkt_data_string.substr(space + 1);
+      // log_debug(uuid + "|" + name);
+      if (uuid != global::config::uuid) {
+        Player temp_player;
+        temp_player.name = name;
+        temp_player.uuid = uuid;
+
+        global::online_players.emplace(uuid, std::move(temp_player));
+      }
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED))) {
       // todo: togli player da online players
     }
-
-
   }
 
   // encrypted (chat messages, ecc)
