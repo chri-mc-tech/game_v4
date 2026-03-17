@@ -75,6 +75,7 @@ Il server crasha se mi collego con 2 client con stesso uuid e nome (problema puo
 
 Fixare crashano tutti i client al register di uno
 
+server crasha a client disconnect
 
 ---------------------
 COSE DA AGGIUNGERE
