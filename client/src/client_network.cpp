@@ -155,6 +155,33 @@ int enet_event_receive() {
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED))) {
       // todo: togli player da online players
     }
+
+    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_COORDS))) {
+      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+
+      size_t start = 0;
+
+      while (start < pkt_data_string.size()) {
+        size_t end = pkt_data_string.find(';', start);
+
+        if (end == std::string::npos)
+          end = pkt_data_string.size();
+        string player_object = pkt_data_string.substr(start, end - start);
+
+        size_t space1 = player_object.find_first_of(' ');
+        size_t space2 = player_object.find_last_of(' ');
+
+        string uuid = player_object.substr(0, space1);
+        string x = player_object.substr(space1 + 1, space2);
+        string y = player_object.substr(space2 + 1);
+        if (uuid != global::config::uuid) {
+          Player* temp_player = get_player_from_uuid(uuid);
+          temp_player->location_x = stoi(x);
+          temp_player->location_x = stoi(y);
+        }
+      }
+    }
+
   }
 
   // encrypted (chat messages, ecc)

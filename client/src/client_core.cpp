@@ -248,6 +248,7 @@ int sdl_loop() {
       if (!global::chat_open) {
         deactivate_text_input();
       }
+      render_players();
     }
 
     default: break;
@@ -352,4 +353,11 @@ void update_location() {
   if (key_states[SDL_SCANCODE_D]) {
     global::main_player.location_x ++;
   }
+}
+void render_players() {
+  for (const auto& loop_player : global::online_players) {
+    SDL_RenderFillRect(global::sdl::renderer, loop_player.second.rect);
+  }
+
+  SDL_RenderFillRect(global::sdl::renderer, global::main_player.rect);
 }
