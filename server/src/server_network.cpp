@@ -168,21 +168,24 @@ void enet_event_receive() {
           player_data::save_hashed_password(temp_player->uuid, decrypted_string);
 
           shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_REGISTER_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
+          enet_peer_disconnect_later(enet_event.peer, 0);
         }
 
         else {
           shared::network::send_packet(
             enet_event.peer,
-            PKT_FROM_SERVER_DENY_LOGIN_PASSWORD,
+            PKT_FROM_SERVER_DENY_REGISTER_PASSWORD,
             "hash not valid",
             1,
             ENET_PACKET_FLAG_RELIABLE
             );
+          enet_peer_disconnect_later(enet_event.peer, 0);
         }
       }
       if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_HASHED_LOGIN_PASSWORD))) {
         using namespace YAML;
         using std::ofstream;
+
         decrypted_string.erase(0, decrypted_string.find(']') + 1);
         if (shared::utils::is_valid_hash(decrypted_string)) {
           if (player_data::is_hash_correct(temp_player->uuid, decrypted_string)) {
@@ -213,7 +216,7 @@ void enet_event_disconnected() {
   string uuid = get_uuid_from_peer();
   global::peer_to_uuid.erase(global::enet::enet_event.peer);
   global::online_players.erase(uuid);
-  send_a_player_has_disconnected(get_player_from_uuid(get_uuid_from_peer()));
+  send_a_player_has_disconnected(uuid);
 
 }
 
@@ -229,8 +232,6 @@ int create_enet_host() {
   return 0;
 }
 
-// Separare "uuid x y;uuid2 x2 y2;uuid3 x3 y3" ecc
-// uuid x y;
 void send_players_location() {
   using std::to_string;
 
@@ -284,8 +285,8 @@ void send_a_player_has_connected(Player* connected_player) {
   }
 }
 
-void send_a_player_has_disconnected(Player* disconnected_player) {
-  string packet_string = disconnected_player->uuid;
+void send_a_player_has_disconnected(string uuid) {
+  string packet_string = uuid;
 
   for (const auto& temp_loop_player : global::online_players) {
     shared::network::send_packet(temp_loop_player.second.peer, PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED, packet_string, 1, ENET_PACKET_FLAG_RELIABLE);

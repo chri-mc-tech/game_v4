@@ -36,20 +36,10 @@ bool initialize_libraries() {
 int client_run() {
   global::running = true;
 
-  global::sdl::window = SDL_CreateWindow("game", global::sdl::window_width, global::sdl::window_height, SDL_WINDOW_RESIZABLE);
-  global::sdl::renderer = SDL_CreateRenderer(global::sdl::window, "direct3d11");
-
-  global::ttf::font = TTF_OpenFont("Archivo-SemiBold.ttf", 40);
-  global::ttf::text_engine = TTF_CreateRendererTextEngine(global::sdl::renderer);
+  start_sdl();
 
   ui::create_objects_to_render();
   ui::create_buttons();
-
-  SDL_SetRenderVSync(global::sdl::renderer, SDL_RENDERER_VSYNC_DISABLED);
-
-  if (!global::config::name.empty()) {
-    global::status = STATUS_WAITING_USER_INPUT_IP;
-  }
 
   global::main_player.name = global::config::name;
   global::main_player.uuid = global::config::uuid;
@@ -58,8 +48,8 @@ int client_run() {
 
   std::jthread thread_count_frames(count_frames);
 
-  const double TICK_RATE = 40.0;
-  const double TICK_TIME = 1.0 / TICK_RATE;
+  constexpr double TICK_RATE = 40.0;
+  constexpr double TICK_TIME = 1.0 / TICK_RATE;
 
   double accumulator = 0.0;
 
@@ -75,16 +65,7 @@ int client_run() {
     enet_loop();
     sdl_poll_loop();
     sdl_loop();
-
-    if (SDL_GetModState() & SDL_KMOD_CTRL) {
-      global::modifier = SDL_KMOD_CTRL;
-    }
-    else if (SDL_GetModState() & SDL_KMOD_SHIFT) {
-      global::modifier = SDL_KMOD_SHIFT;
-    }
-    else {
-      global::modifier = 0;
-    }
+    update_modifier();
 
     while (accumulator >= TICK_TIME)
     {
@@ -367,4 +348,29 @@ void render_players() {
   SDL_RenderFillRect(global::sdl::renderer, &global::main_player.rect);
   log_debug(global::main_player.name + ", " + std::to_string(global::main_player.location_x));
 
+}
+
+
+void start_sdl() {
+  global::sdl::window = SDL_CreateWindow("game", global::sdl::window_width, global::sdl::window_height, SDL_WINDOW_RESIZABLE);
+  global::sdl::renderer = SDL_CreateRenderer(global::sdl::window, "direct3d11");
+
+  global::ttf::font = TTF_OpenFont("Archivo-SemiBold.ttf", 40);
+  global::ttf::text_engine = TTF_CreateRendererTextEngine(global::sdl::renderer);
+
+  SDL_SetRenderVSync(global::sdl::renderer, SDL_RENDERER_VSYNC_DISABLED);
+
+}
+
+void update_modifier() {
+
+  if (SDL_GetModState() & SDL_KMOD_CTRL) {
+    global::modifier = SDL_KMOD_CTRL;
+  }
+  else if (SDL_GetModState() & SDL_KMOD_SHIFT) {
+    global::modifier = SDL_KMOD_SHIFT;
+  }
+  else {
+    global::modifier = 0;
+  }
 }

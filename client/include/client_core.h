@@ -11,3 +11,5 @@ void set_status(int status);
 void count_frames();
 void update_location();
 void render_players();
+void start_sdl();
+void update_modifier();
