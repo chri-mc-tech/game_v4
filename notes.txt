@@ -73,6 +73,8 @@ Nel client se tengo/muovo col mouse la finestra per piu di qualche secondo smett
 
 Il server crasha se mi collego con 2 client con stesso uuid e nome (problema puo essere nel controllo uuid o nel controllo nome)
 
+Fixare crashano tutti i client al register di uno
+
 
 ---------------------
 COSE DA AGGIUNGERE

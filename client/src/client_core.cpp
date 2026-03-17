@@ -355,13 +355,14 @@ void update_location() {
   }
 }
 void render_players() {
-  SDL_SetRenderDrawColor(global::sdl::renderer, 130, 190, 255, 255);
+  SDL_SetRenderDrawColor(global::sdl::renderer, 0, 168, 255, 255);
   for (auto& loop_player : global::online_players) {
     loop_player.second.rect = {loop_player.second.location_x, loop_player.second.location_y, 30, 30};
     SDL_RenderFillRect(global::sdl::renderer, &loop_player.second.rect);
     log_debug(loop_player.second.name + ", " + std::to_string(loop_player.second.location_x));
   }
 
+  SDL_SetRenderDrawColor(global::sdl::renderer, 0, 255, 0, 255);
   global::main_player.rect = {global::main_player.location_x, global::main_player.location_y, 30, 30};
   SDL_RenderFillRect(global::sdl::renderer, &global::main_player.rect);
   log_debug(global::main_player.name + ", " + std::to_string(global::main_player.location_x));
