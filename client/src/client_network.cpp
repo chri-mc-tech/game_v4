@@ -154,6 +154,9 @@ int enet_event_receive() {
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED))) {
       // todo: togli player da online players
+      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+
+      global::online_players.erase(pkt_data_string);
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_COORDS))) {

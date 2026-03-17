@@ -213,6 +213,7 @@ void enet_event_disconnected() {
   string uuid = get_uuid_from_peer();
   global::peer_to_uuid.erase(global::enet::enet_event.peer);
   global::online_players.erase(uuid);
+  send_a_player_has_disconnected(get_player_from_uuid(get_uuid_from_peer()));
 
 }
 
@@ -280,5 +281,13 @@ void send_a_player_has_connected(Player* connected_player) {
 
   for (const auto& temp_loop_player : global::online_players) {
       shared::network::send_packet(temp_loop_player.second.peer, PKT_FROM_SERVER_A_PLAYER_HAS_CONNECTED, packet_string, 1, ENET_PACKET_FLAG_RELIABLE);
+  }
+}
+
+void send_a_player_has_disconnected(Player* disconnected_player) {
+  string packet_string = disconnected_player->uuid;
+
+  for (const auto& temp_loop_player : global::online_players) {
+    shared::network::send_packet(temp_loop_player.second.peer, PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED, packet_string, 1, ENET_PACKET_FLAG_RELIABLE);
   }
 }
