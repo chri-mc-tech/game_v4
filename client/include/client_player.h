@@ -13,7 +13,7 @@ public:
   string name;
   float location_x = 0;
   float location_y = 0;
-  SDL_FRect* rect;
+  SDL_FRect rect;
 };
 
 Player * get_player_from_uuid(const string& uuid);

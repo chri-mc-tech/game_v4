@@ -145,8 +145,8 @@ int enet_event_receive() {
       // log_debug(uuid + "|" + name);
       if (uuid != global::config::uuid) {
         Player temp_player;
-        temp_player.name = name;
         temp_player.uuid = uuid;
+        temp_player.name = name;
 
         global::online_players.emplace(uuid, std::move(temp_player));
       }
@@ -164,7 +164,7 @@ int enet_event_receive() {
       while (start < pkt_data_string.size()) {
         size_t end = pkt_data_string.find(';', start);
 
-        if (end == std::string::npos)
+        if (end == string::npos)
           end = pkt_data_string.size();
         string player_object = pkt_data_string.substr(start, end - start);
 
@@ -172,13 +172,16 @@ int enet_event_receive() {
         size_t space2 = player_object.find_last_of(' ');
 
         string uuid = player_object.substr(0, space1);
-        string x = player_object.substr(space1 + 1, space2);
+        string x = player_object.substr(space1 + 1, space2 - space1 - 1);
         string y = player_object.substr(space2 + 1);
         if (uuid != global::config::uuid) {
+
           Player* temp_player = get_player_from_uuid(uuid);
           temp_player->location_x = stoi(x);
-          temp_player->location_x = stoi(y);
+          temp_player->location_y = stoi(y);
         }
+        start = end + 1;
+
       }
     }
 

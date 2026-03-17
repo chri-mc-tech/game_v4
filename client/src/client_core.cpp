@@ -339,25 +339,31 @@ void update_location() {
   const bool *key_states = SDL_GetKeyboardState(nullptr);
 
   if (key_states[SDL_SCANCODE_W]) {
-    global::main_player.location_y --;
+    global::main_player.location_y -= 4;
   }
 
   if (key_states[SDL_SCANCODE_S]) {
-    global::main_player.location_y ++;
+    global::main_player.location_y += 4;
   }
 
   if (key_states[SDL_SCANCODE_A]) {
-    global::main_player.location_x --;
+    global::main_player.location_x -= 4;
   }
 
   if (key_states[SDL_SCANCODE_D]) {
-    global::main_player.location_x ++;
+    global::main_player.location_x += 4;
   }
 }
 void render_players() {
-  for (const auto& loop_player : global::online_players) {
-    SDL_RenderFillRect(global::sdl::renderer, loop_player.second.rect);
+  SDL_SetRenderDrawColor(global::sdl::renderer, 130, 190, 255, 255);
+  for (auto& loop_player : global::online_players) {
+    loop_player.second.rect = {loop_player.second.location_x, loop_player.second.location_y, 30, 30};
+    SDL_RenderFillRect(global::sdl::renderer, &loop_player.second.rect);
+    log_debug(loop_player.second.name + ", " + std::to_string(loop_player.second.location_x));
   }
 
-  SDL_RenderFillRect(global::sdl::renderer, global::main_player.rect);
+  global::main_player.rect = {global::main_player.location_x, global::main_player.location_y, 30, 30};
+  SDL_RenderFillRect(global::sdl::renderer, &global::main_player.rect);
+  log_debug(global::main_player.name + ", " + std::to_string(global::main_player.location_x));
+
 }
