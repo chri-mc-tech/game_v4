@@ -28,7 +28,9 @@ jobs:
 
       - name: Bootstrap vcpkg
         run: |
-          git clone https://github.com/microsoft/vcpkg.git .vcpkg
+          if [ ! -d ".vcpkg/.git" ]; then
+            git clone https://github.com/microsoft/vcpkg.git .vcpkg
+          fi
           ./.vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
       - name: Install vcpkg packages
