@@ -69,6 +69,7 @@ int enet_event_receive() {
           0,
           ENET_PACKET_FLAG_RELIABLE);
 
+        global::status_connection = STATUS_CONNECTION_ENCRYPTED;
       }
     }
   }
@@ -87,12 +88,12 @@ int enet_event_receive() {
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_CONFIRM_REGISTER_PASSWORD))) {
       //global::status = STATUS_AUTHENTICATED;
-      global::status_menu = STATUS_MENU_CONNECTED;
+      global::status_menu = STATUS_MENU_IN_GAME;
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_CONFIRM_LOGIN_PASSWORD))) {
       //global::status = STATUS_AUTHENTICATED;
-      global::status_menu = STATUS_MENU_CONNECTED;
+      global::status_menu = STATUS_MENU_IN_GAME;
 
     }
 
@@ -214,6 +215,8 @@ int enet_event_disconnected() {
 
 int connect_to_server(const string& ip, const string& port) {
   global::status_connection = STATUS_CONNECTION_CONNECTING;
+  global::status_menu = STATUS_MENU_CONNECTING;
+
 
   ENetAddress server_to_connect;
   enet_address_set_host(&server_to_connect, ip.c_str());

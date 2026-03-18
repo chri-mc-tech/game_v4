@@ -205,7 +205,7 @@ int sdl_loop() {
   }
 
 
-  if (global::status_connection == STATUS_CONNECTION_ENCRYPTED) {
+  if (global::status_connection == STATUS_MENU_IN_GAME) {
     if (!global::chat_open) {
       deactivate_text_input();
     }
