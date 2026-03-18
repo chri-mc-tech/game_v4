@@ -36,7 +36,7 @@ int enet_loop() {
 int enet_event_connected() {
   log_debug("connected");
   global::enet::is_connected = true;
-  global::status = STATUS_ENCRYPTING;
+  global::status_connection = STATUS_CONNECTION_ENCRYPTING;
 
   string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID) + global::config::name + " " + global::config::uuid;
   ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
@@ -55,7 +55,7 @@ int enet_event_receive() {
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
-      if (global::status == STATUS_ENCRYPTING) {
+      if (global::status_connection == STATUS_CONNECTION_ENCRYPTING) {
         global::client_private_key = shared::crypto::create_private_key();
         global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
         global::server_public_key = Integer(pkt_data_string.c_str());
@@ -78,19 +78,22 @@ int enet_event_receive() {
     log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_ASK_REGISTER_PASSWORD))) {
-      global::status = STATUS_WAITING_USER_INPUT_REGISTER_PASSWORD;
+      global::status_menu = STATUS_MENU_WAITING_USER_INPUT_REGISTER_PASSWORD;
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_ASK_LOGIN_PASSWORD))) {
-      global::status = STATUS_WAITING_USER_INPUT_LOGIN_PASSWORD;
+      global::status_menu = STATUS_MENU_WAITING_USER_INPUT_LOGIN_PASSWORD;
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_CONFIRM_REGISTER_PASSWORD))) {
-      global::status = STATUS_AUTHENTICATED;
+      //global::status = STATUS_AUTHENTICATED;
+      global::status_menu = STATUS_MENU_CONNECTED;
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_CONFIRM_LOGIN_PASSWORD))) {
-      global::status = STATUS_AUTHENTICATED;
+      //global::status = STATUS_AUTHENTICATED;
+      global::status_menu = STATUS_MENU_CONNECTED;
+
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_DENY_REGISTER_PASSWORD))) {
@@ -203,13 +206,14 @@ int enet_event_receive() {
 int enet_event_disconnected() {
   log_debug("disconnected");
   global::enet::is_connected = false;
-  global::status = STATUS_DISCONNECTED_FROM_SERVER;
+  global::status_connection = STATUS_CONNECTION_NOT_CONNECTED;
+  global::status_menu = STATUS_MENU_DISCONNECTED_FROM_SERVER;
 
   return 0;
 }
 
 int connect_to_server(const string& ip, const string& port) {
-  global::status = STATUS_CONNECTING;
+  global::status_connection = STATUS_CONNECTION_CONNECTING;
 
   ENetAddress server_to_connect;
   enet_address_set_host(&server_to_connect, ip.c_str());
@@ -225,8 +229,9 @@ int connect_to_server(const string& ip, const string& port) {
 void wait_server_connection() {
   std::this_thread::sleep_for(std::chrono::seconds(6));
   if (!global::enet::is_connected) {
-    if (global::status == STATUS_CONNECTING) {
-      global::status = STATUS_ERROR_CONNECTING_TO_SERVER;
+    if (global::status_connection == STATUS_CONNECTION_CONNECTING) {
+      global::status_menu = STATUS_MENU_DISCONNECTED_FROM_SERVER;
+      global::status_connection = STATUS_CONNECTION_NOT_CONNECTED;
       enet_peer_reset(global::enet::connected_server_peer);
     }
   }

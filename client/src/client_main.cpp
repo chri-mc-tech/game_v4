@@ -48,7 +48,7 @@ int main() {
   create_log_file();
 
   if (!global::config::name.empty()) {
-    global::status = STATUS_WAITING_USER_INPUT_IP;
+    global::status_menu = STATUS_MENU_WAITING_USER_INPUT_IP;
   }
 
   return client_run();

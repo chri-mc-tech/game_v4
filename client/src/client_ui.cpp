@@ -138,7 +138,7 @@ namespace ui::render {
       string t_string = input_string;
       input_string.clear();
       if (shared::utils::is_valid_nickname(t_string)) {
-        set_status(STATUS_WAITING_USER_INPUT_IP);
+        set_status_menu(STATUS_MENU_WAITING_USER_INPUT_IP);
         config::save_new_nickname(t_string);
       }
       else {
@@ -168,7 +168,7 @@ namespace ui::render {
       string t_string = input_string;
       input_string.clear();
       if (shared::utils::is_valid_password(t_string)) {
-        global::status = STATUS_CHECKING_REGISTER_PASSWORD;
+        global::status_menu = STATUS_MENU_CONNECTED;
         string hashed_password = shared::crypto::hash_password(t_string);
         log_debug("hashed_password: " + hashed_password);
         if (!shared::network::send_packet(global::enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_REGISTER_PASSWORD, hashed_password, 2, ENET_PACKET_FLAG_RELIABLE, &global::encryption_key)) {
@@ -203,7 +203,7 @@ namespace ui::render {
       string t_string = input_string;
       input_string.clear();
       if (shared::utils::is_valid_password(t_string)) {
-        global::status = STATUS_CHECKING_LOGIN_PASSWORD;
+        global::status_menu = STATUS_MENU_CONNECTED;
         string hashed_password = shared::crypto::hash_password(t_string);
         log_debug("hashed_password: " + hashed_password);
         if (!shared::network::send_packet(global::enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_LOGIN_PASSWORD, hashed_password, 2, ENET_PACKET_FLAG_RELIABLE, &global::encryption_key)) {

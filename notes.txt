@@ -82,9 +82,13 @@ COSE DA AGGIUNGERE
 ---------------------
 
 Modificare status del player nel client e fare:
-connesso? bool
 chat aperta? bool
 stato connessione (connecting, encrypting, encrypted)
-stato menu (main, connecting, connected)
+stato menu
 
 Stati come autenticato ecc fare solo lato server per sicurezza
+
+-------
+
+Modificare tutti i enet_peer_disconnect che ci sono nel server verso i client
+aggiungendo un motivo, che poi viene letto dal client
