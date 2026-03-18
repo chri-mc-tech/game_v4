@@ -152,64 +152,93 @@ int sdl_loop() {
   SDL_SetRenderDrawColor(global::sdl::renderer, 0, 0, 0, 255);
   SDL_RenderClear(global::sdl::renderer);
 
-  switch (global::status_menu) {
-    case STATUS_MENU_WAITING_USER_INPUT_NAME: {
-      activate_text_input();
-      ui::render::ask_new_name();
-      ui::update_text_input();
+  switch (global::status_connection) {
+    case STATUS_CONNECTION_NOT_CONNECTED: {
+      switch (global::status_menu) {
+        case STATUS_MENU_WAITING_USER_INPUT_NAME: {
+          activate_text_input();
+          ui::render::ask_new_name();
+          ui::update_text_input();
+          break;
+        }
+
+        case STATUS_MENU_WAITING_USER_INPUT_IP: {
+          activate_text_input();
+          ui::render::ask_server_ip();
+          ui::update_text_input();
+          break;
+        }
+
+        default: break;
+      }
       break;
     }
 
-    case STATUS_MENU_WAITING_USER_INPUT_IP: {
-      activate_text_input();
-      ui::render::ask_server_ip();
-      ui::update_text_input();
-      break;
-    }
-
-    case STATUS_MENU_CONNECTING: {
+    case STATUS_CONNECTION_CONNECTING: {
       deactivate_text_input();
-      if (global::status_connection == STATUS_CONNECTION_CONNECTING) {
-        TTF_SetTextString(ui::text_connection_status, "Connecting...", 0);
-      }
-      if (global::status_connection == STATUS_CONNECTION_ENCRYPTING) {
-        TTF_SetTextString(ui::text_connection_status, "Encrypting...", 0);
-      }
+      TTF_SetTextString(ui::text_connection_status, "Connecting...", 0);
+      ui::render::connection_status();
+      break;
+
+    }
+
+    case STATUS_CONNECTION_CONNECTED: {
+      deactivate_text_input();
+      TTF_SetTextString(ui::text_connection_status, "Connected...", 0);
       ui::render::connection_status();
       break;
     }
 
-    case STATUS_MENU_DISCONNECTED_FROM_SERVER: {
+    case STATUS_CONNECTION_ENCRYPTING: {
       deactivate_text_input();
-      TTF_SetTextString(ui::text_connection_status, "Disconnected", 0);
-      ui::button_continue.render();
+      TTF_SetTextString(ui::text_connection_status, "Encrypting...", 0);
       ui::render::connection_status();
       break;
+
     }
 
-    case STATUS_MENU_WAITING_USER_INPUT_REGISTER_PASSWORD: {
-      activate_text_input();
-      ui::render::ask_register_password();
-      ui::update_text_input();
-      break;
+    case STATUS_CONNECTION_ENCRYPTED: {
+      switch (global::status_menu) {
+        case STATUS_MENU_WAITING_USER_INPUT_REGISTER_PASSWORD: {
+          activate_text_input();
+          ui::render::ask_register_password();
+          ui::update_text_input();
+          break;
+        }
+
+        case STATUS_MENU_WAITING_USER_INPUT_LOGIN_PASSWORD: {
+          activate_text_input();
+          ui::render::ask_login_password();
+          ui::update_text_input();
+          break;
+        }
+        default: break;
+      }
     }
 
-    case STATUS_MENU_WAITING_USER_INPUT_LOGIN_PASSWORD: {
-      activate_text_input();
-      ui::render::ask_login_password();
-      ui::update_text_input();
-      break;
+
+      /*
+      todo: integra questo da qualche parte
+      case STATUS_MENU_DISCONNECTED_FROM_SERVER: {
+        deactivate_text_input();
+        TTF_SetTextString(ui::text_connection_status, "Disconnected", 0);
+        ui::button_continue.render();
+        ui::render::connection_status();
+        break;
+      }
+      */
+
+
+      default: break;
     }
-
-    default: break;
-  }
-
 
   if (global::status_connection == STATUS_CONNECTION_ENCRYPTED) {
-    if (!global::chat_open) {
-      deactivate_text_input();
+    if (global::status_game == STATUS_GAME_PLAYING) {
+      if (!global::chat_open) {
+        deactivate_text_input();
+      }
+      render_players();
     }
-    render_players();
   }
 
   if (global::chat_open) {
@@ -246,7 +275,8 @@ int sdl_loop() {
   if (global::config::debug) {
     TTF_SetTextString(ui::text_debug,
       ("status_conn: " + std::to_string(global::status_connection) +
-      "\nstatus_menu: " + std::to_string(global::status_menu)).c_str(), 0);
+      "\nstatus_menu: " + std::to_string(global::status_menu) +
+      "\nstatus_game: " + std::to_string(global::status_game)).c_str(), 0);
 
     TTF_DrawRendererText(ui::text_debug, 30, 10);
   }
@@ -283,6 +313,9 @@ void set_status_menu(const int status) {
 }
 void set_status_connection(const int status) {
   global::status_connection = status;
+}
+void set_status_game(const int status) {
+  global::status_game = status;
 }
 
 void count_frames() {

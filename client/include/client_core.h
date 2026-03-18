@@ -9,6 +9,7 @@ void activate_text_input();
 void deactivate_text_input();
 void set_status_menu(int status);
 void set_status_connection(int status);
+void set_status_game(int status);
 void count_frames();
 void update_location();
 void render_players();
