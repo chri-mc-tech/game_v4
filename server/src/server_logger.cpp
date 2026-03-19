@@ -20,7 +20,16 @@ void create_log_file() {
   using std::to_string;
 
   auto t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  std::tm tm; localtime_s(&tm, &t);
+
+  std::tm tm;
+
+  #ifdef _WIN32
+    // Windows (MSVC)
+    localtime_s(&tm, &t);
+  #else
+    // Linux / Unix
+    localtime_r(&t, &tm);
+  #endif
 
   std::filesystem::create_directory("logs");
 
