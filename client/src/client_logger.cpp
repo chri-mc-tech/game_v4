@@ -37,7 +37,6 @@ void create_log_file() {
     to_string(tm.tm_min) + "-" +
     to_string(tm.tm_sec) + ".log";
 
-
   global::log_file.open(log_file_name);
   global::log_file << "[" << get_current_time() << " INFO]: " << "CLIENT LOG FILE" << endl;
   
