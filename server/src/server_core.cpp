@@ -29,6 +29,7 @@ int server_run()
   auto last = std::chrono::high_resolution_clock::now();
 
   while (global::running) {
+    auto frame_start = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
     double delta = std::chrono::duration<double>(now - last).count();
     last = now;
@@ -40,6 +41,15 @@ int server_run()
       enet_loop();
       send_players_location();
       accumulator -= TICK_TIME;
+    }
+
+    auto frame_end = std::chrono::high_resolution_clock::now();
+    double elapsed = std::chrono::duration<double>(frame_end - frame_start).count();
+
+    if (elapsed < TICK_TIME) {
+      std::this_thread::sleep_for(
+          std::chrono::duration<double>(TICK_TIME - elapsed)
+      );
     }
   }
 
