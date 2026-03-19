@@ -26,6 +26,8 @@ int server_run()
 
   double accumulator = 0.0;
 
+
+
   auto last = std::chrono::high_resolution_clock::now();
 
   while (global::running) {
@@ -55,3 +57,4 @@ int server_run()
 
   return 0;
 }
+

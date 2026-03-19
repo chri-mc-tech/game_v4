@@ -77,6 +77,11 @@ Fixare crashano tutti i client al register di uno
 
 a caso quando entra uno, prima del login, crashano gli altri client
 
+!! IMPORTANTE !!
+Se un client si scollega devo azzerare la lista player per il client
+
+fixare memory leak server, probabilmente pacchetti vengono creati ma non distrutti se non vengono inviati
+
 server crasha a client disconnect (forse fixato)
 
 ---------------------
