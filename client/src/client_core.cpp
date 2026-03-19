@@ -169,6 +169,14 @@ int sdl_loop() {
           break;
         }
 
+        case STATUS_MENU_DISCONNECTED_FROM_SERVER: {
+          deactivate_text_input();
+          TTF_SetTextString(ui::text_connection_status, "Disconnected", 0);
+          ui::button_continue.render();
+          ui::render::connection_status();
+          break;
+        }
+
         default: break;
       }
       break;
@@ -215,19 +223,6 @@ int sdl_loop() {
         default: break;
       }
     }
-
-
-      /*
-      todo: integra questo da qualche parte
-      case STATUS_MENU_DISCONNECTED_FROM_SERVER: {
-        deactivate_text_input();
-        TTF_SetTextString(ui::text_connection_status, "Disconnected", 0);
-        ui::button_continue.render();
-        ui::render::connection_status();
-        break;
-      }
-      */
-
 
       default: break;
     }

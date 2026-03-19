@@ -214,6 +214,9 @@ int enet_event_disconnected() {
 }
 
 int connect_to_server(const string& ip, const string& port) {
+  global::status_connection = STATUS_CONNECTION_CONNECTING;
+  global::status_menu = STATUS_MENU_CONNECTING;
+
   ENetAddress server_to_connect;
   enet_address_set_host(&server_to_connect, ip.c_str());
   server_to_connect.port = static_cast<enet_uint16>(std::stoul(port));
