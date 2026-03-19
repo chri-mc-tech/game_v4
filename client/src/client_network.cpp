@@ -36,7 +36,8 @@ int enet_loop() {
 int enet_event_connected() {
   log_debug("connected");
   global::enet::is_connected = true;
-  global::status_connection = STATUS_CONNECTION_ENCRYPTING;
+  global::status_connection = STATUS_CONNECTION_CONNECTED;
+  global::status_menu = STATUS_CONNECTION_CONNECTED;
 
   string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID) + global::config::name + " " + global::config::uuid;
   ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
@@ -55,22 +56,22 @@ int enet_event_receive() {
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
-      if (global::status_connection == STATUS_CONNECTION_ENCRYPTING) {
-        global::client_private_key = shared::crypto::create_private_key();
-        global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
-        global::server_public_key = Integer(pkt_data_string.c_str());
-        global::shared_key = shared::crypto::calculate_session_key(global::client_private_key, global::server_public_key);
-        global::encryption_key = shared::crypto::create_encryption_key_from_session_key(global::shared_key);
+      global::status_connection = STATUS_CONNECTION_ENCRYPTING;
 
-        shared::network::send_packet(
-          global::enet::connected_server_peer,
-          PKT_FROM_CLIENT_PUBLIC_KEY,
-          IntToString(global::client_public_key),
-          0,
-          ENET_PACKET_FLAG_RELIABLE);
+      global::client_private_key = shared::crypto::create_private_key();
+      global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
+      global::server_public_key = Integer(pkt_data_string.c_str());
+      global::shared_key = shared::crypto::calculate_session_key(global::client_private_key, global::server_public_key);
+      global::encryption_key = shared::crypto::create_encryption_key_from_session_key(global::shared_key);
 
-        global::status_connection = STATUS_CONNECTION_ENCRYPTED;
-      }
+      shared::network::send_packet(
+        global::enet::connected_server_peer,
+        PKT_FROM_CLIENT_PUBLIC_KEY,
+        IntToString(global::client_public_key),
+        0,
+        ENET_PACKET_FLAG_RELIABLE);
+
+      global::status_connection = STATUS_CONNECTION_ENCRYPTED;
     }
   }
 
@@ -87,29 +88,28 @@ int enet_event_receive() {
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_CONFIRM_REGISTER_PASSWORD))) {
-      //global::status = STATUS_AUTHENTICATED;
+      global::status_game = STATUS_GAME_PLAYING;
       global::status_menu = STATUS_MENU_IN_GAME;
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_CONFIRM_LOGIN_PASSWORD))) {
-      //global::status = STATUS_AUTHENTICATED;
+      global::status_game = STATUS_GAME_PLAYING;
       global::status_menu = STATUS_MENU_IN_GAME;
-
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_DENY_REGISTER_PASSWORD))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
       log_warn(pkt_data_string);
+      enet_peer_disconnect_later(global::enet::connected_server_peer, 0);
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_DENY_LOGIN_PASSWORD))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
       log_warn(pkt_data_string);
+      enet_peer_disconnect_later(global::enet::connected_server_peer, 0);
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PLAYER_LIST))) {
-      // todo: crea player object per ogni player e aggiungi a online players
-
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
       size_t start = 0;
@@ -214,10 +214,6 @@ int enet_event_disconnected() {
 }
 
 int connect_to_server(const string& ip, const string& port) {
-  global::status_connection = STATUS_CONNECTION_CONNECTING;
-  global::status_menu = STATUS_MENU_CONNECTING;
-
-
   ENetAddress server_to_connect;
   enet_address_set_host(&server_to_connect, ip.c_str());
   server_to_connect.port = static_cast<enet_uint16>(std::stoul(port));
