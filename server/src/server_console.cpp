@@ -11,7 +11,7 @@ namespace console {
   void console() {
     string input_string;
     while (global::running) {
-      std::cout << ">> ";
+      //std::cout << ">> ";
       std::getline(std::cin, input_string);
       if (!input_string.empty()) {
         if (input_string.find(' ') != string::npos) {

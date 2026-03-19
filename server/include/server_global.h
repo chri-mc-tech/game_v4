@@ -1,5 +1,8 @@
 #pragma once
 
+#include <fstream>
+
+
 #include "server_player.h"
 #include "shared_global.h"
 
@@ -8,6 +11,7 @@
 
 namespace global {
   inline bool running;
+  inline std::ofstream log_file;
   inline std::unordered_map<string, Player> online_players;
   inline std::unordered_map<ENetPeer*, string> peer_to_uuid;
 }

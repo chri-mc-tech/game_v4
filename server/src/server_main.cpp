@@ -53,5 +53,6 @@ int main() {
   // log_debug(to_string(shared::network::get_packet_type("[1]ciao")));
 
   jthread thread_console(console::console);
+  create_log_file();
   return server_run();
 }
