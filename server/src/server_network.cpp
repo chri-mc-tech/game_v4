@@ -36,10 +36,7 @@ void enet_event_connected() {
 void enet_event_receive() {
   using namespace global::enet;
 
-  // log_info("packet received");
   string pkt_data_string = shared::utils::packet_to_string(enet_event.packet);
-
-  // log_debug("packet: " + pkt_data_string);
 
   // initial packets (not encrypted)
   if (enet_event.channelID == 0) {
@@ -116,21 +113,11 @@ void enet_event_receive() {
         }
       }
 
-
-      /*
-      log_debug("server public key: " + IntToString(temp_player->server_public_key));
-      log_debug("client public key: " + IntToString(temp_player->client_public_key));
-      log_debug("shared key: " + IntToString(temp_player->session_key));
-      log_debug("hex encryption key: " + shared::crypto::secByteBlock_to_hex(temp_player->encryption_key));
-      */
-
     }
   }
 
   // not encrypted (coords, ecc)
   else if (enet_event.channelID == 1) {
-    // log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
-
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_COORDS))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
@@ -141,12 +128,7 @@ void enet_event_receive() {
       temp_player->location_x = loc_x;
       temp_player->location_y = loc_y;
 
-      // log_debug(std::to_string(loc_x));
-      // log_debug(std::to_string(loc_y));
-
     }
-
-
   }
 
   // encrypted (password hash, chat messages, ecc)
