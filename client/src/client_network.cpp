@@ -184,8 +184,8 @@ int enet_event_receive() {
         if (uuid != global::config::uuid) {
 
           Player* temp_player = get_player_from_uuid(uuid);
-          temp_player->location_x = stoi(x);
-          temp_player->location_y = stoi(y);
+          temp_player->location_x = stof(x);
+          temp_player->location_y = stof(y);
         }
         start = end + 1;
 
@@ -209,6 +209,7 @@ int enet_event_disconnected() {
   global::enet::is_connected = false;
   global::status_connection = STATUS_CONNECTION_NOT_CONNECTED;
   global::status_menu = STATUS_MENU_DISCONNECTED_FROM_SERVER;
+  global::online_players.clear();
 
   return 0;
 }

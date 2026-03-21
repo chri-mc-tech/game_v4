@@ -71,18 +71,17 @@ BUG DA FIXARE
 
 Nel client se tengo/muovo col mouse la finestra per piu di qualche secondo smette di eseguire il polling di enet (e di mandare pacchetti) e quindi si scollega dal server
 
-Il server crasha se mi collego con 2 client con stesso uuid e nome (problema puo essere nel controllo uuid o nel controllo nome)
-
-Fixare crashano tutti i client al register di uno
-
-a caso quando entra uno, prima del login, crashano gli altri client
+(forse fixato) Il server crasha se mi collego con 2 client con stesso uuid e nome
+(problema puo essere nel controllo uuid o nel controllo nome)
 
 !! IMPORTANTE !!
-Se un client si scollega devo azzerare la lista player per il client
+A caso quando entra uno, prima del login, crashano gli altri client
 
-fixare memory leak server, probabilmente pacchetti vengono creati ma non distrutti se non vengono inviati
+(forse fixato) Se un client si scollega devo azzerare la lista player per il client
 
-server crasha a client disconnect (forse fixato)
+Fixare memory leak server, probabilmente pacchetti vengono creati ma non distrutti se non vengono inviati
+
+(forse fixato) server crasha a client disconnect
 
 ---------------------
 COSE DA AGGIUNGERE
