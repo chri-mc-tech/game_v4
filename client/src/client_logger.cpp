@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <winsock2.h>
 #include <windows.h>
 #include "client_global.h"
 #include "shared_utils.h"

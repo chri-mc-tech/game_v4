@@ -65,7 +65,6 @@ namespace global {
 }
 
 namespace global::enet {
-  inline ENetEvent enet_event;
   inline ENetHost* enet_client = nullptr;
   inline ENetPeer* connected_server_peer;
   inline bool is_connected;

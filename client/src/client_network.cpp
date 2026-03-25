@@ -22,18 +22,19 @@ int create_enet_host() {
 }
 
 int enet_loop() {
-  while (enet_host_service(global::enet::enet_client, &global::enet::enet_event, 0) > 0) {
-    switch (global::enet::enet_event.type) {
-      case ENET_EVENT_TYPE_CONNECT: enet_event_connected(); break;
-      case ENET_EVENT_TYPE_RECEIVE: enet_event_receive(); break;
-      case ENET_EVENT_TYPE_DISCONNECT: enet_event_disconnected(); break;
+  ENetEvent enet_event;
+  while (enet_host_service(global::enet::enet_client, &enet_event, 0) > 0) {
+    switch (enet_event.type) {
+      case ENET_EVENT_TYPE_CONNECT: enet_event_connected(enet_event); break;
+      case ENET_EVENT_TYPE_RECEIVE: enet_event_receive(enet_event); break;
+      case ENET_EVENT_TYPE_DISCONNECT: enet_event_disconnected(enet_event); break;
       case ENET_EVENT_TYPE_NONE: break;
     }
   }
   return 0;
 }
 
-int enet_event_connected() {
+int enet_event_connected(const ENetEvent &enet_event) {
   log_debug("connected");
   global::enet::is_connected = true;
   global::status_connection = STATUS_CONNECTION_CONNECTED;
@@ -45,11 +46,11 @@ int enet_event_connected() {
   return 0;
 }
 
-int enet_event_receive() {
-  string pkt_data_string = shared::utils::packet_to_string(global::enet::enet_event.packet);
+int enet_event_receive(const ENetEvent &enet_event) {
+  string pkt_data_string = shared::utils::packet_to_string(enet_event.packet);
 
   // initial packets (not encrypted)
-  if (global::enet::enet_event.channelID == 0) {
+  if (enet_event.channelID == 0) {
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
@@ -73,7 +74,7 @@ int enet_event_receive() {
   }
 
   // not encrypted (coords, ecc)
-  else if (global::enet::enet_event.channelID == 1) {
+  else if (enet_event.channelID == 1) {
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_ASK_REGISTER_PASSWORD))) {
       global::status_menu = STATUS_MENU_WAITING_USER_INPUT_REGISTER_PASSWORD;
@@ -189,7 +190,7 @@ int enet_event_receive() {
   }
 
   // encrypted (chat messages, ecc)
-  else if (global::enet::enet_event.channelID == 2) {
+  else if (enet_event.channelID == 2) {
     if (!global::encryption_key.empty()) {
       string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, global::encryption_key);
       log_debug(decrypted_string.substr(0, decrypted_string.find(']') + 1));
@@ -198,7 +199,7 @@ int enet_event_receive() {
   return 0;
 }
 
-int enet_event_disconnected() {
+int enet_event_disconnected(const ENetEvent &enet_event) {
   log_debug("disconnected");
   global::enet::is_connected = false;
   global::status_connection = STATUS_CONNECTION_NOT_CONNECTED;

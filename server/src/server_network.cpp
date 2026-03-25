@@ -16,23 +16,25 @@
 #include "shared_utils.h"
 
 int enet_loop() {
-  while (enet_host_service(global::enet::enet_server, &global::enet::enet_event, 0) > 0) {
-    switch (global::enet::enet_event.type) {
-      case ENET_EVENT_TYPE_CONNECT: enet_event_connected(); break;
-      case ENET_EVENT_TYPE_RECEIVE: enet_event_receive(); break;
-      case ENET_EVENT_TYPE_DISCONNECT: enet_event_disconnected(); break;
+  ENetEvent enet_event;
+
+  while (enet_host_service(global::enet::enet_server, &enet_event, 0) > 0) {
+    switch (enet_event.type) {
+      case ENET_EVENT_TYPE_CONNECT: enet_event_connected(enet_event); break;
+      case ENET_EVENT_TYPE_RECEIVE: enet_event_receive(enet_event); break;
+      case ENET_EVENT_TYPE_DISCONNECT: enet_event_disconnected(enet_event); break;
       case ENET_EVENT_TYPE_NONE: break;
     }
   }
   return 0;
 }
 
-void enet_event_connected() {
-  log_info("player connected: " + enet_ip_to_string(global::enet::enet_event.peer->address.host));
+void enet_event_connected(const ENetEvent &enet_event) {
+  log_info("player connected: " + enet_ip_to_string(enet_event.peer->address.host));
 
 }
 
-void enet_event_receive() {
+void enet_event_receive(const ENetEvent &enet_event) {
   using namespace global::enet;
 
   string pkt_data_string = shared::utils::packet_to_string(enet_event.packet);
@@ -89,7 +91,7 @@ void enet_event_receive() {
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_PUBLIC_KEY))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
-      const auto it = global::online_players.find(get_uuid_from_peer());
+      const auto it = global::online_players.find(get_uuid_from_peer(enet_event));
       if (it == global::online_players.end()) {return;}
       Player* temp_player = &it->second;
       temp_player->client_public_key = Integer(pkt_data_string.c_str());
@@ -120,7 +122,7 @@ void enet_event_receive() {
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_COORDS))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
-      Player* temp_player = get_player_from_uuid(get_uuid_from_peer());
+      Player* temp_player = get_player_from_uuid(get_uuid_from_peer(enet_event));
       float loc_x = stof(pkt_data_string.substr(0, pkt_data_string.find(' ')));
       float loc_y = stof(pkt_data_string.substr(pkt_data_string.find(' ') + 1));
 
@@ -133,7 +135,7 @@ void enet_event_receive() {
   // encrypted (password hash, chat messages, ecc)
   else if (enet_event.channelID == 2) {
 
-    Player* temp_player = get_player_from_uuid(get_uuid_from_peer());
+    Player* temp_player = get_player_from_uuid(get_uuid_from_peer(enet_event));
 
     if (!temp_player->encryption_key.empty()) {
       string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);
@@ -190,10 +192,10 @@ void enet_event_receive() {
   }
 }
 
-void enet_event_disconnected() {
+void enet_event_disconnected(const ENetEvent &enet_event) {
   log_info("player disconnected");
-  string uuid = get_uuid_from_peer();
-  global::peer_to_uuid.erase(global::enet::enet_event.peer);
+  string uuid = get_uuid_from_peer(enet_event);
+  global::peer_to_uuid.erase(enet_event.peer);
   global::online_players.erase(uuid);
   send_a_player_has_disconnected(uuid);
 
@@ -265,7 +267,7 @@ void send_a_player_has_connected(Player* connected_player) {
 }
 
 void send_a_player_has_disconnected(string uuid) {
-  string packet_string = uuid;
+  const string& packet_string = uuid;
 
   for (const auto& temp_loop_player : global::online_players) {
     shared::network::send_packet(temp_loop_player.second.peer, PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED, packet_string, 1, ENET_PACKET_FLAG_RELIABLE);
