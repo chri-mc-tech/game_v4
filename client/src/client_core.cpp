@@ -15,17 +15,14 @@
 #include "shared_utils.h"
 
 bool initialize_libraries() {
-  // if !=0: error
   if (enet_initialize() != 0) {
     return false;
   }
 
-  // if false: error
   if (! SDL_Init(SDL_INIT_VIDEO)) {
     return false;
   }
 
-  // if false: error
   if (! TTF_Init()) {
     return false;
   }
@@ -46,7 +43,7 @@ int client_run() {
   global::main_player.location_x = 0;
   global::main_player.location_y = 0;
 
-  std::jthread thread_count_frames(count_frames);
+  // std::jthread thread_count_frames(count_frames);
 
   constexpr double TICK_RATE = 40.0;
   constexpr double TICK_TIME = 1.0 / TICK_RATE;
@@ -75,7 +72,7 @@ int client_run() {
       accumulator -= TICK_TIME;
     }
 
-    global::frames ++;
+    // global::frames ++;
 
     if (global::ttf::input_string.ends_with("\n")) {global::ttf::input_string.clear();}
   }
@@ -129,7 +126,6 @@ int sdl_poll_loop() {
             global::ttf::input_string += pasted_text;
           }
         }
-
 
         break;
       }
@@ -355,14 +351,11 @@ void render_players() {
   for (auto& loop_player : global::online_players) {
     loop_player.second.rect = {loop_player.second.location_x, loop_player.second.location_y, 30, 30};
     SDL_RenderFillRect(global::sdl::renderer, &loop_player.second.rect);
-    log_debug(loop_player.second.name + ", " + std::to_string(loop_player.second.location_x));
   }
 
   SDL_SetRenderDrawColor(global::sdl::renderer, 0, 255, 0, 255);
   global::main_player.rect = {global::main_player.location_x, global::main_player.location_y, 30, 30};
   SDL_RenderFillRect(global::sdl::renderer, &global::main_player.rect);
-  log_debug(global::main_player.name + ", " + std::to_string(global::main_player.location_x));
-
 }
 
 

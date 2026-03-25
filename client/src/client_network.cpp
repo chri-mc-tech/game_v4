@@ -46,13 +46,10 @@ int enet_event_connected() {
 }
 
 int enet_event_receive() {
-  log_debug("received");
   string pkt_data_string = shared::utils::packet_to_string(global::enet::enet_event.packet);
 
   // initial packets (not encrypted)
   if (global::enet::enet_event.channelID == 0) {
-    log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
-
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
@@ -77,7 +74,6 @@ int enet_event_receive() {
 
   // not encrypted (coords, ecc)
   else if (global::enet::enet_event.channelID == 1) {
-    log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_ASK_REGISTER_PASSWORD))) {
       global::status_menu = STATUS_MENU_WAITING_USER_INPUT_REGISTER_PASSWORD;
@@ -138,7 +134,6 @@ int enet_event_receive() {
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_A_PLAYER_HAS_CONNECTED))) {
-      // todo: crea player object per player collegato e aggiungi a online players
 
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
@@ -157,7 +152,6 @@ int enet_event_receive() {
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED))) {
-      // todo: togli player da online players
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
       global::online_players.erase(pkt_data_string);

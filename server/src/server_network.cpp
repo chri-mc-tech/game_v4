@@ -4,7 +4,6 @@
 
 #include "server_global.h"
 
-#include <bits/fs_fwd.h>
 #include <cryptopp/algparam.h>
 #include <enet/enet.h>
 #include <server_logger.h>
@@ -138,8 +137,6 @@ void enet_event_receive() {
 
     if (!temp_player->encryption_key.empty()) {
       string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);
-      // log_debug(decrypted_string.substr(0, decrypted_string.find(']') + 1));
-      // log_debug(decrypted_string);
 
       if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_HASHED_REGISTER_PASSWORD))) {
         using namespace YAML;
