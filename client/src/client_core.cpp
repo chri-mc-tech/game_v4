@@ -109,11 +109,17 @@ int sdl_poll_loop() {
         }
 
         else if (sdl_event.key.key == SDLK_T) {
+          if (!global::chat_open) {
+            if (global::status_game == STATUS_GAME_PLAYING) {
+              global::chat_open = true;
+            }
+          }
+        }
+
+        else if (sdl_event.key.key == SDLK_ESCAPE) {
           if (global::chat_open) {
             global::chat_open = false;
-          }
-          else {
-            global::chat_open = true;
+            global::ttf::input_string.clear();
           }
         }
 
@@ -235,7 +241,6 @@ int sdl_loop() {
   }
 
   if (global::chat_open) {
-    activate_text_input();
     using namespace global::ttf;
     using namespace global::sdl;
 
@@ -244,8 +249,7 @@ int sdl_loop() {
 
     int t_width, t_height;
     TTF_GetTextSize(ui::text_input, &t_width, &t_height);
-    TTF_DrawRendererText(ui::text_input, roundf(static_cast<float>(window_width - t_width) / 2),
-                                     roundf(static_cast<float>(window_height - t_height) / 2) - 250);
+    TTF_DrawRendererText(ui::text_input, 20, static_cast<float>(window_height) - 60);
 
     if (input_string == "/ping\n") {
       log_info("ping: " + std::to_string(global::enet::connected_server_peer->roundTripTime));
@@ -334,22 +338,24 @@ void count_frames() {
 void update_location() {
   if (global::status_connection == STATUS_CONNECTION_ENCRYPTED) {
     if (global::status_game == STATUS_GAME_PLAYING) {
-      const bool *key_states = SDL_GetKeyboardState(nullptr);
+      if (!global::chat_open) {
+        const bool *key_states = SDL_GetKeyboardState(nullptr);
 
-      if (key_states[SDL_SCANCODE_W]) {
-        global::main_player.location_y -= 4;
-      }
+        if (key_states[SDL_SCANCODE_W]) {
+          global::main_player.location_y -= 4;
+        }
 
-      if (key_states[SDL_SCANCODE_S]) {
-        global::main_player.location_y += 4;
-      }
+        if (key_states[SDL_SCANCODE_S]) {
+          global::main_player.location_y += 4;
+        }
 
-      if (key_states[SDL_SCANCODE_A]) {
-        global::main_player.location_x -= 4;
-      }
+        if (key_states[SDL_SCANCODE_A]) {
+          global::main_player.location_x -= 4;
+        }
 
-      if (key_states[SDL_SCANCODE_D]) {
-        global::main_player.location_x += 4;
+        if (key_states[SDL_SCANCODE_D]) {
+          global::main_player.location_x += 4;
+        }
       }
     }
   }

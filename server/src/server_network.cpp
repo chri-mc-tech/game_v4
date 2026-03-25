@@ -221,7 +221,8 @@ void send_players_location() {
 
   // create string with coords of all online players
   for (const auto& temp_player : global::online_players) {
-    if (temp_player.second.player_status == PLAYER_STATUS_AUTHENTICATED) {
+    if (temp_player.second.player_status == PLAYER_STATUS_AUTHENTICATED
+      ) {
       if (!first) {
         packet_string += ";";
       }

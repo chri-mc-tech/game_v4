@@ -41,7 +41,6 @@ namespace ui {
   inline TTF_Text* text_fps;
   inline TTF_Text* text_debug;
 
-
   inline TTF_Text* text_input;
 
   void create_objects_to_render();
