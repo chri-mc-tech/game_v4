@@ -221,17 +221,19 @@ void send_players_location() {
 
   // create string with coords of all online players
   for (const auto& temp_player : global::online_players) {
-    if (!first) {
-      packet_string += ";";
+    if (temp_player.second.player_status == PLAYER_STATUS_AUTHENTICATED) {
+      if (!first) {
+        packet_string += ";";
+      }
+
+      string uuid = temp_player.first;
+      string str_x = to_string(temp_player.second.location_x);
+      string str_y = to_string(temp_player.second.location_y);
+
+      packet_string += uuid + " " + str_x.substr(0, str_x.find('.') + 3) + " " + str_y.substr(0, str_y.find('.') + 3);
+
+      first = false;
     }
-
-    string uuid = temp_player.first;
-    string str_x = to_string(temp_player.second.location_x);
-    string str_y = to_string(temp_player.second.location_y);
-
-    packet_string += uuid + " " + str_x.substr(0, str_x.find('.') + 3) + " " + str_y.substr(0, str_y.find('.') + 3);
-
-    first = false;
   }
 
   // send the string to all players

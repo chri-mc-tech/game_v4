@@ -74,8 +74,12 @@ Nel client se tengo/muovo col mouse la finestra per piu di qualche secondo smett
 (forse fixato) Il server crasha se mi collego con 2 client con stesso uuid e nome
 (problema puo essere nel controllo uuid o nel controllo nome)
 
-!! IMPORTANTE !!
-A caso quando entra uno, prima del login, crashano gli altri client
+-------------------------------------
+(forse fixato):
+    se entra 1 persona, fa il login, e ne entra unaltra fa crashare la prima
+    se entra una persona e prima che faccia il login ne entra un altra, se poi fanno il login nessuno crasha
+    il client crasha al collegamento di un player solo se è gia loggato
+-------------------------------------
 
 (forse fixato) Se un client si scollega devo azzerare la lista player per il client
 

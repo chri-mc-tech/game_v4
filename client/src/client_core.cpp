@@ -228,6 +228,8 @@ int sdl_loop() {
       if (!global::chat_open) {
         deactivate_text_input();
       }
+      SDL_SetRenderDrawColor(global::sdl::renderer, 0, 255, 255, 255);
+
       render_players();
     }
   }
@@ -267,7 +269,9 @@ int sdl_loop() {
     TTF_SetTextString(ui::text_debug,
       ("status_conn: " + std::to_string(global::status_connection) +
       "\nstatus_menu: " + std::to_string(global::status_menu) +
-      "\nstatus_game: " + std::to_string(global::status_game)).c_str(), 0);
+      "\nstatus_game: " + std::to_string(global::status_game) +
+      "\ncoords: x:" + std::to_string(static_cast<int>(global::main_player.location_x)) +
+      " y:" + std::to_string(static_cast<int>(global::main_player.location_y))).c_str(), 0);
 
     TTF_DrawRendererText(ui::text_debug, 30, 10);
   }
@@ -328,33 +332,51 @@ void count_frames() {
 }
 
 void update_location() {
-  const bool *key_states = SDL_GetKeyboardState(nullptr);
+  if (global::status_connection == STATUS_CONNECTION_ENCRYPTED) {
+    if (global::status_game == STATUS_GAME_PLAYING) {
+      const bool *key_states = SDL_GetKeyboardState(nullptr);
 
-  if (key_states[SDL_SCANCODE_W]) {
-    global::main_player.location_y -= 4;
-  }
+      if (key_states[SDL_SCANCODE_W]) {
+        global::main_player.location_y -= 4;
+      }
 
-  if (key_states[SDL_SCANCODE_S]) {
-    global::main_player.location_y += 4;
-  }
+      if (key_states[SDL_SCANCODE_S]) {
+        global::main_player.location_y += 4;
+      }
 
-  if (key_states[SDL_SCANCODE_A]) {
-    global::main_player.location_x -= 4;
-  }
+      if (key_states[SDL_SCANCODE_A]) {
+        global::main_player.location_x -= 4;
+      }
 
-  if (key_states[SDL_SCANCODE_D]) {
-    global::main_player.location_x += 4;
+      if (key_states[SDL_SCANCODE_D]) {
+        global::main_player.location_x += 4;
+      }
+    }
   }
 }
 void render_players() {
+  int screen_x;
+  int screen_y;
+  SDL_GetWindowSize(global::sdl::window, &screen_x, &screen_y);
+
+  int screen_x_center = screen_x / 2;
+  int screen_y_center = screen_y / 2;
+
   SDL_SetRenderDrawColor(global::sdl::renderer, 0, 168, 255, 255);
   for (auto& loop_player : global::online_players) {
-    loop_player.second.rect = {loop_player.second.location_x, loop_player.second.location_y, 30, 30};
-    SDL_RenderFillRect(global::sdl::renderer, &loop_player.second.rect);
+        int relative_x = loop_player.second.location_x - global::main_player.location_x;
+        int relative_y = loop_player.second.location_y - global::main_player.location_y;
+
+        int render_x = screen_x_center + relative_x - 30 / 2;
+        int render_y = screen_y_center + relative_y - 30 / 2;
+
+        loop_player.second.rect = {static_cast<float>(render_x), static_cast<float>(render_y), 30, 30};
+        SDL_RenderFillRect(global::sdl::renderer, &loop_player.second.rect);
   }
 
   SDL_SetRenderDrawColor(global::sdl::renderer, 0, 255, 0, 255);
-  global::main_player.rect = {global::main_player.location_x, global::main_player.location_y, 30, 30};
+
+  global::main_player.rect = {static_cast<float>(screen_x_center) - 30 / 2, static_cast<float>(screen_y_center) - 30 / 2, 30, 30};
   SDL_RenderFillRect(global::sdl::renderer, &global::main_player.rect);
 }
 
