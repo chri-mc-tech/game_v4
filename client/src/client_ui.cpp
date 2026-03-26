@@ -45,9 +45,11 @@ namespace ui {
     text_fps = TTF_CreateText(text_engine, font, nullptr, 0);
     TTF_SetTextColor(text_fps, 255, 255, 255, 255);
 
-    text_debug = TTF_CreateText(text_engine, font, nullptr, 0);
-    TTF_SetTextColor(text_debug, 50, 100, 180, 255);
+    text_debug_menu = TTF_CreateText(text_engine, font, nullptr, 0);
+    TTF_SetTextColor(text_debug_menu, 200, 200, 200, 200);
 
+    text_advanced_debug_menu = TTF_CreateText(text_engine, font, nullptr, 0);
+    TTF_SetTextColor(text_advanced_debug_menu, 50, 100, 180, 255);
   }
 
   void create_buttons() {

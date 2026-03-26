@@ -86,7 +86,7 @@ void log_error(const string& text) {
 }
 
 void log_debug(const string& text) {
-  if (global::config::debug) {
+  if (global::config::log_debug) {
     global::log_file << "[" << get_current_time() << " DEBUG]: " << text << endl;
   }
   if (global::config::debug_console) {

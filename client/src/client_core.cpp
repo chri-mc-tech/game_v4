@@ -133,6 +133,20 @@ int sdl_poll_loop() {
           }
         }
 
+        else if (sdl_event.key.key == SDLK_F3) {
+          if (global::debug_menu == DEBUG_MENU_CLOSED) {
+            if (global::modifier == SDL_KMOD_SHIFT) {
+              global::debug_menu = DEBUG_MENU_ADVANCED;
+            }
+            else {
+              global::debug_menu = DEBUG_MENU_DEFAULT;
+            }
+          }
+          else {
+            global::debug_menu = DEBUG_MENU_CLOSED;
+          }
+        }
+
         break;
       }
 
@@ -269,15 +283,24 @@ int sdl_loop() {
       static_cast<float>(global::sdl::window_width - temp_text_width - 30), 10);
   }
 
-  if (global::config::debug) {
-    TTF_SetTextString(ui::text_debug,
-      ("status_conn: " + std::to_string(global::status_connection) +
-      "\nstatus_menu: " + std::to_string(global::status_menu) +
-      "\nstatus_game: " + std::to_string(global::status_game) +
-      "\ncoords: x:" + std::to_string(static_cast<int>(global::main_player.location_x)) +
+  if (global::debug_menu != DEBUG_MENU_CLOSED) {
+
+    TTF_SetTextString(ui::text_debug_menu,
+      ("coords \nx:" + std::to_string(static_cast<int>(global::main_player.location_x)) +
       " y:" + std::to_string(static_cast<int>(global::main_player.location_y))).c_str(), 0);
 
-    TTF_DrawRendererText(ui::text_debug, 30, 10);
+    TTF_DrawRendererText(ui::text_debug_menu, 30, 10);
+
+    if (global::debug_menu == DEBUG_MENU_ADVANCED) {
+      TTF_SetTextString(ui::text_advanced_debug_menu,
+        ("status_conn: " + std::to_string(global::status_connection) +
+        "\nstatus_menu: " + std::to_string(global::status_menu) +
+        "\nstatus_game: " + std::to_string(global::status_game)).c_str(), 0);
+
+      int debug_text_width;
+      TTF_GetTextSize(ui::text_advanced_debug_menu, &debug_text_width, nullptr);
+      TTF_DrawRendererText(ui::text_advanced_debug_menu, global::sdl::window_width - debug_text_width - 30, 10);
+    }
   }
 
   SDL_RenderPresent(global::sdl::renderer);
@@ -360,6 +383,7 @@ void update_location() {
     }
   }
 }
+
 void render_players() {
   int screen_x;
   int screen_y;

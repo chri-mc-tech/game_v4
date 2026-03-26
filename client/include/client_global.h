@@ -39,6 +39,12 @@ enum status_game {
   STATUS_GAME_PAUSED
 };
 
+enum debug_menu {
+  DEBUG_MENU_CLOSED,
+  DEBUG_MENU_DEFAULT,
+  DEBUG_MENU_ADVANCED
+};
+
 
 
 namespace global {
@@ -55,6 +61,7 @@ namespace global {
   inline Integer shared_key;
   inline SecByteBlock encryption_key;
   inline Player main_player;
+  inline int debug_menu;
 
   inline std::ofstream log_file;
 
@@ -93,7 +100,7 @@ namespace global::ttf {
 namespace global::config {
   inline string uuid;
   inline string name;
+  inline bool log_debug;
   inline bool show_fps;
-  inline bool debug;
   inline bool debug_console;
 }

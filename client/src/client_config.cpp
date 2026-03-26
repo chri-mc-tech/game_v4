@@ -28,7 +28,7 @@ namespace config {
     config["uuid"] = shared::crypto::generate_uuid();
     config["name"] = "";
     config["show_fps"] = false;
-    config["debug"] = false;
+    config["log_debug"] = false;
     config["debug_console"] = false;
 
 
@@ -49,7 +49,7 @@ namespace config {
     global::config::uuid = config["uuid"].as<string>();
     global::config::name = config["name"].as<string>();
     global::config::show_fps = config["show_fps"].as<bool>();
-    global::config::debug = config["debug"].as<bool>();
+    global::config::log_debug = config["log_debug"].as<bool>();
     global::config::debug_console = config["debug_console"].as<bool>();
 
     return true;

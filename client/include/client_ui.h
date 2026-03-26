@@ -39,7 +39,8 @@ namespace ui {
   inline TTF_Text* text_ask_login_password;
   inline TTF_Text* text_connection_status;
   inline TTF_Text* text_fps;
-  inline TTF_Text* text_debug;
+  inline TTF_Text* text_debug_menu;
+  inline TTF_Text* text_advanced_debug_menu;
 
   inline TTF_Text* text_input;
 
