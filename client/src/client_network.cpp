@@ -174,9 +174,9 @@ int enet_event_receive(const ENetEvent &enet_event) {
 
         if (s1 != string::npos && s2 != string::npos && s3 != string::npos) {
           string uuid = player_object.substr(0, s1);
-          string x    = player_object.substr(s1 + 1, s2 - s1 - 1);
-          string y    = player_object.substr(s2 + 1, s3 - s2 - 1);
-          string z    = player_object.substr(s3 + 1);
+          string x = player_object.substr(s1 + 1, s2 - s1 - 1);
+          string y = player_object.substr(s2 + 1, s3 - s2 - 1);
+          string z = player_object.substr(s3 + 1);
 
           if (uuid != global::config::uuid) {
             Player* temp_player = get_player_from_uuid(uuid);
@@ -184,6 +184,8 @@ int enet_event_receive(const ENetEvent &enet_event) {
               temp_player->location_x = stof(x);
               temp_player->location_y = stof(y);
               temp_player->location_z = stof(z);
+
+              log_debug(x + ", " + y + ", " + z);
             }
           }
         }

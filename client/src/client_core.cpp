@@ -60,7 +60,7 @@ int client_run() {
     while (accumulator >= TICK_TIME)
     {
       // {TICK_RATE} TPS functions
-      update_location();
+
       send_location();
       accumulator -= TICK_TIME;
     }

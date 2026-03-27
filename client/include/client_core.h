@@ -13,7 +13,6 @@ void deactivate_text_input();
 void set_status_menu(int status);
 void set_status_connection(int status);
 void set_status_game(int status);
-void update_location();
 void render_players();
 void start_graphics();
 void update_modifier();
