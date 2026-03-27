@@ -1,6 +1,4 @@
-
-
-#include "../include/client_player.h"
+#include "client_player.h"
 
 #include "client_global.h"
 

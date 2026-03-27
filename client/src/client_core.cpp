@@ -1,15 +1,7 @@
-#define NOGDI
-#define NOUSER
-#define WIN32_LEAN_AND_MEAN
-
-#include <raylib.h>
-
 #include "client_core.h"
 #include "client_global.h"
 #include "client_network.h"
 
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
 #include <enet/enet.h>
 #include <fstream>
 #include <thread>
@@ -25,24 +17,16 @@ bool initialize_libraries() {
     return false;
   }
 
-  if (! SDL_Init(SDL_INIT_VIDEO)) {
-    return false;
-  }
-
-  if (! TTF_Init()) {
-    return false;
-  }
-
   return true;
 }
 
 int client_run() {
   global::running = true;
 
-  start_sdl();
+  start_graphics();
 
-  ui::create_objects_to_render();
-  ui::create_buttons();
+  // ui::create_objects_to_render();
+  // ui::create_buttons();
 
   global::main_player.name = global::config::name;
   global::main_player.uuid = global::config::uuid;
@@ -59,6 +43,11 @@ int client_run() {
   auto last = std::chrono::high_resolution_clock::now();
 
   while (global::running) {
+    if (WindowShouldClose()) {
+      global::running = false;
+      break;
+    }
+
     auto now = std::chrono::high_resolution_clock::now();
     double delta = std::chrono::duration<double>(now - last).count();
     last = now;
@@ -66,9 +55,7 @@ int client_run() {
     accumulator += delta;
 
     enet_loop();
-    sdl_poll_loop();
-    sdl_loop();
-    update_modifier();
+    render();
 
     while (accumulator >= TICK_TIME)
     {
@@ -80,309 +67,115 @@ int client_run() {
 
     // global::frames ++;
 
-    if (global::ttf::input_string.ends_with("\n")) {global::ttf::input_string.clear();}
+    if (global::input_string.ends_with("\n")) {global::input_string.clear();}
   }
 
   return 0;
 }
 
-int sdl_poll_loop() {
-  using global::sdl::sdl_event;
-  while (SDL_PollEvent(&sdl_event)) {
-    switch (sdl_event.type) {
-      case SDL_EVENT_QUIT: global::running = false; break;
-      case SDL_EVENT_WINDOW_RESIZED: {
-        SDL_GetWindowSize(global::sdl::window, &global::sdl::window_width, &global::sdl::window_height);
-        ui::button_continue.update_location(global::sdl::window_width/2, global::sdl::window_height/2 + 100);
-        break;
+int render() {
+
+  using global::speed;
+
+  if (IsWindowResized()) {
+    global::graphics::window_width = GetScreenWidth();
+    global::graphics::window_height = GetScreenHeight();
+  }
+
+  static Color cube_colors[10][10];
+  static bool generated = false;
+
+  if (!generated) {
+    for (int x = 0; x < 10; x++) {
+      for (int z = 0; z < 10; z++) {
+        cube_colors[x][z] = (Color){
+          (unsigned char)(rand() % 256),
+          (unsigned char)(rand() % 256),
+          (unsigned char)(rand() % 256),
+          255
+        };
       }
-      case SDL_EVENT_TEXT_INPUT: {
-        if (!global::ttf::input_string.ends_with('\n')) {
-          global::ttf::input_string += sdl_event.text.text;
-        }
-        break;
-      }
-      case SDL_EVENT_KEY_DOWN: {
-        if (sdl_event.key.key == SDLK_BACKSPACE) {
-          if (!global::ttf::input_string.empty()) {
-            global::ttf::input_string.pop_back();
-          }
-        }
-        else if (sdl_event.key.key == SDLK_RETURN) {
-          if (!global::ttf::input_string.ends_with("\n")) {
-            global::ttf::input_string += "\n";
-          }
-        }
+    }
+    generated = true;
+  }
 
-        else if (sdl_event.key.key == SDLK_T) {
-          if (!global::chat_open) {
-            if (global::status_game == STATUS_GAME_PLAYING) {
-              global::chat_open = true;
-            }
-          }
-        }
-
-        else if (sdl_event.key.key == SDLK_ESCAPE) {
-          if (global::chat_open) {
-            global::chat_open = false;
-            global::ttf::input_string.clear();
-          }
-        }
-
-        else if (sdl_event.key.key == SDLK_V) {
-          if (global::modifier == SDL_KMOD_CTRL) {
-            string pasted_text = SDL_GetClipboardText();
-            if (pasted_text.find('\n') != string::npos) {
-              pasted_text.erase(pasted_text.find('\n'));
-            }
-            global::ttf::input_string += pasted_text;
-          }
-        }
-
-        else if (sdl_event.key.key == SDLK_F3) {
-          if (global::debug_menu == DEBUG_MENU_CLOSED) {
-            if (global::modifier == SDL_KMOD_SHIFT) {
-              global::debug_menu = DEBUG_MENU_ADVANCED;
-            }
-            else {
-              global::debug_menu = DEBUG_MENU_DEFAULT;
-            }
-          }
-          else {
-            global::debug_menu = DEBUG_MENU_CLOSED;
-          }
-        }
-
-        break;
-      }
-
-      case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-        if (global::status_menu == STATUS_MENU_DISCONNECTED_FROM_SERVER) {
-          ui::button_continue.handle_event(sdl_event, [](){set_status_menu(STATUS_MENU_WAITING_USER_INPUT_IP);});
-        }
-      }
-
-      default: break;
+  if (IsKeyPressed(KEY_ESCAPE)) {
+    if (IsCursorHidden()) {
+      EnableCursor();
+    }
+    else {
+      DisableCursor();
     }
   }
 
+  if (IsCursorHidden()) {
+    if (GetMouseWheelMove() > 0) {
+      speed += (speed / 4);
+    }
+
+    if (GetMouseWheelMove() < 0) {
+      speed -= (speed / 4);
+
+    }
+    UpdateCameraPro(&global::graphics::camera,
+            (Vector3){
+                IsKeyDown(KEY_W)*speed - IsKeyDown(KEY_S)*speed,
+                IsKeyDown(KEY_D)*speed - IsKeyDown(KEY_A)*speed,
+                IsKeyDown(KEY_SPACE)*speed - IsKeyDown(KEY_LEFT_SHIFT)*speed,
+            },
+            (Vector3){
+                GetMouseDelta().x*0.05f,
+                GetMouseDelta().y*0.05f,
+                0.0f
+            }, 0);
+
+
+    BeginDrawing();
+    ClearBackground(SKYBLUE);
+
+    BeginMode3D(global::graphics::camera);
+
+    for (int x = 0; x < 10; x++) {
+      for (int z = 0; z < 10; z++) {
+
+        DrawCube(
+          (Vector3){ (float)x + 0.5f, 0.5f, (float)z + 0.5f },
+          1.0f, 1.0f, 1.0f,
+          cube_colors[x][z]
+        );
+
+      }
+    }
+  }
+
+  DrawGrid(50, 1.0f);
+  EndMode3D();
+
+  DrawFPS(10, 10);
+
+  EndDrawing();
 
   return 0;
-}
-
-int sdl_loop() {
-  SDL_SetRenderDrawColor(global::sdl::renderer, 0, 0, 0, 255);
-  SDL_RenderClear(global::sdl::renderer);
-
-  switch (global::status_connection) {
-    case STATUS_CONNECTION_NOT_CONNECTED: {
-      switch (global::status_menu) {
-        case STATUS_MENU_WAITING_USER_INPUT_NAME: {
-          activate_text_input();
-          ui::render::ask_new_name();
-          ui::update_text_input();
-          break;
-        }
-
-        case STATUS_MENU_WAITING_USER_INPUT_IP: {
-          activate_text_input();
-          ui::render::ask_server_ip();
-          ui::update_text_input();
-          break;
-        }
-
-        case STATUS_MENU_DISCONNECTED_FROM_SERVER: {
-          deactivate_text_input();
-          TTF_SetTextString(ui::text_connection_status, "Disconnected", 0);
-          ui::button_continue.render();
-          ui::render::connection_status();
-          break;
-        }
-
-        default: break;
-      }
-      break;
-    }
-
-    case STATUS_CONNECTION_CONNECTING: {
-      deactivate_text_input();
-      TTF_SetTextString(ui::text_connection_status, "Connecting...", 0);
-      ui::render::connection_status();
-      break;
-
-    }
-
-    case STATUS_CONNECTION_CONNECTED: {
-      deactivate_text_input();
-      TTF_SetTextString(ui::text_connection_status, "Connected...", 0);
-      ui::render::connection_status();
-      break;
-    }
-
-    case STATUS_CONNECTION_ENCRYPTING: {
-      deactivate_text_input();
-      TTF_SetTextString(ui::text_connection_status, "Encrypting...", 0);
-      ui::render::connection_status();
-      break;
-
-    }
-
-    case STATUS_CONNECTION_ENCRYPTED: {
-      switch (global::status_menu) {
-        case STATUS_MENU_WAITING_USER_INPUT_REGISTER_PASSWORD: {
-          activate_text_input();
-          ui::render::ask_register_password();
-          ui::update_text_input();
-          break;
-        }
-
-        case STATUS_MENU_WAITING_USER_INPUT_LOGIN_PASSWORD: {
-          activate_text_input();
-          ui::render::ask_login_password();
-          ui::update_text_input();
-          break;
-        }
-        default: break;
-      }
-    }
-
-      default: break;
-    }
-
-  if (global::status_connection == STATUS_CONNECTION_ENCRYPTED) {
-    if (global::status_game == STATUS_GAME_PLAYING) {
-      if (!global::chat_open) {
-        deactivate_text_input();
-      }
-      SDL_SetRenderDrawColor(global::sdl::renderer, 0, 255, 255, 255);
-
-      render_players();
-    }
-  }
-
-  if (global::chat_open) {
-    using namespace global::ttf;
-    using namespace global::sdl;
-
-    activate_text_input();
-    ui::update_text_input();
-
-    int t_width, t_height;
-    TTF_GetTextSize(ui::text_input, &t_width, &t_height);
-    TTF_DrawRendererText(ui::text_input, 20, static_cast<float>(window_height) - 60);
-
-    if (input_string == "/ping\n") {
-      log_info("ping: " + std::to_string(global::enet::connected_server_peer->roundTripTime));
-    }
-
-
-    if (input_string.ends_with('\n')) {
-      global::chat_open = false;
-    }
-  }
-
-  if (global::config::show_fps) {
-    int temp_text_width;
-
-    TTF_GetTextSize(ui::text_fps, &temp_text_width, nullptr);
-    TTF_DrawRendererText(ui::text_fps,
-      static_cast<float>(global::sdl::window_width - temp_text_width - 30), 10);
-  }
-
-  if (global::debug_menu != DEBUG_MENU_CLOSED) {
-
-    TTF_SetTextString(ui::text_debug_menu,
-      ("coords \nx:" + std::to_string(static_cast<int>(global::main_player.location_x)) +
-      " y:" + std::to_string(static_cast<int>(global::main_player.location_y))).c_str(), 0);
-
-    TTF_DrawRendererText(ui::text_debug_menu, 30, 10);
-
-    if (global::debug_menu == DEBUG_MENU_ADVANCED) {
-      TTF_SetTextString(ui::text_advanced_debug_menu,
-        ("status_conn: " + std::to_string(global::status_connection) +
-        "\nstatus_menu: " + std::to_string(global::status_menu) +
-        "\nstatus_game: " + std::to_string(global::status_game)).c_str(), 0);
-
-      int debug_text_width;
-      TTF_GetTextSize(ui::text_advanced_debug_menu, &debug_text_width, nullptr);
-      TTF_DrawRendererText(ui::text_advanced_debug_menu, global::sdl::window_width - debug_text_width - 30, 10);
-    }
-  }
-
-  SDL_RenderPresent(global::sdl::renderer);
-  if (global::status_menu == STATUS_MENU_WAITING_USER_INPUT_IP ||
-      global::status_menu == STATUS_MENU_WAITING_USER_INPUT_NAME ||
-      global::status_menu == STATUS_MENU_DISCONNECTED_FROM_SERVER ||
-      global::status_menu == STATUS_MENU_WAITING_USER_INPUT_REGISTER_PASSWORD ||
-      global::status_menu == STATUS_MENU_WAITING_USER_INPUT_LOGIN_PASSWORD ||
-      global::status_menu == STATUS_MENU_CONNECTING
-      ) {
-    SDL_Delay(16);
-  }
-  return 0;
-}
-
-void activate_text_input() {
-  if (global::sdl::text_input_active == false) {
-    global::sdl::text_input_active = true;
-    SDL_StartTextInput(global::sdl::window);
-  }
-}
-
-void deactivate_text_input() {
-  if (global::sdl::text_input_active == true) {
-    global::sdl::text_input_active = false;
-    SDL_StopTextInput(global::sdl::window);
-  }
-}
-
-void set_status_menu(const int status) {
-  global::status_menu = status;
-}
-void set_status_connection(const int status) {
-  global::status_connection = status;
-}
-void set_status_game(const int status) {
-  global::status_game = status;
-}
-
-void count_frames() {
-  Uint32 last_time = SDL_GetTicks();
-
-  while (global::running) {
-    Uint32 current_time = SDL_GetTicks();
-    Uint32 delta = current_time - last_time;
-
-    if (delta >= 1000) {
-      global::fps = static_cast<int>(static_cast<float>(global::frames) / (static_cast<float>(delta) / 1000));
-      global::frames = 0;
-      last_time = current_time;
-
-      TTF_SetTextString(ui::text_fps, std::to_string(global::fps).c_str(), 0);
-
-    }
-  }
 }
 
 void update_location() {
   if (global::status_connection == STATUS_CONNECTION_ENCRYPTED) {
     if (global::status_game == STATUS_GAME_PLAYING) {
       if (!global::chat_open) {
-        const bool *key_states = SDL_GetKeyboardState(nullptr);
 
-        if (key_states[SDL_SCANCODE_W]) {
+        if (IsKeyDown(KEY_W)) {
           global::main_player.location_y -= 4;
         }
 
-        if (key_states[SDL_SCANCODE_S]) {
+        if (IsKeyDown(KEY_S)) {
           global::main_player.location_y += 4;
         }
 
-        if (key_states[SDL_SCANCODE_A]) {
+        if (IsKeyDown(KEY_A)) {
           global::main_player.location_x -= 4;
         }
 
-        if (key_states[SDL_SCANCODE_D]) {
+        if (IsKeyDown(KEY_D)) {
           global::main_player.location_x += 4;
         }
       }
@@ -390,56 +183,21 @@ void update_location() {
   }
 }
 
-void render_players() {
-  int screen_x;
-  int screen_y;
-  SDL_GetWindowSize(global::sdl::window, &screen_x, &screen_y);
+void start_graphics() {
+  using namespace global::graphics;
 
-  int screen_x_center = screen_x / 2;
-  int screen_y_center = screen_y / 2;
+  InitWindow(window_width, window_height, "game");
 
-  SDL_SetRenderDrawColor(global::sdl::renderer, 0, 168, 255, 255);
-  for (auto& loop_player : global::online_players) {
-        int relative_x = loop_player.second.location_x - global::main_player.location_x;
-        int relative_y = loop_player.second.location_y - global::main_player.location_y;
+  SetWindowState(FLAG_WINDOW_RESIZABLE);
+  SetWindowMinSize(640, 360);
+  SetWindowMaxSize(7680, 4320);
 
-        int render_x = screen_x_center + relative_x - 30 / 2;
-        int render_y = screen_y_center + relative_y - 30 / 2;
+  camera.position = (Vector3){ 0.0f, 2.0f, 6.0f };
+  camera.target = (Vector3){ 0.0f, 1.8f, 0.0f };
+  camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+  camera.fovy = 70.0f;
+  camera.projection = CAMERA_PERSPECTIVE;
 
-        loop_player.second.rect = {static_cast<float>(render_x), static_cast<float>(render_y), 30, 30};
-        SDL_RenderFillRect(global::sdl::renderer, &loop_player.second.rect);
-  }
+  SetExitKey(KEY_NULL);
 
-  SDL_SetRenderDrawColor(global::sdl::renderer, 0, 255, 0, 255);
-
-  global::main_player.rect = {static_cast<float>(screen_x_center) - 30 / 2, static_cast<float>(screen_y_center) - 30 / 2, 30, 30};
-  SDL_RenderFillRect(global::sdl::renderer, &global::main_player.rect);
-}
-
-
-void start_sdl() {
-
-  InitWindow(1280, 720, "raylib test");
-
-  global::sdl::window = SDL_CreateWindow("game", global::sdl::window_width, global::sdl::window_height, SDL_WINDOW_RESIZABLE);
-  global::sdl::renderer = SDL_CreateRenderer(global::sdl::window, "direct3d11");
-
-  global::ttf::font = TTF_OpenFont("Archivo-SemiBold.ttf", 40);
-  global::ttf::text_engine = TTF_CreateRendererTextEngine(global::sdl::renderer);
-
-  SDL_SetRenderVSync(global::sdl::renderer, SDL_RENDERER_VSYNC_DISABLED);
-
-}
-
-void update_modifier() {
-
-  if (SDL_GetModState() & SDL_KMOD_CTRL) {
-    global::modifier = SDL_KMOD_CTRL;
-  }
-  else if (SDL_GetModState() & SDL_KMOD_SHIFT) {
-    global::modifier = SDL_KMOD_SHIFT;
-  }
-  else {
-    global::modifier = 0;
-  }
 }

@@ -1,13 +1,15 @@
 #pragma once
 
-#include <fstream>
+#define NOGDI
+#define NOUSER
+#define WIN32_LEAN_AND_MEAN
 
+#include <raylib.h>
+
+#include <fstream>
 
 #include "client_player.h"
 
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
-#include <enet/enet.h>
 #include <unordered_map>
 
 using CryptoPP::Integer;
@@ -62,6 +64,9 @@ namespace global {
   inline SecByteBlock encryption_key;
   inline Player main_player;
   inline int debug_menu;
+  inline float speed = 0.002f;
+
+  inline string input_string;
 
   inline std::ofstream log_file;
 
@@ -77,24 +82,14 @@ namespace global::enet {
   inline bool is_connected;
 }
 
-namespace global::sdl {
-  inline SDL_Event sdl_event;
-  inline SDL_Window* window;
-  inline SDL_Renderer* renderer;
-  inline bool text_input_active;
-
+namespace global::graphics {
   inline int window_width = 1280;
   inline int window_height = 720;
+
   inline float render_scale_x = 1.0f;
   inline float render_scale_y = 1.0f;
-}
 
-namespace global::ttf {
-  inline TTF_Font* font;
-  inline TTF_TextEngine* text_engine;
-
-  inline string input_string;
-
+  inline Camera3D camera = { 0 };
 }
 
 namespace global::config {
