@@ -1,3 +1,9 @@
+#define NOGDI
+#define NOUSER
+#define WIN32_LEAN_AND_MEAN
+
+#include <raylib.h>
+
 #include "client_core.h"
 #include "client_global.h"
 #include "client_network.h"
@@ -412,6 +418,9 @@ void render_players() {
 
 
 void start_sdl() {
+
+  InitWindow(1280, 720, "raylib test");
+
   global::sdl::window = SDL_CreateWindow("game", global::sdl::window_width, global::sdl::window_height, SDL_WINDOW_RESIZABLE);
   global::sdl::renderer = SDL_CreateRenderer(global::sdl::window, "direct3d11");
 
