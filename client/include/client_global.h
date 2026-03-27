@@ -82,7 +82,7 @@ namespace global {
   inline bool inv_open;
 
   // debug
-  static Color cube_colors[10][10];
+  static Color cube_colors[50][50];
   //
 
 }

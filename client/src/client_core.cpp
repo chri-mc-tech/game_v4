@@ -140,8 +140,8 @@ int render() {
 }
 
 void create_test_cubes() {
-  for (int x = 0; x < 10; x++) {
-    for (int z = 0; z < 10; z++) {
+  for (int x = 0; x < 50; x++) {
+    for (int z = 0; z < 50; z++) {
       global::cube_colors[x][z] = (Color){
         static_cast<unsigned char>(rand() % 256),
         static_cast<unsigned char>(rand() % 256),
@@ -153,8 +153,8 @@ void create_test_cubes() {
 }
 
 void render_test_cubes() {
-  for (int x = 0; x < 10; x++) {
-    for (int z = 0; z < 10; z++) {
+  for (int x = 0; x < 50; x++) {
+    for (int z = 0; z < 50; z++) {
 
       DrawCube(
         (Vector3){ static_cast<float>(x) + 0.5f, 0.5f, static_cast<float>(z) + 0.5f },
@@ -175,8 +175,8 @@ void start_graphics() {
   SetWindowMinSize(640, 360);
   SetWindowMaxSize(7680, 4320);
 
-  camera.position = (Vector3){ 0.0f, 2.0f, 6.0f };
-  camera.target = (Vector3){ 0.0f, 1.8f, 0.0f };
+  camera.position = (Vector3){ 0.0f, 2.0f, 0.0f };
+  camera.target = (Vector3){ 0.0f, 1.8f, 1.0f };
   camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
   camera.fovy = 70.0f;
   camera.projection = CAMERA_PERSPECTIVE;
