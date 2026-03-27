@@ -64,7 +64,12 @@ namespace global {
   inline SecByteBlock encryption_key;
   inline Player main_player;
   inline int debug_menu;
+
+  // physics variables
   inline float speed = 0.002f;
+  inline float velocityY = 0.0f;
+  inline constexpr float GRAVITY = -9.81f;
+  inline bool isGrounded = false;
 
   inline string input_string;
 

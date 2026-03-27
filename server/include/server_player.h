@@ -14,6 +14,7 @@ public:
   int player_status = 0;
   float location_x = 0.0f;
   float location_y = 0.0f;
+  float location_z = 0.0f;
   ENetPeer* peer;
   Integer server_private_key;
   Integer server_public_key;

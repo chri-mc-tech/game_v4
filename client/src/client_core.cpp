@@ -65,17 +65,18 @@ int client_run() {
       accumulator -= TICK_TIME;
     }
 
-    // global::frames ++;
-
     if (global::input_string.ends_with("\n")) {global::input_string.clear();}
   }
 
+  CloseWindow();
   return 0;
 }
 
 int render() {
 
   using global::speed;
+  using namespace global;
+
 
   if (IsWindowResized()) {
     global::graphics::window_width = GetScreenWidth();
@@ -89,9 +90,9 @@ int render() {
     for (int x = 0; x < 10; x++) {
       for (int z = 0; z < 10; z++) {
         cube_colors[x][z] = (Color){
-          (unsigned char)(rand() % 256),
-          (unsigned char)(rand() % 256),
-          (unsigned char)(rand() % 256),
+          static_cast<unsigned char>(rand() % 256),
+          static_cast<unsigned char>(rand() % 256),
+          static_cast<unsigned char>(rand() % 256),
           255
         };
       }
@@ -117,11 +118,13 @@ int render() {
       speed -= (speed / 4);
 
     }
+
+
     UpdateCameraPro(&global::graphics::camera,
             (Vector3){
                 IsKeyDown(KEY_W)*speed - IsKeyDown(KEY_S)*speed,
                 IsKeyDown(KEY_D)*speed - IsKeyDown(KEY_A)*speed,
-                IsKeyDown(KEY_SPACE)*speed - IsKeyDown(KEY_LEFT_SHIFT)*speed,
+                0
             },
             (Vector3){
                 GetMouseDelta().x*0.05f,
@@ -133,13 +136,13 @@ int render() {
     BeginDrawing();
     ClearBackground(SKYBLUE);
 
-    BeginMode3D(global::graphics::camera);
+    BeginMode3D(graphics::camera);
 
     for (int x = 0; x < 10; x++) {
       for (int z = 0; z < 10; z++) {
 
         DrawCube(
-          (Vector3){ (float)x + 0.5f, 0.5f, (float)z + 0.5f },
+          (Vector3){ static_cast<float>(x) + 0.5f, 0.5f, static_cast<float>(z) + 0.5f },
           1.0f, 1.0f, 1.0f,
           cube_colors[x][z]
         );
@@ -148,39 +151,17 @@ int render() {
     }
   }
 
-  DrawGrid(50, 1.0f);
+  DrawGrid(100, 1.0f);
   EndMode3D();
 
   DrawFPS(10, 10);
+  DrawText(std::to_string(graphics::camera.position.x).c_str(), 10, 40, 30, BLACK);
+  DrawText(std::to_string(graphics::camera.position.y).c_str(), 10, 70, 30, BLACK);
+  DrawText(std::to_string(graphics::camera.position.z).c_str(), 10, 100, 30, BLACK);
 
   EndDrawing();
 
   return 0;
-}
-
-void update_location() {
-  if (global::status_connection == STATUS_CONNECTION_ENCRYPTED) {
-    if (global::status_game == STATUS_GAME_PLAYING) {
-      if (!global::chat_open) {
-
-        if (IsKeyDown(KEY_W)) {
-          global::main_player.location_y -= 4;
-        }
-
-        if (IsKeyDown(KEY_S)) {
-          global::main_player.location_y += 4;
-        }
-
-        if (IsKeyDown(KEY_A)) {
-          global::main_player.location_x -= 4;
-        }
-
-        if (IsKeyDown(KEY_D)) {
-          global::main_player.location_x += 4;
-        }
-      }
-    }
-  }
 }
 
 void start_graphics() {
@@ -199,5 +180,7 @@ void start_graphics() {
   camera.projection = CAMERA_PERSPECTIVE;
 
   SetExitKey(KEY_NULL);
+
+  DisableCursor();
 
 }

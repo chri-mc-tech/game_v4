@@ -162,28 +162,32 @@ int enet_event_receive(const ENetEvent &enet_event) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
       size_t start = 0;
-
       while (start < pkt_data_string.size()) {
         size_t end = pkt_data_string.find(';', start);
+        if (end == string::npos) end = pkt_data_string.size();
 
-        if (end == string::npos)
-          end = pkt_data_string.size();
         string player_object = pkt_data_string.substr(start, end - start);
 
-        size_t space1 = player_object.find_first_of(' ');
-        size_t space2 = player_object.find_last_of(' ');
+        size_t s1 = player_object.find(' ');
+        size_t s2 = player_object.find(' ', s1 + 1);
+        size_t s3 = player_object.find(' ', s2 + 1);
 
-        string uuid = player_object.substr(0, space1);
-        string x = player_object.substr(space1 + 1, space2 - space1 - 1);
-        string y = player_object.substr(space2 + 1);
-        if (uuid != global::config::uuid) {
+        if (s1 != string::npos && s2 != string::npos && s3 != string::npos) {
+          string uuid = player_object.substr(0, s1);
+          string x    = player_object.substr(s1 + 1, s2 - s1 - 1);
+          string y    = player_object.substr(s2 + 1, s3 - s2 - 1);
+          string z    = player_object.substr(s3 + 1);
 
-          Player* temp_player = get_player_from_uuid(uuid);
-          temp_player->location_x = stof(x);
-          temp_player->location_y = stof(y);
+          if (uuid != global::config::uuid) {
+            Player* temp_player = get_player_from_uuid(uuid);
+            if (temp_player) {
+              temp_player->location_x = stof(x);
+              temp_player->location_y = stof(y);
+              temp_player->location_z = stof(z);
+            }
+          }
         }
         start = end + 1;
-
       }
     }
 
@@ -247,7 +251,9 @@ void send_location() {
     shared::network::send_packet(
       global::enet::connected_server_peer,
       PKT_FROM_CLIENT_COORDS,
-      (std::to_string(global::main_player.location_x) + " " + std::to_string(global::main_player.location_y)),
+      (std::to_string(global::main_player.location_x) + " " +
+       std::to_string(global::main_player.location_y) + " " +
+       std::to_string(global::main_player.location_z)),
       1, 0);
   }
 }

@@ -123,12 +123,17 @@ void enet_event_receive(const ENetEvent &enet_event) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
       Player* temp_player = get_player_from_uuid(get_uuid_from_peer(enet_event));
-      float loc_x = stof(pkt_data_string.substr(0, pkt_data_string.find(' ')));
-      float loc_y = stof(pkt_data_string.substr(pkt_data_string.find(' ') + 1));
+
+      size_t space1 = pkt_data_string.find(' ');
+      size_t space2 = pkt_data_string.find(' ', space1 + 1);
+
+      float loc_x = stof(pkt_data_string.substr(0, space1));
+      float loc_y = stof(pkt_data_string.substr(space1 + 1, space2 - space1 - 1));
+      float loc_z = stof(pkt_data_string.substr(space2 + 1));
 
       temp_player->location_x = loc_x;
       temp_player->location_y = loc_y;
-
+      temp_player->location_z = loc_z;
     }
   }
 
