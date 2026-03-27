@@ -42,6 +42,8 @@ int client_run() {
 
   auto last = std::chrono::high_resolution_clock::now();
 
+  create_test_cubes();
+
   while (global::running) {
     if (WindowShouldClose()) {
       global::running = false;
@@ -79,26 +81,10 @@ int render() {
 
 
   if (IsWindowResized()) {
-    global::graphics::window_width = GetScreenWidth();
-    global::graphics::window_height = GetScreenHeight();
+    graphics::window_width = GetScreenWidth();
+    graphics::window_height = GetScreenHeight();
   }
 
-  static Color cube_colors[10][10];
-  static bool generated = false;
-
-  if (!generated) {
-    for (int x = 0; x < 10; x++) {
-      for (int z = 0; z < 10; z++) {
-        cube_colors[x][z] = (Color){
-          static_cast<unsigned char>(rand() % 256),
-          static_cast<unsigned char>(rand() % 256),
-          static_cast<unsigned char>(rand() % 256),
-          255
-        };
-      }
-    }
-    generated = true;
-  }
 
   if (IsKeyPressed(KEY_ESCAPE)) {
     if (IsCursorHidden()) {
@@ -120,7 +106,7 @@ int render() {
     }
 
 
-    UpdateCameraPro(&global::graphics::camera,
+    UpdateCameraPro(&graphics::camera,
             (Vector3){
                 IsKeyDown(KEY_W)*speed - IsKeyDown(KEY_S)*speed,
                 IsKeyDown(KEY_D)*speed - IsKeyDown(KEY_A)*speed,
@@ -131,25 +117,14 @@ int render() {
                 GetMouseDelta().y*0.05f,
                 0.0f
             }, 0);
-
-
-    BeginDrawing();
-    ClearBackground(SKYBLUE);
-
-    BeginMode3D(graphics::camera);
-
-    for (int x = 0; x < 10; x++) {
-      for (int z = 0; z < 10; z++) {
-
-        DrawCube(
-          (Vector3){ static_cast<float>(x) + 0.5f, 0.5f, static_cast<float>(z) + 0.5f },
-          1.0f, 1.0f, 1.0f,
-          cube_colors[x][z]
-        );
-
-      }
-    }
   }
+
+  BeginDrawing();
+  ClearBackground(SKYBLUE);
+
+  BeginMode3D(graphics::camera);
+
+  render_test_cubes();
 
   DrawGrid(100, 1.0f);
   EndMode3D();
@@ -162,6 +137,33 @@ int render() {
   EndDrawing();
 
   return 0;
+}
+
+void create_test_cubes() {
+  for (int x = 0; x < 10; x++) {
+    for (int z = 0; z < 10; z++) {
+      global::cube_colors[x][z] = (Color){
+        static_cast<unsigned char>(rand() % 256),
+        static_cast<unsigned char>(rand() % 256),
+        static_cast<unsigned char>(rand() % 256),
+        255
+      };
+    }
+  }
+}
+
+void render_test_cubes() {
+  for (int x = 0; x < 10; x++) {
+    for (int z = 0; z < 10; z++) {
+
+      DrawCube(
+        (Vector3){ static_cast<float>(x) + 0.5f, 0.5f, static_cast<float>(z) + 0.5f },
+        1.0f, 1.0f, 1.0f,
+        global::cube_colors[x][z]
+      );
+
+    }
+  }
 }
 
 void start_graphics() {

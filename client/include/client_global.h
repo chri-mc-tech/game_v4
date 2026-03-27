@@ -70,6 +70,7 @@ namespace global {
   inline float velocityY = 0.0f;
   inline constexpr float GRAVITY = -9.81f;
   inline bool isGrounded = false;
+  //
 
   inline string input_string;
 
@@ -79,6 +80,11 @@ namespace global {
 
   inline bool chat_open;
   inline bool inv_open;
+
+  // debug
+  static Color cube_colors[10][10];
+  //
+
 }
 
 namespace global::enet {

@@ -16,3 +16,5 @@ void set_status_game(int status);
 void render_players();
 void start_graphics();
 void update_modifier();
+void create_test_cubes();
+void render_test_cubes();
