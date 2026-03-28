@@ -6,6 +6,7 @@
 #include <cryptopp/integer.h>
 #include <enet/enet.h>
 #include <iostream>
+#include <raylib.h>
 
 using std::string;
 
@@ -13,9 +14,7 @@ class Player {
 public:
   string uuid;
   string name;
-  float location_x = 0;
-  float location_y = 0;
-  float location_z = 0;
+  Vector3 location;
 };
 
 Player * get_player_from_uuid(const string& uuid);

@@ -47,7 +47,13 @@ enum debug_menu {
   DEBUG_MENU_ADVANCED
 };
 
-
+class Block {
+public:
+  int x = 0;
+  int y = 0;
+  int z = 0;
+  bool solid = false;
+};
 
 namespace global {
   inline int status_connection = STATUS_CONNECTION_NOT_CONNECTED;
@@ -65,8 +71,17 @@ namespace global {
   inline Player main_player;
   inline int debug_menu;
 
+  inline bool is_third_person = false;
+  inline float player_height = 1.8f; // 1.8
+  inline float player_width = 0.6f; // 0.6
+  inline float camera_height = 1.6f; // 1.6
+
+  inline BoundingBox hitbox;
+
+  inline std::vector<Block> world;
+
   // physics variables
-  inline float speed = 0.002f;
+  inline float speed = 2.0f;
   inline float velocityY = 0.0f;
   inline constexpr float GRAVITY = -9.81f;
   inline bool isGrounded = false;

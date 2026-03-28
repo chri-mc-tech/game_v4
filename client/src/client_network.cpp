@@ -181,9 +181,9 @@ int enet_event_receive(const ENetEvent &enet_event) {
           if (uuid != global::config::uuid) {
             Player* temp_player = get_player_from_uuid(uuid);
             if (temp_player) {
-              temp_player->location_x = stof(x);
-              temp_player->location_y = stof(y);
-              temp_player->location_z = stof(z);
+              temp_player->location.x = stof(x);
+              temp_player->location.y = stof(y);
+              temp_player->location.z = stof(z);
 
               log_debug(x + ", " + y + ", " + z);
             }
@@ -253,9 +253,9 @@ void send_location() {
     shared::network::send_packet(
       global::enet::connected_server_peer,
       PKT_FROM_CLIENT_COORDS,
-      (std::to_string(global::main_player.location_x) + " " +
-       std::to_string(global::main_player.location_y) + " " +
-       std::to_string(global::main_player.location_z)),
+      (std::to_string(global::main_player.location.x) + " " +
+       std::to_string(global::main_player.location.y) + " " +
+       std::to_string(global::main_player.location.z)),
       1, 0);
   }
 }
