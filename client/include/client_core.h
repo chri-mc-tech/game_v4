@@ -23,3 +23,4 @@ int update_camera(double dt);
 void update_player(double dt);
 void draw_player_model();
 void draw_player_hitbox();
+bool check_collision();

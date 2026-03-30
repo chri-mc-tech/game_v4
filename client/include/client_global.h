@@ -96,6 +96,10 @@ namespace global {
   inline bool chat_open;
   inline bool inv_open;
 
+  inline Vector3 last_movement;
+  inline Vector3 next_movement;
+
+
   // debug
   static Color cube_colors[50][50];
   //

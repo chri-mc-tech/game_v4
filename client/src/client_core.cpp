@@ -103,18 +103,29 @@ int update_camera(double dt) {
   if (IsCursorHidden()) {
     float frame_speed = speed * static_cast<float>(dt);
 
-    UpdateCameraPro(&graphics::camera,
-        (Vector3){
-            (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
-            (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
-              (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
-        },
+    if (!check_collision()) {
+      next_movement = {
+        (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
+        (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
+          (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
+      };
+    }
+
+    else {
+      next_movement = Vector3Subtract({0, 0, 0}, last_movement);
+    }
+
+    UpdateCameraPro(&graphics::camera, next_movement,
         (Vector3){GetMouseDelta().x * 0.05f, GetMouseDelta().y * 0.05f, 0.0f},
         0);
 
-    main_player.location = graphics::camera.position;
+    std::cout << last_movement.x << "; " << last_movement.y << "; " << last_movement.z << "; " << "\n";
 
+    main_player.location = graphics::camera.position;
     main_player.location.y -= camera_height;
+
+    last_movement = next_movement;
+
   }
 
   return 0;
@@ -126,7 +137,7 @@ int render() {
   using graphics::camera;
 
   BeginDrawing();
-  ClearBackground(SKYBLUE);
+  ClearBackground({ 30, 31, 108, 255 }); // day: SKYBLUE night: 30, 31, 108
 
   BeginMode3D(camera);
 
@@ -141,29 +152,6 @@ int render() {
 
   DrawBoundingBox(hitbox, BLACK);
 
-
-  bool collision = false;
-
-  for (auto &b : world) {
-    if (!b.solid) continue;
-
-    if (abs(b.x - main_player.location.x) > 2) continue;
-    if (abs(b.y - main_player.location.y) > 3) continue;
-    if (abs(b.z - main_player.location.z) > 2) continue;
-
-    BoundingBox blockBox = {
-      (Vector3){ float(b.x), float(b.y) - 0.5f, float(b.z) },
-      (Vector3){ float(b.x) + 1.0f, float(b.y) + 0.5f, float(b.z) + 1.0f }
-    };
-
-    DrawBoundingBox(blockBox, RED);
-
-    if (CheckCollisionBoxes(hitbox, blockBox)) {
-      collision = true;
-    }
-  }
-
-
   // draw_player_model();
   // draw_player_hitbox();
 
@@ -173,8 +161,8 @@ int render() {
   DrawFPS(10, 10);
   DrawText((std::to_string(camera.position.x).substr(0, 4) + ", " + std::to_string(camera.position.y).substr(0, 4) + ", " + std::to_string(camera.position.z).substr(0, 4)).c_str(), 10, 40, 30, BLACK);
   DrawText((std::to_string(main_player.location.x).substr(0, 4) + ", " + std::to_string(main_player.location.y).substr(0, 4) + ", " + std::to_string(main_player.location.z).substr(0, 4)).c_str(), 10, 70, 30, BLACK);
-  if (collision) {
-    DrawText("COLLISION", 10, 120, 20, RED);
+  if (check_collision()) {
+    DrawText("COLLISION", 10, 120, 30, RED);
   }
 
   EndDrawing();
@@ -186,9 +174,9 @@ void create_test_cubes() {
   for (int x = 0; x < 50; x++) {
     for (int z = 0; z < 50; z++) {
       global::cube_colors[x][z] = (Color){
-        static_cast<unsigned char>(rand() % 256),
-        static_cast<unsigned char>(rand() % 256),
-        static_cast<unsigned char>(rand() % 256),
+        static_cast<unsigned char>(rand() % 100),
+        static_cast<unsigned char>(rand() % 100),
+        static_cast<unsigned char>(rand() % 100),
         255
       };
       Block b;
@@ -225,8 +213,8 @@ void start_graphics() {
   SetWindowMinSize(640, 360);
   SetWindowMaxSize(7680, 4320);
 
-  camera.position = (Vector3){ 0.0f, camera_height + 0.5f, 0.0f };
-  camera.target = (Vector3){ 0.0f, camera_height + 0.5f, 1.0f };
+  camera.position = (Vector3){ 0.0f, camera_height + 0.6f, 0.0f };
+  camera.target = (Vector3){ 0.0f, camera_height + 0.6f, 1.0f };
   camera.up = (Vector3){ 0.0f, 2.0f, 0.0f };
   camera.fovy = 70.0f;
   camera.projection = CAMERA_PERSPECTIVE;
@@ -245,36 +233,27 @@ void draw_player_model() {
 
 }
 
-void draw_player_hitbox() {
+bool check_collision() {
   using namespace global;
 
-  /*
-  float thickness = 0.003f;
-  int layers = 5;
+  for (auto &b : world) {
+    if (!b.solid) continue;
 
-  float step = thickness / layers;
+    if (abs(b.x - main_player.location.x) > 2) continue;
+    if (abs(b.y - main_player.location.y) > 3) continue;
+    if (abs(b.z - main_player.location.z) > 2) continue;
 
-  for (int x = -layers; x <= layers; x++) {
-    for (int z = -layers; z <= layers; z++) {
-
-      Vector3 pos = {
-        main_player.location.x + x * step,
-        main_player.location.y + 0.001f,
-        main_player.location.z + z * step
+    BoundingBox blockBox = {
+      (Vector3){ float(b.x), float(b.y) - 0.5f, float(b.z) },
+      (Vector3){ float(b.x) + 1.0f, float(b.y) + 0.5f, float(b.z) + 1.0f }
     };
 
-      DrawCubeWires(
-          (Vector3){
-              pos.x,
-              pos.y + player_height / 2.0f,
-              pos.z
-          },
-          player_width,
-          player_height,
-          player_width,
-          RED
-      );
+    DrawBoundingBox(blockBox, RED);
+
+    if (CheckCollisionBoxes(hitbox, blockBox)) {
+      return true;
     }
   }
-  */
+  return false;
+
 }
