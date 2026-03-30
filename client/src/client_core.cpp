@@ -46,14 +46,14 @@ int client_run() {
     }
 
     auto now = std::chrono::high_resolution_clock::now();
-    double delta = std::chrono::duration<double>(now - last).count();
+    global::delta_time = std::chrono::duration<double>(now - last).count();
     last = now;
 
-    accumulator += delta;
+    accumulator += global::delta_time;
 
     enet_loop();
-    update_window(delta);
-    update_camera(delta);
+    update_window();
+    update_camera();
     render();
 
     while (accumulator >= TICK_TIME) {
@@ -69,7 +69,7 @@ int client_run() {
 }
 
 
-int update_window(double dt) {
+int update_window() {
   using global::speed;
   using namespace global;
 
@@ -91,17 +91,17 @@ int update_window(double dt) {
   if (IsCursorHidden()) {
     float wheel = GetMouseWheelMove();
     if (wheel != 0) {
-      speed += (wheel * speed * 30.0f) * static_cast<float>(dt);
+      speed += (wheel * speed * 30.0f) * static_cast<float>(delta_time);
     }
   }
   return 0;
 }
 
-int update_camera(double dt) {
+int update_camera() {
   using namespace global;
 
   if (IsCursorHidden()) {
-    float frame_speed = speed * static_cast<float>(dt);
+    float frame_speed = speed * static_cast<float>(delta_time);
 
     if (!check_collision()) {
       next_movement = {

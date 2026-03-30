@@ -96,6 +96,8 @@ namespace global {
   inline bool chat_open;
   inline bool inv_open;
 
+  inline double delta_time;
+
   inline Vector3 last_movement;
   inline Vector3 next_movement;
 
