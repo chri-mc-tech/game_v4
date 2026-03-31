@@ -39,6 +39,8 @@ int client_run() {
 
   create_test_cubes();
 
+  global::graphics::font = LoadFont("Archivo-SemiBold.ttf");
+
   while (global::running) {
     if (WindowShouldClose()) {
       global::running = false;
@@ -179,6 +181,8 @@ void rendering_menu() {
     case STATUS_MENU_MAIN_MENU: {
       DrawRectangleRounded(singleplayer_button, 0.5, 10, BLUE);
       DrawRectangleRounded(multiplayer_button, 0.5, 10, BLUE);
+
+      // DrawTextEx();
 
       DrawText("singleplayer", window_width / 2 - 120,
         window_height / 2 - 70,

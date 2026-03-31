@@ -119,6 +119,8 @@ namespace global::graphics {
   inline float render_scale_x = 1.0f;
   inline float render_scale_y = 1.0f;
 
+  inline Font font;
+
   inline Camera3D camera = { 0 };
 }
 
