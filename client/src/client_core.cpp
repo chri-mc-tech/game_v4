@@ -78,20 +78,22 @@ int update_window() {
     graphics::window_height = GetScreenHeight();
   }
 
+  if (global::status_game == STATUS_GAME_PLAYING) {
+    if (IsKeyPressed(KEY_ESCAPE)) {
+      if (IsCursorHidden()) {
+        EnableCursor();
+      }
+      else {
+        DisableCursor();
+      }
+    }
 
-  if (IsKeyPressed(KEY_ESCAPE)) {
+
     if (IsCursorHidden()) {
-      EnableCursor();
-    }
-    else {
-      DisableCursor();
-    }
-  }
-
-  if (IsCursorHidden()) {
-    float wheel = GetMouseWheelMove();
-    if (wheel != 0) {
-      speed += (wheel * speed * 30.0f) * static_cast<float>(delta_time);
+      float wheel = GetMouseWheelMove();
+      if (wheel != 0) {
+        speed += (wheel * speed * 30.0f) * static_cast<float>(delta_time);
+      }
     }
   }
   return 0;
@@ -100,32 +102,32 @@ int update_window() {
 int update_camera() {
   using namespace global;
 
-  if (IsCursorHidden()) {
-    float frame_speed = speed * static_cast<float>(delta_time);
+  if (global::status_game == STATUS_GAME_PLAYING) {
+    if (IsCursorHidden()) {
+      float frame_speed = speed * static_cast<float>(delta_time);
 
-    if (!check_collision()) {
-      next_movement = {
-        (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
-        (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
-          (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
-      };
+      if (!check_collision()) {
+        next_movement = {
+          (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
+          (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
+            (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
+        };
+      }
+
+      else {
+        next_movement = Vector3Subtract({0, 0, 0}, last_movement);
+      }
+
+      UpdateCameraPro(&graphics::camera, next_movement,
+          (Vector3){GetMouseDelta().x * 0.05f, GetMouseDelta().y * 0.05f, 0.0f},
+          0);
+
+      main_player.location = graphics::camera.position;
+      main_player.location.y -= camera_height;
+
+      last_movement = next_movement;
+
     }
-
-    else {
-      next_movement = Vector3Subtract({0, 0, 0}, last_movement);
-    }
-
-    UpdateCameraPro(&graphics::camera, next_movement,
-        (Vector3){GetMouseDelta().x * 0.05f, GetMouseDelta().y * 0.05f, 0.0f},
-        0);
-
-    std::cout << last_movement.x << "; " << last_movement.y << "; " << last_movement.z << "; " << "\n";
-
-    main_player.location = graphics::camera.position;
-    main_player.location.y -= camera_height;
-
-    last_movement = next_movement;
-
   }
 
   return 0;
@@ -137,46 +139,74 @@ int render() {
   using graphics::camera;
 
   BeginDrawing();
+
   ClearBackground({ 30, 31, 108, 255 }); // day: SKYBLUE night: 30, 31, 108
-
-  BeginMode3D(camera);
-
-  render_test_cubes();
-
-  // std::cout << std::to_string(main_player.location.x) + ", " + std::to_string(main_player.location.y) + ", " + std::to_string(main_player.location.z) + "\n";
-
-  hitbox = {
-    Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
-    Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
-  };
-
-  DrawBoundingBox(hitbox, BLACK);
-
-  // draw_player_model();
-  // draw_player_hitbox();
-
-  DrawGrid(100, 1.0f);
-  EndMode3D();
-
-  DrawFPS(10, 10);
-  DrawText((std::to_string(camera.position.x).substr(0, 4) + ", " + std::to_string(camera.position.y).substr(0, 4) + ", " + std::to_string(camera.position.z).substr(0, 4)).c_str(), 10, 40, 30, BLACK);
-  DrawText((std::to_string(main_player.location.x).substr(0, 4) + ", " + std::to_string(main_player.location.y).substr(0, 4) + ", " + std::to_string(main_player.location.z).substr(0, 4)).c_str(), 10, 70, 30, BLACK);
-  if (check_collision()) {
-    DrawText("COLLISION", 10, 120, 30, RED);
-  }
+  rendering_3D();
+  rendering_menu();
 
   EndDrawing();
 
   return 0;
 }
 
+
+void rendering_menu() {
+  using namespace global;
+  using namespace global::graphics;
+
+  DrawFPS(10, 10);
+  /*
+  DrawText((std::to_string(main_player.location.x).substr(0, 4) + ", " + std::to_string(main_player.location.y).substr(0, 4) + ", " + std::to_string(main_player.location.z).substr(0, 4)).c_str(), 10, 70, 30, BLACK);
+  if (check_collision()) {
+    DrawText("COLLISION", 10, 120, 30, RED);
+  }
+  */
+
+  Rectangle test_button = {
+    static_cast<float>(window_width)/2, static_cast<float>(window_height)/2,
+    100, 40
+  };
+
+  switch (global::status_menu) {
+    case STATUS_MENU_MAIN_MENU: {
+      if (CheckCollisionPointRec(GetMousePosition(), test_button)) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+          std::cout << "test\n";
+        }
+      }
+    }
+  }
+}
+
+void rendering_3D() {
+  using namespace global;
+  using graphics::camera;
+  if (global::status_game == STATUS_GAME_PLAYING) {
+    BeginMode3D(camera);
+
+    render_test_cubes();
+
+    hitbox = {
+      Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
+      Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
+    };
+
+    DrawBoundingBox(hitbox, RED);
+
+    DrawGrid(100, 1.0f);
+    EndMode3D();
+  }
+
+}
+
+
 void create_test_cubes() {
   for (int x = 0; x < 50; x++) {
     for (int z = 0; z < 50; z++) {
       global::cube_colors[x][z] = (Color){
-        static_cast<unsigned char>(rand() % 100),
-        static_cast<unsigned char>(rand() % 100),
-        static_cast<unsigned char>(rand() % 100),
+        static_cast<unsigned char>(rand() % 10),
+        static_cast<unsigned char>(rand() % 30),
+        static_cast<unsigned char>(rand() % 200),
         255
       };
       Block b;
@@ -221,7 +251,8 @@ void start_graphics() {
 
   SetExitKey(KEY_NULL);
 
-  DisableCursor();
+  EnableCursor();
+
 
 }
 

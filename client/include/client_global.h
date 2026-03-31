@@ -19,18 +19,16 @@ using CryptoPP::SecByteBlock;
 
 enum status_connection {
   STATUS_CONNECTION_NOT_CONNECTED,
-  STATUS_CONNECTION_CONNECTING,
   STATUS_CONNECTION_CONNECTED,
-  STATUS_CONNECTION_ENCRYPTING,
   STATUS_CONNECTION_ENCRYPTED,
 };
 
 enum status_menu {
   STATUS_MENU_WAITING_USER_INPUT_NAME,
+  STATUS_MENU_MAIN_MENU,
   STATUS_MENU_WAITING_USER_INPUT_IP,
   STATUS_MENU_CONNECTING,
-  STATUS_MENU_WAITING_USER_INPUT_REGISTER_PASSWORD,
-  STATUS_MENU_WAITING_USER_INPUT_LOGIN_PASSWORD,
+  STATUS_MENU_WAITING_USER_INPUT_PASSWORD,
   STATUS_MENU_IN_GAME,
   STATUS_MENU_DISCONNECTED_FROM_SERVER,
 };
@@ -71,7 +69,7 @@ namespace global {
   inline Player main_player;
   inline int debug_menu;
 
-  inline bool is_third_person = false;
+  // inline bool is_third_person = false;
   inline float player_height = 1.8f; // 1.8
   inline float player_width = 0.6f; // 0.6
   inline float camera_height = 1.6f; // 1.6

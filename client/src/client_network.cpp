@@ -54,8 +54,6 @@ int enet_event_receive(const ENetEvent &enet_event) {
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
       pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
-      global::status_connection = STATUS_CONNECTION_ENCRYPTING;
-
       global::client_private_key = shared::crypto::create_private_key();
       global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
       global::server_public_key = Integer(pkt_data_string.c_str());
@@ -77,11 +75,11 @@ int enet_event_receive(const ENetEvent &enet_event) {
   else if (enet_event.channelID == 1) {
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_ASK_REGISTER_PASSWORD))) {
-      global::status_menu = STATUS_MENU_WAITING_USER_INPUT_REGISTER_PASSWORD;
+      global::status_menu = STATUS_MENU_WAITING_USER_INPUT_PASSWORD;
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_ASK_LOGIN_PASSWORD))) {
-      global::status_menu = STATUS_MENU_WAITING_USER_INPUT_LOGIN_PASSWORD;
+      global::status_menu = STATUS_MENU_WAITING_USER_INPUT_PASSWORD;
     }
 
     if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_CONFIRM_REGISTER_PASSWORD))) {
@@ -216,7 +214,6 @@ int enet_event_disconnected(const ENetEvent &enet_event) {
 }
 
 int connect_to_server(const string& ip, const string& port) {
-  global::status_connection = STATUS_CONNECTION_CONNECTING;
   global::status_menu = STATUS_MENU_CONNECTING;
 
   ENetAddress server_to_connect;
@@ -233,7 +230,7 @@ int connect_to_server(const string& ip, const string& port) {
 void wait_server_connection() {
   std::this_thread::sleep_for(std::chrono::seconds(6));
   if (!global::enet::is_connected) {
-    if (global::status_connection == STATUS_CONNECTION_CONNECTING) {
+    if (global::status_connection == STATUS_MENU_CONNECTING) {
       global::status_menu = STATUS_MENU_DISCONNECTED_FROM_SERVER;
       global::status_connection = STATUS_CONNECTION_NOT_CONNECTED;
       enet_peer_reset(global::enet::connected_server_peer);

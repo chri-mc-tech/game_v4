@@ -24,3 +24,5 @@ void update_player();
 void draw_player_model();
 void draw_player_hitbox();
 bool check_collision();
+void rendering_menu();
+void rendering_3D();
