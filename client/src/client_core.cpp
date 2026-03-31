@@ -140,7 +140,8 @@ int render() {
 
   BeginDrawing();
 
-  ClearBackground({ 30, 31, 108, 255 }); // day: SKYBLUE night: 30, 31, 108
+  ClearBackground(BLACK);
+  // ClearBackground({ 30, 31, 108, 255 }); // day: SKYBLUE night: 30, 31, 108
   rendering_3D();
   rendering_menu();
 
@@ -162,14 +163,28 @@ void rendering_menu() {
   }
   */
 
-  Rectangle test_button = {
-    static_cast<float>(window_width)/2, static_cast<float>(window_height)/2,
-    100, 40
+  Rectangle singleplayer_button = {
+    (static_cast<float>(window_width) / 2) - 150, (static_cast<float>(window_height) / 2) - 70,
+    300, 40
   };
+
+  Rectangle multiplayer_button = {
+    (static_cast<float>(window_width) / 2) - 150, (static_cast<float>(window_height) / 2) - 20,
+    300, 40
+  };
+
+  DrawText(std::to_string(global::status_menu).c_str(), 10, 30, 20, GREEN);
 
   switch (global::status_menu) {
     case STATUS_MENU_MAIN_MENU: {
-      if (CheckCollisionPointRec(GetMousePosition(), test_button)) {
+      DrawRectangleRounded(singleplayer_button, 0.5, 10, BLUE);
+      DrawRectangleRounded(multiplayer_button, 0.5, 10, BLUE);
+
+      DrawText("singleplayer", window_width / 2 - 120,
+        window_height / 2 - 70,
+        30, BLACK);
+
+      if (CheckCollisionPointRec(GetMousePosition(), singleplayer_button)) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
           std::cout << "test\n";
         }
