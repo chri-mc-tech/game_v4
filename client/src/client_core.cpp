@@ -41,6 +41,8 @@ int client_run() {
 
   global::graphics::font = LoadFontEx("Archivo-SemiBold.ttf", 64, nullptr, 0);
 
+  ui::create_all_buttons();
+
   while (global::running) {
     if (WindowShouldClose()) {
       global::running = false;
@@ -185,27 +187,35 @@ void rendering_menu() {
   }
   */
 
-  Rectangle singleplayer_button = {
-    (static_cast<float>(window_width) / 2) - 150, (static_cast<float>(window_height) / 2) - 70,
-    300, 40
-  };
+  DrawText(std::to_string(global::status_menu).c_str(), 10, 30, 20, GREEN);
 
-  Rectangle multiplayer_button = {
+  //------------------------------
+  // BUTTON TEST
+  //------------------------------
+
+  /*
+  Rectangle singleplayer_button = {
     (static_cast<float>(window_width) / 2) - 150, (static_cast<float>(window_height) / 2) - 20,
     300, 40
   };
 
-  DrawText(std::to_string(global::status_menu).c_str(), 10, 30, 20, GREEN);
+  Rectangle multiplayer_button = {
+    (static_cast<float>(window_width) / 2) - 150, (static_cast<float>(window_height) / 2) + 40,
+    300, 40
+  };
 
+  const char* text = "Singleplayer";
+
+  Vector2 text_size = MeasureTextEx(font, text, 32, 0.5);
+*/
   switch (global::status_menu) {
     case STATUS_MENU_MAIN_MENU: {
-      DrawRectangleRounded(singleplayer_button, 0.5, 10, BLUE);
-      DrawRectangleRounded(multiplayer_button, 0.5, 10, BLUE);
 
-      DrawTextEx(font, "singleplayer", {static_cast<float>(window_width) / 2 - 120,
-        static_cast<float>(window_height) / 2 - 70}, 32, 2, WHITE);
 
-      if (CheckCollisionPointRec(GetMousePosition(), singleplayer_button)) {
+      ui::button_singleplayer.render();
+      ui::button_multiplayer.render();
+
+      if (CheckCollisionPointRec(GetMousePosition(), ui::button_singleplayer.rect)) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
           std::cout << "test\n";
         }
