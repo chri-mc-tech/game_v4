@@ -39,7 +39,7 @@ int client_run() {
 
   create_test_cubes();
 
-  global::graphics::font = LoadFont("Archivo-SemiBold.ttf");
+  global::graphics::font = LoadFontEx("Archivo-SemiBold.ttf", 64, nullptr, 0);
 
   while (global::running) {
     if (WindowShouldClose()) {
@@ -152,6 +152,26 @@ int render() {
   return 0;
 }
 
+void rendering_3D() {
+  using namespace global;
+  using graphics::camera;
+  if (global::status_game == STATUS_GAME_PLAYING) {
+    BeginMode3D(camera);
+
+    render_test_cubes();
+
+    hitbox = {
+      Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
+      Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
+    };
+
+    DrawBoundingBox(hitbox, RED);
+
+    DrawGrid(100, 1.0f);
+    EndMode3D();
+  }
+
+}
 
 void rendering_menu() {
   using namespace global;
@@ -182,11 +202,8 @@ void rendering_menu() {
       DrawRectangleRounded(singleplayer_button, 0.5, 10, BLUE);
       DrawRectangleRounded(multiplayer_button, 0.5, 10, BLUE);
 
-      // DrawTextEx();
-
-      DrawText("singleplayer", window_width / 2 - 120,
-        window_height / 2 - 70,
-        30, BLACK);
+      DrawTextEx(font, "singleplayer", {static_cast<float>(window_width) / 2 - 120,
+        static_cast<float>(window_height) / 2 - 70}, 32, 2, WHITE);
 
       if (CheckCollisionPointRec(GetMousePosition(), singleplayer_button)) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
@@ -196,28 +213,6 @@ void rendering_menu() {
     }
   }
 }
-
-void rendering_3D() {
-  using namespace global;
-  using graphics::camera;
-  if (global::status_game == STATUS_GAME_PLAYING) {
-    BeginMode3D(camera);
-
-    render_test_cubes();
-
-    hitbox = {
-      Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
-      Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
-    };
-
-    DrawBoundingBox(hitbox, RED);
-
-    DrawGrid(100, 1.0f);
-    EndMode3D();
-  }
-
-}
-
 
 void create_test_cubes() {
   for (int x = 0; x < 50; x++) {
