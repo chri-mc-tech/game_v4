@@ -9,6 +9,10 @@ namespace ui {
     font_size = t_font_size;
   }
 
+  void Button::update(int t_x, int t_y, int t_width, int t_height) {
+    rect = {static_cast<float>(t_x), static_cast<float>(t_y), static_cast<float>(t_width), static_cast<float>(t_height)};
+  }
+
   void Button::render() {
     DrawRectangleRounded(rect, 0.5, 10, GRAY);
     DrawTextEx(global::graphics::font, text,
@@ -31,6 +35,18 @@ namespace ui {
     button_multiplayer.create(window_width/2 - 100,
     window_height/2,
     200, 40, "Multiplayer", 32);
+
+    button_direct_connect.create(window_width - 300,
+    window_height - 60,
+    250, 40, "Direct connect", 32);
+
+    button_add_server.create(50,
+    window_height - 60,
+    250, 40, "Add server", 32);
+
+    button_remove_server.create(350,
+    window_height - 60,
+    250, 40, "Remove server", 32);
 
 
   }

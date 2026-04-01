@@ -211,15 +211,34 @@ void rendering_menu() {
   switch (global::status_menu) {
     case STATUS_MENU_MAIN_MENU: {
 
-
       ui::button_singleplayer.render();
       ui::button_multiplayer.render();
 
       if (CheckCollisionPointRec(GetMousePosition(), ui::button_singleplayer.rect)) {
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-          std::cout << "test\n";
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         }
       }
+      if (CheckCollisionPointRec(GetMousePosition(), ui::button_multiplayer.rect)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+          global::status_menu = STATUS_MENU_MULTIPLAYER;
+
+        }
+      }
+      break;
+    }
+
+    case STATUS_MENU_MULTIPLAYER: {
+      ui::button_direct_connect.render();
+      ui::button_add_server.render();
+      ui::button_remove_server.render();
+
+      if (CheckCollisionPointRec(GetMousePosition(), ui::button_multiplayer.rect)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+          global::status_menu = STATUS_MENU_DIRECT_CONNECT;
+
+        }
+      }
+      break;
     }
   }
 }
