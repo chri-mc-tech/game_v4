@@ -221,7 +221,7 @@ void rendering_menu() {
       if (CheckCollisionPointRec(GetMousePosition(), ui::button_multiplayer.rect)) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
           global::status_menu = STATUS_MENU_MULTIPLAYER;
-
+\
         }
       }
       break;
