@@ -6,8 +6,15 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <winsock2.h>
-#include <windows.h>
+#include <ctime>
+
+#ifdef _WIN32
+    #include <winsock2.h>
+    #include <windows.h>
+#else
+    #include <unistd.h>
+#endif
+
 #include "client_global.h"
 #include "shared_utils.h"
 
@@ -20,13 +27,20 @@
 using std::cout;
 using std::endl;
 using std::ofstream;
+using std::string;
 using namespace shared::utils;
 
 void create_log_file() {
   using std::to_string;
   auto t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  std::tm tm; localtime_s(&tm, &t);
-  
+  std::tm tm;
+
+#ifdef _WIN32
+  localtime_s(&tm, &t);
+#else
+  localtime_r(&t, &tm);
+#endif
+
   std::filesystem::create_directory("logs");
 
   string log_file_name =
@@ -40,31 +54,26 @@ void create_log_file() {
 
   global::log_file.open(log_file_name);
   global::log_file << "[" << get_current_time() << " INFO]: " << "CLIENT LOG FILE" << endl;
-  
 }
 
 void console_init() {
+#ifdef _WIN32
   AllocConsole();
-
   FILE* f;
   freopen_s(&f, "CONOUT$", "w", stdout);
   cout.clear();
 
   HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-
   DWORD mode = 0;
   GetConsoleMode(handle, &mode);
-
   mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
   SetConsoleMode(handle, mode);
-
+#endif
   cout << "CLIENT DEBUG CONSOLE" << endl;
 }
 
-
 void log_info(const string& text) {
   global::log_file << "[" << get_current_time() << " INFO]: " << text << endl;
-
   if (global::config::debug_console) {
     cout << "[" << get_current_time() << COLOR_GREEN " INFO" << COLOR_RESET << "]: " << text << COLOR_RESET << endl;
   }
@@ -72,7 +81,6 @@ void log_info(const string& text) {
 
 void log_warn(const string& text) {
   global::log_file << "[" << get_current_time() << " WARN]: " << text << endl;
-
   if (global::config::debug_console) {
     cout << "[" << get_current_time() << COLOR_YELLOW " WARN" << COLOR_RESET << "]: " << COLOR_YELLOW << text << COLOR_RESET << endl;
   }
@@ -93,4 +101,3 @@ void log_debug(const string& text) {
     cout << "[" << get_current_time() << COLOR_CYAN " DEBUG" << COLOR_RESET << "]: " << COLOR_CYAN << text << COLOR_RESET << endl;
   }
 }
-
