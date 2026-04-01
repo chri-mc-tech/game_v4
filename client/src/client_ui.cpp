@@ -9,8 +9,8 @@ namespace ui {
     font_size = t_font_size;
   }
 
-  void Button::update(int t_x, int t_y, int t_width, int t_height) {
-    rect = {static_cast<float>(t_x), static_cast<float>(t_y), static_cast<float>(t_width), static_cast<float>(t_height)};
+  void Button::update(int t_x, int t_y) {
+    rect = {static_cast<float>(t_x), static_cast<float>(t_y), rect.width, rect.height};
   }
 
   void Button::render() {
@@ -36,10 +36,6 @@ namespace ui {
     window_height/2,
     200, 40, "Multiplayer", 32);
 
-    button_direct_connect.create(window_width - 300,
-    window_height - 60,
-    250, 40, "Direct connect", 32);
-
     button_add_server.create(50,
     window_height - 60,
     250, 40, "Add server", 32);
@@ -48,6 +44,24 @@ namespace ui {
     window_height - 60,
     250, 40, "Remove server", 32);
 
+    button_direct_connect.create(window_width - 300,
+    window_height - 60,
+    250, 40, "Direct connect", 32);
+
+    button_continue.create(window_width - 300,
+    window_height - 60,
+    250, 40, "Continue", 32);
 
   }
+
+  void draw_centered_text(const string &text, int x, int y, Color color) {
+    using namespace global::graphics;
+
+    Vector2 size = MeasureTextEx(font, text.c_str(), 32, 0.5);
+
+    DrawTextEx(font, text.c_str(),
+  {x - (size.x / 2), y - (size.y / 2)},
+  32, 0.5, color);
+  }
+
 }

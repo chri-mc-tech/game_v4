@@ -211,6 +211,11 @@ void rendering_menu() {
   switch (global::status_menu) {
     case STATUS_MENU_MAIN_MENU: {
 
+      ui::button_singleplayer.update(window_width/2 - 100,
+      window_height/2 - 60);
+      ui::button_multiplayer.update(window_width/2 - 100,
+    window_height/2);
+
       ui::button_singleplayer.render();
       ui::button_multiplayer.render();
 
@@ -228,18 +233,63 @@ void rendering_menu() {
     }
 
     case STATUS_MENU_MULTIPLAYER: {
+      ui::button_add_server.update(50,
+    window_height - 60);
+
+      ui::button_remove_server.update(350,
+    window_height - 60);
+
+      ui::button_direct_connect.update(window_width - 300,
+    window_height - 60);
+
+
       ui::button_direct_connect.render();
       ui::button_add_server.render();
       ui::button_remove_server.render();
 
-      if (CheckCollisionPointRec(GetMousePosition(), ui::button_multiplayer.rect)) {
+      if (CheckCollisionPointRec(GetMousePosition(), ui::button_direct_connect.rect)) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
           global::status_menu = STATUS_MENU_DIRECT_CONNECT;
-
         }
       }
       break;
     }
+    case STATUS_MENU_DIRECT_CONNECT: {
+      auto char_pressed = GetCharPressed();
+      auto key_pressed = GetKeyPressed();
+
+      if (key_pressed == KEY_BACKSPACE) {
+        if (!input_string.empty()) {
+          input_string.pop_back();
+        }
+      }
+
+      if (char_pressed != 0) {
+          input_string += char_pressed;
+      }
+      ui::draw_centered_text("Server IP:",
+        static_cast<float>(window_width)/2, static_cast<float>(window_height)/2 - 100,
+        WHITE);
+
+      ui::draw_centered_text(input_string.c_str(),
+        static_cast<float>(window_width)/2, static_cast<float>(window_height)/2,
+        WHITE);
+
+      ui::button_continue.update(window_width - 300,
+      window_height - 60);
+
+      ui::button_continue.render();
+
+      if (CheckCollisionPointRec(GetMousePosition(), ui::button_continue.rect)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+          global::status_menu = STATUS_MENU_CONNECTING;
+        }
+      }
+
+      break;
+    }
+
+
   }
 }
 
