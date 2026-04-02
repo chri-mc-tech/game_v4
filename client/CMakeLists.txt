@@ -17,11 +17,5 @@ add_executable(client WIN32
         include/client_logger.h
 )
 
-target_link_options(client PRIVATE
-        -static
-        -static-libgcc
-        -static-libstdc++
-)
-
 target_include_directories(client PRIVATE include)
 target_link_libraries(client PRIVATE shared)

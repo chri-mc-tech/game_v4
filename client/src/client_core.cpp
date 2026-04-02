@@ -39,6 +39,10 @@ int client_run() {
 
   create_test_cubes();
 
+  global::graphics::font = LoadFontEx("Archivo-SemiBold.ttf", 64, nullptr, 0);
+
+  ui::create_all_buttons();
+
   while (global::running) {
     if (WindowShouldClose()) {
       global::running = false;
@@ -78,20 +82,22 @@ int update_window() {
     graphics::window_height = GetScreenHeight();
   }
 
+  if (global::status_game == STATUS_GAME_PLAYING) {
+    if (IsKeyPressed(KEY_ESCAPE)) {
+      if (IsCursorHidden()) {
+        EnableCursor();
+      }
+      else {
+        DisableCursor();
+      }
+    }
 
-  if (IsKeyPressed(KEY_ESCAPE)) {
+
     if (IsCursorHidden()) {
-      EnableCursor();
-    }
-    else {
-      DisableCursor();
-    }
-  }
-
-  if (IsCursorHidden()) {
-    float wheel = GetMouseWheelMove();
-    if (wheel != 0) {
-      speed += (wheel * speed * 30.0f) * static_cast<float>(delta_time);
+      float wheel = GetMouseWheelMove();
+      if (wheel != 0) {
+        speed += (wheel * speed * 30.0f) * static_cast<float>(delta_time);
+      }
     }
   }
   return 0;
@@ -100,32 +106,32 @@ int update_window() {
 int update_camera() {
   using namespace global;
 
-  if (IsCursorHidden()) {
-    float frame_speed = speed * static_cast<float>(delta_time);
+  if (global::status_game == STATUS_GAME_PLAYING) {
+    if (IsCursorHidden()) {
+      float frame_speed = speed * static_cast<float>(delta_time);
 
-    if (!check_collision()) {
-      next_movement = {
-        (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
-        (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
-        (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
-      };
+      if (!check_collision()) {
+        next_movement = {
+          (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
+          (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
+            (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
+        };
+      }
+
+      else {
+        next_movement = Vector3Subtract({0, 0, 0}, last_movement);
+      }
+
+      UpdateCameraPro(&graphics::camera, next_movement,
+          (Vector3){GetMouseDelta().x * 0.05f, GetMouseDelta().y * 0.05f, 0.0f},
+          0);
+
+      main_player.location = graphics::camera.position;
+      main_player.location.y -= camera_height;
+
+      last_movement = next_movement;
+
     }
-
-    else {
-      next_movement = Vector3Subtract({0, 0, 0}, last_movement);
-    }
-
-    UpdateCameraPro(&graphics::camera, next_movement,
-        (Vector3){GetMouseDelta().x * 0.05f, GetMouseDelta().y * 0.05f, 0.0f},
-        0);
-
-    std::cout << last_movement.x << "; " << last_movement.y << "; " << last_movement.z << "; " << "\n";
-
-    main_player.location = graphics::camera.position;
-    main_player.location.y -= camera_height;
-
-    last_movement = next_movement;
-
   }
 
   return 0;
@@ -137,46 +143,163 @@ int render() {
   using graphics::camera;
 
   BeginDrawing();
-  ClearBackground({ 30, 31, 108, 255 }); // day: SKYBLUE night: 30, 31, 108
 
-  BeginMode3D(camera);
-
-  render_test_cubes();
-
-  // std::cout << std::to_string(main_player.location.x) + ", " + std::to_string(main_player.location.y) + ", " + std::to_string(main_player.location.z) + "\n";
-
-  hitbox = {
-    Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
-    Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
-  };
-
-  DrawBoundingBox(hitbox, BLACK);
-
-  // draw_player_model();
-  // draw_player_hitbox();
-
-  DrawGrid(100, 1.0f);
-  EndMode3D();
-
-  DrawFPS(10, 10);
-  DrawText((std::to_string(camera.position.x).substr(0, 4) + ", " + std::to_string(camera.position.y).substr(0, 4) + ", " + std::to_string(camera.position.z).substr(0, 4)).c_str(), 10, 40, 30, BLACK);
-  DrawText((std::to_string(main_player.location.x).substr(0, 4) + ", " + std::to_string(main_player.location.y).substr(0, 4) + ", " + std::to_string(main_player.location.z).substr(0, 4)).c_str(), 10, 70, 30, BLACK);
-  if (check_collision()) {
-    DrawText("COLLISION", 10, 120, 30, RED);
-  }
+  ClearBackground(BLACK);
+  // ClearBackground({ 30, 31, 108, 255 }); // day: SKYBLUE night: 30, 31, 108
+  rendering_3D();
+  rendering_menu();
 
   EndDrawing();
 
   return 0;
 }
 
+void rendering_3D() {
+  using namespace global;
+  using graphics::camera;
+  if (global::status_game == STATUS_GAME_PLAYING) {
+    BeginMode3D(camera);
+
+    render_test_cubes();
+
+    hitbox = {
+      Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
+      Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
+    };
+
+    DrawBoundingBox(hitbox, RED);
+
+    DrawGrid(100, 1.0f);
+    EndMode3D();
+  }
+
+}
+
+void rendering_menu() {
+  using namespace global;
+  using namespace global::graphics;
+
+  DrawFPS(10, 10);
+  /*
+  DrawText((std::to_string(main_player.location.x).substr(0, 4) + ", " + std::to_string(main_player.location.y).substr(0, 4) + ", " + std::to_string(main_player.location.z).substr(0, 4)).c_str(), 10, 70, 30, BLACK);
+  if (check_collision()) {
+    DrawText("COLLISION", 10, 120, 30, RED);
+  }
+  */
+
+  DrawText(std::to_string(global::status_menu).c_str(), 10, 30, 20, GREEN);
+
+  //------------------------------
+  // BUTTON TEST
+  //------------------------------
+
+  /*
+  Rectangle singleplayer_button = {
+    (static_cast<float>(window_width) / 2) - 150, (static_cast<float>(window_height) / 2) - 20,
+    300, 40
+  };
+
+  Rectangle multiplayer_button = {
+    (static_cast<float>(window_width) / 2) - 150, (static_cast<float>(window_height) / 2) + 40,
+    300, 40
+  };
+
+  const char* text = "Singleplayer";
+
+  Vector2 text_size = MeasureTextEx(font, text, 32, 0.5);
+*/
+  switch (global::status_menu) {
+    case STATUS_MENU_MAIN_MENU: {
+
+      ui::button_singleplayer.update(window_width/2 - 100,
+      window_height/2 - 60);
+      ui::button_multiplayer.update(window_width/2 - 100,
+    window_height/2);
+
+      ui::button_singleplayer.render();
+      ui::button_multiplayer.render();
+
+      if (CheckCollisionPointRec(GetMousePosition(), ui::button_singleplayer.rect)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        }
+      }
+      if (CheckCollisionPointRec(GetMousePosition(), ui::button_multiplayer.rect)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+          global::status_menu = STATUS_MENU_MULTIPLAYER;
+\
+        }
+      }
+      break;
+    }
+
+    case STATUS_MENU_MULTIPLAYER: {
+      ui::button_add_server.update(50,
+    window_height - 60);
+
+      ui::button_remove_server.update(350,
+    window_height - 60);
+
+      ui::button_direct_connect.update(window_width - 300,
+    window_height - 60);
+
+
+      ui::button_direct_connect.render();
+      ui::button_add_server.render();
+      ui::button_remove_server.render();
+
+      if (CheckCollisionPointRec(GetMousePosition(), ui::button_direct_connect.rect)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+          global::status_menu = STATUS_MENU_DIRECT_CONNECT;
+        }
+      }
+      break;
+    }
+    case STATUS_MENU_DIRECT_CONNECT: {
+      auto char_pressed = GetCharPressed();
+      auto key_pressed = GetKeyPressed();
+
+      if (key_pressed == KEY_BACKSPACE) {
+        if (!input_string.empty()) {
+          input_string.pop_back();
+        }
+      }
+
+      if (char_pressed != 0) {
+          input_string += char_pressed;
+      }
+      ui::draw_centered_text("Server IP:",
+        static_cast<float>(window_width)/2, static_cast<float>(window_height)/2 - 100,
+        WHITE);
+
+      ui::draw_centered_text(input_string.c_str(),
+        static_cast<float>(window_width)/2, static_cast<float>(window_height)/2,
+        WHITE);
+
+      ui::button_continue.update(window_width - 300,
+      window_height - 60);
+
+      ui::button_continue.render();
+
+      if (CheckCollisionPointRec(GetMousePosition(), ui::button_continue.rect)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+          global::status_menu = STATUS_MENU_CONNECTING;
+        }
+      }
+
+      break;
+    }
+
+
+  }
+}
+
 void create_test_cubes() {
   for (int x = 0; x < 50; x++) {
     for (int z = 0; z < 50; z++) {
       global::cube_colors[x][z] = (Color){
-        static_cast<unsigned char>(rand() % 100),
-        static_cast<unsigned char>(rand() % 100),
-        static_cast<unsigned char>(rand() % 100),
+        static_cast<unsigned char>(rand() % 10),
+        static_cast<unsigned char>(rand() % 30),
+        static_cast<unsigned char>(rand() % 200),
         255
       };
       Block b;
@@ -221,7 +344,8 @@ void start_graphics() {
 
   SetExitKey(KEY_NULL);
 
-  DisableCursor();
+  EnableCursor();
+
 
 }
 
