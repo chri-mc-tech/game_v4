@@ -26,3 +26,4 @@ void draw_player_hitbox();
 bool check_collision();
 void rendering_menu();
 void rendering_3D();
+void get_keyboard_input();

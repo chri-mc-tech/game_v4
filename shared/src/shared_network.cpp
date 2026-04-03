@@ -31,4 +31,8 @@ namespace shared::network {
       return false;
     }
   }
+
+  int get_pkt_type(const string& pkt_string) {
+    return stoi(pkt_string.substr(pkt_string.find('[') + 1, pkt_string.find(']') - pkt_string.find('[') - 1));
+  }
 }

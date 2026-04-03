@@ -9,9 +9,8 @@ namespace ui {
     const char *text = nullptr;
     int font_size = 0;
     Vector2 text_size = {};
-    void create(int t_x, int t_y, int t_width, int t_height, const char * t_text, int t_font_size);
-    void render();
-    void update(int t_x, int t_y);
+    void create(int t_width, int t_height, const char *t_text, int t_font_size);
+    void render(int t_x, int t_y);
   };
 
   void create_all_buttons();

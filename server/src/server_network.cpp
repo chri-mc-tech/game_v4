@@ -106,12 +106,13 @@ void enet_event_receive(const ENetEvent &enet_event) {
         YAML::Node player_file = YAML::LoadFile(file_string);
         if (player_file["password_hash"].as<string>().empty()) {
           log_debug("player still NOT registered");
-          shared::network::send_packet(temp_player->peer, PKT_FROM_SERVER_ASK_REGISTER_PASSWORD, "", 1, 0);
         }
         else {
           log_debug("player already registered");
-          shared::network::send_packet(temp_player->peer, PKT_FROM_SERVER_ASK_LOGIN_PASSWORD, "", 1, 0);
         }
+
+        shared::network::send_packet(temp_player->peer, PKT_FROM_SERVER_ASK_PASSWORD, "", 1, 0);
+
       }
 
     }
@@ -142,55 +143,69 @@ void enet_event_receive(const ENetEvent &enet_event) {
 
     Player* temp_player = get_player_from_uuid(get_uuid_from_peer(enet_event));
 
-    if (!temp_player->encryption_key.empty()) {
-      string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);
+    if (temp_player->encryption_key.empty()) {
+      return;
+    }
 
-      if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_HASHED_REGISTER_PASSWORD))) {
-        using namespace YAML;
-        using std::ofstream;
-        decrypted_string.erase(0, decrypted_string.find(']') + 1);
-        if (shared::utils::is_valid_hash(decrypted_string)) {
+    string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);
 
-          player_data::save_hashed_password(temp_player->uuid, decrypted_string);
+    if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_HASHED_PASSWORD))) {
+      using namespace YAML;
+      using std::ofstream;
 
-          shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_REGISTER_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
-          enet_peer_disconnect_later(enet_event.peer, 0);
-        }
+      string file_string = ("data/players/" + temp_player->uuid + ".yaml");
+      std::ifstream file(file_string);
 
-        else {
-          shared::network::send_packet(
-            enet_event.peer,
-            PKT_FROM_SERVER_DENY_REGISTER_PASSWORD,
-            "hash not valid",
-            1,
-            ENET_PACKET_FLAG_RELIABLE
-            );
-          enet_peer_disconnect_later(enet_event.peer, 0);
-        }
-      }
-      if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_HASHED_LOGIN_PASSWORD))) {
-        using namespace YAML;
-        using std::ofstream;
+      if (file.good()) {
+        log_debug("pass received");
+        Node player_file = LoadFile(file_string);
+        if (player_file["password_hash"].as<string>().empty()) {
 
-        decrypted_string.erase(0, decrypted_string.find(']') + 1);
-        if (shared::utils::is_valid_hash(decrypted_string)) {
-          if (player_data::is_hash_correct(temp_player->uuid, decrypted_string)) {
-            shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_LOGIN_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
-            temp_player->player_status = PLAYER_STATUS_AUTHENTICATED;
+          log_debug("saving register pass received");
 
-            send_player_list(temp_player->peer);
+          decrypted_string.erase(0, decrypted_string.find(']') + 1);
+          if (shared::utils::is_valid_hash(decrypted_string)) {
 
-            send_a_player_has_connected(temp_player);
+            player_data::save_hashed_password(temp_player->uuid, decrypted_string);
+
+            shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
+            enet_peer_disconnect_later(enet_event.peer, 0);
           }
 
           else {
-            shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_DENY_LOGIN_PASSWORD,"not correct", 1, ENET_PACKET_FLAG_RELIABLE);
+            shared::network::send_packet(
+              enet_event.peer,
+              PKT_FROM_SERVER_DENY_PASSWORD,
+              "hash not valid",
+              1,
+              ENET_PACKET_FLAG_RELIABLE
+              );
             enet_peer_disconnect_later(enet_event.peer, 0);
           }
         }
-
         else {
-          shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_DENY_LOGIN_PASSWORD, "hash not valid", 1, ENET_PACKET_FLAG_RELIABLE);
+          log_debug("checking login pass received");
+
+          decrypted_string.erase(0, decrypted_string.find(']') + 1);
+          if (shared::utils::is_valid_hash(decrypted_string)) {
+            if (player_data::is_hash_correct(temp_player->uuid, decrypted_string)) {
+              shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
+              temp_player->player_status = PLAYER_STATUS_AUTHENTICATED;
+
+              send_player_list(temp_player->peer);
+
+              send_a_player_has_connected(temp_player);
+            }
+
+            else {
+              shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_DENY_PASSWORD,"not correct", 1, ENET_PACKET_FLAG_RELIABLE);
+              enet_peer_disconnect_later(enet_event.peer, 0);
+            }
+          }
+
+          else {
+            shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_DENY_PASSWORD, "hash not valid", 1, ENET_PACKET_FLAG_RELIABLE);
+          }
         }
       }
     }

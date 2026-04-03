@@ -12,6 +12,7 @@
 #include "client_logger.h"
 #include "client_ui.h"
 #include "shared_crypto.h"
+#include "shared_network.h"
 #include "shared_utils.h"
 
 bool initialize_libraries() {
@@ -32,15 +33,12 @@ int client_run() {
 
   constexpr double TICK_RATE = 40.0;
   constexpr double TICK_TIME = 1.0 / TICK_RATE;
-
   double accumulator = 0.0;
-
   auto last = std::chrono::high_resolution_clock::now();
 
-  create_test_cubes();
+  // create_test_cubes();
 
   global::graphics::font = LoadFontEx("Archivo-SemiBold.ttf", 64, nullptr, 0);
-
   ui::create_all_buttons();
 
   while (global::running) {
@@ -114,7 +112,7 @@ int update_camera() {
         next_movement = {
           (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
           (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
-            (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
+          (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
         };
       }
 
@@ -160,14 +158,14 @@ void rendering_3D() {
   if (global::status_game == STATUS_GAME_PLAYING) {
     BeginMode3D(camera);
 
-    render_test_cubes();
+    // render_test_cubes();
 
     hitbox = {
       Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
       Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
     };
 
-    DrawBoundingBox(hitbox, RED);
+    // DrawBoundingBox(hitbox, RED);
 
     DrawGrid(100, 1.0f);
     EndMode3D();
@@ -189,35 +187,12 @@ void rendering_menu() {
 
   DrawText(std::to_string(global::status_menu).c_str(), 10, 30, 20, GREEN);
 
-  //------------------------------
-  // BUTTON TEST
-  //------------------------------
 
-  /*
-  Rectangle singleplayer_button = {
-    (static_cast<float>(window_width) / 2) - 150, (static_cast<float>(window_height) / 2) - 20,
-    300, 40
-  };
-
-  Rectangle multiplayer_button = {
-    (static_cast<float>(window_width) / 2) - 150, (static_cast<float>(window_height) / 2) + 40,
-    300, 40
-  };
-
-  const char* text = "Singleplayer";
-
-  Vector2 text_size = MeasureTextEx(font, text, 32, 0.5);
-*/
   switch (global::status_menu) {
     case STATUS_MENU_MAIN_MENU: {
 
-      ui::button_singleplayer.update(window_width/2 - 100,
-      window_height/2 - 60);
-      ui::button_multiplayer.update(window_width/2 - 100,
-    window_height/2);
-
-      ui::button_singleplayer.render();
-      ui::button_multiplayer.render();
+      ui::button_singleplayer.render(window_width/2 - 100,window_height/2 - 60);
+      ui::button_multiplayer.render(window_width/2 - 100, window_height/2);
 
       if (CheckCollisionPointRec(GetMousePosition(), ui::button_singleplayer.rect)) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -226,26 +201,16 @@ void rendering_menu() {
       if (CheckCollisionPointRec(GetMousePosition(), ui::button_multiplayer.rect)) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
           global::status_menu = STATUS_MENU_MULTIPLAYER;
-\
         }
       }
       break;
     }
 
     case STATUS_MENU_MULTIPLAYER: {
-      ui::button_add_server.update(50,
-    window_height - 60);
 
-      ui::button_remove_server.update(350,
-    window_height - 60);
-
-      ui::button_direct_connect.update(window_width - 300,
-    window_height - 60);
-
-
-      ui::button_direct_connect.render();
-      ui::button_add_server.render();
-      ui::button_remove_server.render();
+      ui::button_add_server.render(50, window_height - 60);
+      ui::button_remove_server.render(350, window_height - 60);
+      ui::button_direct_connect.render(window_width - 300, window_height - 60);
 
       if (CheckCollisionPointRec(GetMousePosition(), ui::button_direct_connect.rect)) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -255,41 +220,58 @@ void rendering_menu() {
       break;
     }
     case STATUS_MENU_DIRECT_CONNECT: {
-      auto char_pressed = GetCharPressed();
-      auto key_pressed = GetKeyPressed();
+      get_keyboard_input();
 
-      if (key_pressed == KEY_BACKSPACE) {
-        if (!input_string.empty()) {
-          input_string.pop_back();
-        }
-      }
-
-      if (char_pressed != 0) {
-          input_string += char_pressed;
-      }
-      ui::draw_centered_text("Server IP:",
-        static_cast<float>(window_width)/2, static_cast<float>(window_height)/2 - 100,
-        WHITE);
-
-      ui::draw_centered_text(input_string.c_str(),
-        static_cast<float>(window_width)/2, static_cast<float>(window_height)/2,
-        WHITE);
-
-      ui::button_continue.update(window_width - 300,
-      window_height - 60);
-
-      ui::button_continue.render();
+      ui::draw_centered_text("Server IP:", window_width/2, window_height/2 - 50, WHITE);
+      ui::draw_centered_text(input_string, window_width/2, window_height/2, WHITE);
+      ui::button_continue.render(window_width - 300, window_height - 60);
 
       if (CheckCollisionPointRec(GetMousePosition(), ui::button_continue.rect)) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
           global::status_menu = STATUS_MENU_CONNECTING;
+          if (input_string.find(':') == string::npos) {
+            connect_to_server(input_string);
+          }
+          else {
+            auto i = input_string.find(':');
+            string ip = input_string.substr(0, i);
+            string port = input_string.substr(i + 1);
+
+            connect_to_server(ip, port);
+          }
+          input_string.clear();
         }
       }
 
       break;
     }
 
+    case STATUS_MENU_CONNECTING: {
+      ui::draw_centered_text("connecting", window_width/2, window_height/2, WHITE);
 
+      break;
+    }
+
+    case STATUS_MENU_WAITING_USER_INPUT_PASSWORD: {
+      get_keyboard_input();
+
+      ui::draw_centered_text("Password:", window_width/2, window_height/2 - 50, WHITE);
+      ui::draw_centered_text(input_string, window_width/2, window_height/2, WHITE);
+      ui::button_continue.render(window_width - 300, window_height - 60);
+
+      if (CheckCollisionPointRec(GetMousePosition(), ui::button_continue.rect)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+          global::status_menu = STATUS_MENU_VOID;
+          auto hashed_pass = shared::crypto::hash_password(input_string);
+          log_info(input_string);
+          log_info(hashed_pass);
+
+          shared::network::send_packet(enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_PASSWORD, hashed_pass, 2, ENET_PACKET_FLAG_RELIABLE, &encryption_key);
+        }
+      }
+
+      break;
+    }
   }
 }
 
@@ -380,4 +362,21 @@ bool check_collision() {
   }
   return false;
 
+}
+
+void get_keyboard_input() {
+  using namespace global;
+
+  auto char_pressed = GetCharPressed();
+  auto key_pressed = GetKeyPressed();
+
+  if (key_pressed == KEY_BACKSPACE) {
+    if (!input_string.empty()) {
+      input_string.pop_back();
+    }
+  }
+
+  if (char_pressed != 0) {
+    input_string += char_pressed;
+  }
 }
