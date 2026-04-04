@@ -27,6 +27,7 @@ enum packet_type {
   PKT_FROM_SERVER_PLAYER_LIST = 6,
   PKT_FROM_SERVER_A_PLAYER_HAS_CONNECTED = 7,
   PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED = 8,
+  PKT_FROM_SERVER_CHUNK = 9,
 
   PKT_FROM_CLIENT_NAME_AND_UUID = 201,
   PKT_FROM_CLIENT_CHAT = 202,
@@ -37,4 +38,10 @@ enum packet_type {
 
 enum shared_global {
   DEFAULT_PORT = 23234
+};
+
+enum shared_world {
+  SIZE_X = 16,
+  SIZE_Y = 256,
+  SIZE_Z = 16,
 };

@@ -10,6 +10,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "server_utils.h"
+#include "server_world.h"
 #include "shared_crypto.h"
 #include "shared_global.h"
 #include "shared_network.h"
@@ -174,6 +175,7 @@ void enet_event_receive(const ENetEvent &enet_event) {
           player_data::save_hashed_password(temp_player->uuid, decrypted_string);
 
           shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
+
         }
 
         else {
@@ -197,6 +199,12 @@ void enet_event_receive(const ENetEvent &enet_event) {
 
           send_a_player_has_connected(temp_player);
           log_debug("pass correct");
+
+          // DEBUG
+          std::string packet = world::create_chunk_string(world::get_chunk_key(0, 0));
+          std::cout << packet << "\n";
+          shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CHUNK, packet, 1, ENET_PACKET_FLAG_RELIABLE);
+          //////////////////////
         }
         break;
       }

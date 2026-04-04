@@ -25,7 +25,7 @@ int server_run()
   double accumulator = 0.0;
   auto last = std::chrono::high_resolution_clock::now();
 
-  save_block(3, 0, 0, 0, 0, 0);
+  world::load_chunk(0, 0);
 
   while (global::running) {
     auto frame_start = std::chrono::high_resolution_clock::now();
