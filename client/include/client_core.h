@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include "client_ui.h"
+
 bool initialize_libraries();
 int client_run();
 int render();
@@ -27,3 +29,4 @@ bool check_collision();
 void rendering_menu();
 void rendering_3D();
 void get_keyboard_input();
+bool is_button_clicked(const ui::Button &button);

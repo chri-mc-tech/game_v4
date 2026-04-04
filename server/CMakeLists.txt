@@ -15,6 +15,8 @@ add_executable(server
         src/server_utils.cpp
         include/server_utils.h
         src/server_player.cpp
+        src/server_world.cpp
+        include/server_world.h
 )
 
 target_link_options(server PRIVATE

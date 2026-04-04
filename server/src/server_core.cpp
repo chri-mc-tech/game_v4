@@ -5,7 +5,7 @@
 #include "server_network.h"
 
 #include <enet/enet.h>
-
+#include "server_world.h"
 #include "server_global.h"
 
 bool initialize_libraries() {
@@ -20,15 +20,12 @@ bool initialize_libraries() {
 int server_run()
 {
   global::running = true;
-
   constexpr double TICK_RATE = 40.0;
   constexpr double TICK_TIME = 1.0 / TICK_RATE;
-
   double accumulator = 0.0;
-
-
-
   auto last = std::chrono::high_resolution_clock::now();
+
+  save_block(3, 0, 0, 0, 0, 0);
 
   while (global::running) {
     auto frame_start = std::chrono::high_resolution_clock::now();

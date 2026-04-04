@@ -108,6 +108,9 @@ namespace global {
   static Color cube_colors[50][50];
   //
 
+  // background test
+  inline Texture2D background;
+
 }
 
 namespace global::enet {

@@ -41,100 +41,102 @@ void enet_event_receive(const ENetEvent &enet_event) {
 
   // initial packets (not encrypted)
   if (enet_event.channelID == 0) {
-    // log_debug(pkt_data_string.substr(0, pkt_data_string.find(']') + 1));
+    switch (shared::network::get_pkt_type(pkt_data_string)) {
+      case PKT_FROM_CLIENT_NAME_AND_UUID: {
+        pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID))) {
-      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+        string name = pkt_data_string.substr(0, pkt_data_string.find(' '));
+        string uuid = pkt_data_string.substr(pkt_data_string.find(' ') + 1);
 
-      string name = pkt_data_string.substr(0, pkt_data_string.find(' '));
-      string uuid = pkt_data_string.substr(pkt_data_string.find(' ') + 1);
-
-      log_debug(name);
-      if (shared::utils::is_valid_nickname(name)) {
-        log_debug("name valid");
-      }
-      else {log_debug("name NOT valid"); return;}
-
-      log_debug(uuid);
-      if (shared::utils::is_valid_uuid(uuid)) {
-        log_debug("uuid valid");
-      }
-      else {log_debug("uuid NOT valid"); return;}
-
-      if (global::online_players.contains(uuid)) {
-        log_warn("player with uuid " + uuid + " already online");
-      }
-      else {
-        Player temp_player;
-        temp_player.name = name; // nome dal pacchetto
-        temp_player.uuid = uuid; // uuid dal pacchetto
-        temp_player.server_private_key = shared::crypto::create_private_key();
-        temp_player.server_public_key = shared::crypto::create_public_key(temp_player.server_private_key);
-        temp_player.peer = enet_event.peer;
-
-        string file_string = ("data/players/" + temp_player.uuid + ".yaml");
-        std::ifstream file(file_string);
-
-        if (!file.good()) {
-          player_data::create_player_data_file(temp_player);
+        log_debug(name);
+        if (shared::utils::is_valid_nickname(name)) {
+          log_debug("name valid");
         }
-        global::online_players.emplace(uuid, std::move(temp_player));
-        global::peer_to_uuid.emplace(temp_player.peer, uuid);
+        else {log_debug("name NOT valid"); return;}
 
-        shared::network::send_packet(temp_player.peer,
-          PKT_FROM_SERVER_PUBLIC_KEY,
-          IntToString(temp_player.server_public_key),
-          0,
-          ENET_PACKET_FLAG_RELIABLE);
-      }
-    }
+        log_debug(uuid);
+        if (shared::utils::is_valid_uuid(uuid)) {
+          log_debug("uuid valid");
+        }
+        else {log_debug("uuid NOT valid"); return;}
 
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_PUBLIC_KEY))) {
-      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
-      const auto it = global::online_players.find(get_uuid_from_peer(enet_event));
-      if (it == global::online_players.end()) {return;}
-      Player* temp_player = &it->second;
-      temp_player->client_public_key = Integer(pkt_data_string.c_str());
-      temp_player->session_key = shared::crypto::calculate_session_key(temp_player->server_private_key, temp_player->client_public_key);
-      temp_player->encryption_key = shared::crypto::create_encryption_key_from_session_key(temp_player->session_key);
-
-      string file_string = ("data/players/" + temp_player->uuid + ".yaml");
-      std::ifstream file(file_string);
-
-      if (file.good()) {
-        log_debug("player file found");
-        YAML::Node player_file = YAML::LoadFile(file_string);
-        if (player_file["password_hash"].as<string>().empty()) {
-          log_debug("player still NOT registered");
+        if (global::online_players.contains(uuid)) {
+          log_warn("player with uuid " + uuid + " already online");
         }
         else {
-          log_debug("player already registered");
+          Player temp_player;
+          temp_player.name = name; // nome dal pacchetto
+          temp_player.uuid = uuid; // uuid dal pacchetto
+          temp_player.server_private_key = shared::crypto::create_private_key();
+          temp_player.server_public_key = shared::crypto::create_public_key(temp_player.server_private_key);
+          temp_player.peer = enet_event.peer;
+
+          string file_string = ("data/players/" + temp_player.uuid + ".yaml");
+          std::ifstream file(file_string);
+
+          if (!file.good()) {
+            player_data::create_player_data_file(temp_player);
+          }
+          global::online_players.emplace(uuid, std::move(temp_player));
+          global::peer_to_uuid.emplace(temp_player.peer, uuid);
+
+          shared::network::send_packet(temp_player.peer,
+            PKT_FROM_SERVER_PUBLIC_KEY,
+            IntToString(temp_player.server_public_key),
+            0,
+            ENET_PACKET_FLAG_RELIABLE);
         }
-
-        shared::network::send_packet(temp_player->peer, PKT_FROM_SERVER_ASK_PASSWORD, "", 1, 0);
-
+        break;
       }
 
+      case PKT_FROM_CLIENT_PUBLIC_KEY: {
+        pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+        const auto it = global::online_players.find(get_uuid_from_peer(enet_event));
+        if (it == global::online_players.end()) {return;}
+        Player* temp_player = &it->second;
+        temp_player->client_public_key = Integer(pkt_data_string.c_str());
+        temp_player->session_key = shared::crypto::calculate_session_key(temp_player->server_private_key, temp_player->client_public_key);
+        temp_player->encryption_key = shared::crypto::create_encryption_key_from_session_key(temp_player->session_key);
+
+        string file_string = ("data/players/" + temp_player->uuid + ".yaml");
+        std::ifstream file(file_string);
+
+        if (file.good()) {
+          log_debug("player file found");
+          YAML::Node player_file = YAML::LoadFile(file_string);
+          if (player_file["password_hash"].as<string>().empty()) {
+            log_debug("player still NOT registered");
+          }
+          else {
+            log_debug("player already registered");
+          }
+          shared::network::send_packet(temp_player->peer, PKT_FROM_SERVER_ASK_PASSWORD, "", 1, 0);
+        }
+        break;
+      }
     }
   }
 
   // not encrypted (coords, ecc)
   else if (enet_event.channelID == 1) {
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_COORDS))) {
-      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+    switch (shared::network::get_pkt_type(pkt_data_string)) {
+      case PKT_FROM_CLIENT_COORDS: {
+        pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
-      Player* temp_player = get_player_from_uuid(get_uuid_from_peer(enet_event));
+        Player* temp_player = get_player_from_uuid(get_uuid_from_peer(enet_event));
 
-      size_t space1 = pkt_data_string.find(' ');
-      size_t space2 = pkt_data_string.find(' ', space1 + 1);
+        size_t space1 = pkt_data_string.find(' ');
+        size_t space2 = pkt_data_string.find(' ', space1 + 1);
 
-      float loc_x = stof(pkt_data_string.substr(0, space1));
-      float loc_y = stof(pkt_data_string.substr(space1 + 1, space2 - space1 - 1));
-      float loc_z = stof(pkt_data_string.substr(space2 + 1));
+        float loc_x = stof(pkt_data_string.substr(0, space1));
+        float loc_y = stof(pkt_data_string.substr(space1 + 1, space2 - space1 - 1));
+        float loc_z = stof(pkt_data_string.substr(space2 + 1));
 
-      temp_player->location_x = loc_x;
-      temp_player->location_y = loc_y;
-      temp_player->location_z = loc_z;
+        temp_player->location_x = loc_x;
+        temp_player->location_y = loc_y;
+        temp_player->location_z = loc_z;
+        break;
+      }
     }
   }
 
@@ -142,71 +144,61 @@ void enet_event_receive(const ENetEvent &enet_event) {
   else if (enet_event.channelID == 2) {
 
     Player* temp_player = get_player_from_uuid(get_uuid_from_peer(enet_event));
-
-    if (temp_player->encryption_key.empty()) {
-      return;
-    }
-
+    if (temp_player->encryption_key.empty()) return;
     string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, temp_player->encryption_key);
 
-    if (decrypted_string.starts_with(shared::network::pkt_type(PKT_FROM_CLIENT_HASHED_PASSWORD))) {
-      using namespace YAML;
-      using std::ofstream;
+    switch (shared::network::get_pkt_type(decrypted_string)) {
+      case PKT_FROM_CLIENT_HASHED_PASSWORD: {
+        using namespace YAML;
+        using std::ofstream;
 
-      string file_string = ("data/players/" + temp_player->uuid + ".yaml");
-      std::ifstream file(file_string);
+        string file_string = ("data/players/" + temp_player->uuid + ".yaml");
+        std::ifstream file(file_string);
 
-      if (file.good()) {
+        if (!file.good()) {
+          log_error("error");
+          return;
+        }
         log_debug("pass received");
         Node player_file = LoadFile(file_string);
         if (player_file["password_hash"].as<string>().empty()) {
-
           log_debug("saving register pass received");
 
           decrypted_string.erase(0, decrypted_string.find(']') + 1);
-          if (shared::utils::is_valid_hash(decrypted_string)) {
-
-            player_data::save_hashed_password(temp_player->uuid, decrypted_string);
-
-            shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
+          if (!shared::utils::is_valid_hash(decrypted_string)) {
+            log_error("hash not valid");
             enet_peer_disconnect_later(enet_event.peer, 0);
+            return;
           }
 
-          else {
-            shared::network::send_packet(
-              enet_event.peer,
-              PKT_FROM_SERVER_DENY_PASSWORD,
-              "hash not valid",
-              1,
-              ENET_PACKET_FLAG_RELIABLE
-              );
-            enet_peer_disconnect_later(enet_event.peer, 0);
-          }
+          player_data::save_hashed_password(temp_player->uuid, decrypted_string);
+
+          shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
         }
+
         else {
           log_debug("checking login pass received");
 
           decrypted_string.erase(0, decrypted_string.find(']') + 1);
-          if (shared::utils::is_valid_hash(decrypted_string)) {
-            if (player_data::is_hash_correct(temp_player->uuid, decrypted_string)) {
-              shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
-              temp_player->player_status = PLAYER_STATUS_AUTHENTICATED;
-
-              send_player_list(temp_player->peer);
-
-              send_a_player_has_connected(temp_player);
-            }
-
-            else {
-              shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_DENY_PASSWORD,"not correct", 1, ENET_PACKET_FLAG_RELIABLE);
-              enet_peer_disconnect_later(enet_event.peer, 0);
-            }
+          if (!shared::utils::is_valid_hash(decrypted_string)) {
+            log_error("hash not valid");
+            enet_peer_disconnect_later(enet_event.peer, 0);
+            return;
           }
-
-          else {
-            shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_DENY_PASSWORD, "hash not valid", 1, ENET_PACKET_FLAG_RELIABLE);
+          if (!player_data::is_hash_correct(temp_player->uuid, decrypted_string)) {
+            log_debug("wrong password");
+            enet_peer_disconnect_later(enet_event.peer, 0);
+            return;
           }
+          shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CONFIRM_PASSWORD, "", 1, ENET_PACKET_FLAG_RELIABLE);
+          temp_player->player_status = PLAYER_STATUS_AUTHENTICATED;
+
+          send_player_list(temp_player->peer);
+
+          send_a_player_has_connected(temp_player);
+          log_debug("pass correct");
         }
+        break;
       }
     }
   }
@@ -218,7 +210,6 @@ void enet_event_disconnected(const ENetEvent &enet_event) {
   global::peer_to_uuid.erase(enet_event.peer);
   global::online_players.erase(uuid);
   send_a_player_has_disconnected(uuid);
-
 }
 
 int create_enet_host() {

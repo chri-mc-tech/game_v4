@@ -21,7 +21,7 @@ int create_enet_host() {
   return 0;
 }
 
-int enet_loop() {
+void enet_loop() {
   ENetEvent enet_event;
   while (enet_host_service(global::enet::enet_client, &enet_event, 0) > 0) {
     switch (enet_event.type) {
@@ -32,10 +32,9 @@ int enet_loop() {
     }
     enet_packet_destroy(enet_event.packet);
   }
-  return 0;
 }
 
-int enet_event_connected(const ENetEvent &enet_event) {
+void enet_event_connected(const ENetEvent &enet_event) {
   log_debug("connected");
   global::enet::is_connected = true;
   global::status_connection = STATUS_CONNECTION_CONNECTED;
@@ -43,159 +42,161 @@ int enet_event_connected(const ENetEvent &enet_event) {
   string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID) + global::config::name + " " + global::config::uuid;
   ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
   enet_peer_send(global::enet::connected_server_peer, 0, temp_packet);
-  return 0;
 }
 
-int enet_event_receive(const ENetEvent &enet_event) {
+void enet_event_receive(const ENetEvent &enet_event) {
   string pkt_data_string = shared::utils::packet_to_string(enet_event.packet);
 
   // initial packets (not encrypted)
   if (enet_event.channelID == 0) {
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PUBLIC_KEY))) {
-      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+    switch (shared::network::get_pkt_type(pkt_data_string)) {
+      case PKT_FROM_SERVER_PUBLIC_KEY: {
+        pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
-      global::client_private_key = shared::crypto::create_private_key();
-      global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
-      global::server_public_key = Integer(pkt_data_string.c_str());
-      global::shared_key = shared::crypto::calculate_session_key(global::client_private_key, global::server_public_key);
-      global::encryption_key = shared::crypto::create_encryption_key_from_session_key(global::shared_key);
+        global::client_private_key = shared::crypto::create_private_key();
+        global::client_public_key = shared::crypto::create_public_key(global::client_private_key);
+        global::server_public_key = Integer(pkt_data_string.c_str());
+        global::shared_key = shared::crypto::calculate_session_key(global::client_private_key, global::server_public_key);
+        global::encryption_key = shared::crypto::create_encryption_key_from_session_key(global::shared_key);
 
-      shared::network::send_packet(
-        global::enet::connected_server_peer,
-        PKT_FROM_CLIENT_PUBLIC_KEY,
-        IntToString(global::client_public_key),
-        0,
-        ENET_PACKET_FLAG_RELIABLE);
+        shared::network::send_packet(
+          global::enet::connected_server_peer,
+          PKT_FROM_CLIENT_PUBLIC_KEY,
+          IntToString(global::client_public_key),
+          0,
+          ENET_PACKET_FLAG_RELIABLE);
 
-      global::status_connection = STATUS_CONNECTION_ENCRYPTED;
+        global::status_connection = STATUS_CONNECTION_ENCRYPTED;
+        break;
+      }
     }
   }
 
   // not encrypted (coords, ecc)
   else if (enet_event.channelID == 1) {
 
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_ASK_PASSWORD))) {
-      global::status_menu = STATUS_MENU_WAITING_USER_INPUT_PASSWORD;
-    }
+    switch (shared::network::get_pkt_type(pkt_data_string)) {
 
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_CONFIRM_PASSWORD))) {
-      global::status_game = STATUS_GAME_PLAYING;
-      global::status_menu = STATUS_MENU_IN_GAME;
-    }
+      case PKT_FROM_SERVER_ASK_PASSWORD: {
+        global::status_menu = STATUS_MENU_WAITING_USER_INPUT_PASSWORD;
+        break;
+      }
+      case PKT_FROM_SERVER_CONFIRM_PASSWORD: {
+        global::status_game = STATUS_GAME_PLAYING;
+        global::status_menu = STATUS_MENU_IN_GAME;
+        DisableCursor();
+        break;
+      }
+      case PKT_FROM_SERVER_DENY_PASSWORD: {
+        pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+        log_warn(pkt_data_string);
+        enet_peer_disconnect_later(global::enet::connected_server_peer, 0);
+        break;
+      }
+      case PKT_FROM_SERVER_PLAYER_LIST: {
+        pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_DENY_PASSWORD))) {
-      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
-      log_warn(pkt_data_string);
-      enet_peer_disconnect_later(global::enet::connected_server_peer, 0);
-    }
+        size_t start = 0;
 
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_PLAYER_LIST))) {
-      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+        while (start < pkt_data_string.size()) {
+          size_t end = pkt_data_string.find(';', start);
 
-      size_t start = 0;
+          if (end == std::string::npos)
+            end = pkt_data_string.size();
+          string player_object = pkt_data_string.substr(start, end - start);
 
-      while (start < pkt_data_string.size()) {
-        size_t end = pkt_data_string.find(';', start);
+          size_t space = player_object.find(' ');
 
-        if (end == std::string::npos)
-          end = pkt_data_string.size();
-        string player_object = pkt_data_string.substr(start, end - start);
+          string uuid = player_object.substr(0, space);
+          string name = player_object.substr(space + 1);
+          // log_debug(uuid + "|" + name);
+          if (uuid != global::config::uuid) {
+            Player temp_player;
+            temp_player.name = name;
+            temp_player.uuid = uuid;
 
-        size_t space = player_object.find(' ');
+            global::online_players.emplace(uuid, std::move(temp_player));
+          }
+          start = end + 1;
+        }
+        break;
+      }
+      case PKT_FROM_SERVER_A_PLAYER_HAS_CONNECTED: {
+        pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
-        string uuid = player_object.substr(0, space);
-        string name = player_object.substr(space + 1);
+        size_t space = pkt_data_string.find(' ');
+
+        string uuid = pkt_data_string.substr(0, space);
+        string name = pkt_data_string.substr(space + 1);
         // log_debug(uuid + "|" + name);
         if (uuid != global::config::uuid) {
           Player temp_player;
-          temp_player.name = name;
           temp_player.uuid = uuid;
+          temp_player.name = name;
 
           global::online_players.emplace(uuid, std::move(temp_player));
         }
-        start = end + 1;
+        break;
       }
-    }
 
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_A_PLAYER_HAS_CONNECTED))) {
-
-      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
-
-      size_t space = pkt_data_string.find(' ');
-
-      string uuid = pkt_data_string.substr(0, space);
-      string name = pkt_data_string.substr(space + 1);
-      // log_debug(uuid + "|" + name);
-      if (uuid != global::config::uuid) {
-        Player temp_player;
-        temp_player.uuid = uuid;
-        temp_player.name = name;
-
-        global::online_players.emplace(uuid, std::move(temp_player));
+      case PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED: {
+        pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+        global::online_players.erase(pkt_data_string);
+        break;
       }
-    }
+      case PKT_FROM_SERVER_COORDS: {
+        pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
 
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED))) {
-      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+        size_t start = 0;
+        while (start < pkt_data_string.size()) {
+          size_t end = pkt_data_string.find(';', start);
+          if (end == string::npos) end = pkt_data_string.size();
 
-      global::online_players.erase(pkt_data_string);
-    }
+          string player_object = pkt_data_string.substr(start, end - start);
 
-    if (pkt_data_string.starts_with(shared::network::pkt_type(PKT_FROM_SERVER_COORDS))) {
-      pkt_data_string.erase(0, pkt_data_string.find(']') + 1);
+          size_t s1 = player_object.find(' ');
+          size_t s2 = player_object.find(' ', s1 + 1);
+          size_t s3 = player_object.find(' ', s2 + 1);
 
-      size_t start = 0;
-      while (start < pkt_data_string.size()) {
-        size_t end = pkt_data_string.find(';', start);
-        if (end == string::npos) end = pkt_data_string.size();
+          if (s1 != string::npos && s2 != string::npos && s3 != string::npos) {
+            string uuid = player_object.substr(0, s1);
+            string x = player_object.substr(s1 + 1, s2 - s1 - 1);
+            string y = player_object.substr(s2 + 1, s3 - s2 - 1);
+            string z = player_object.substr(s3 + 1);
 
-        string player_object = pkt_data_string.substr(start, end - start);
+            if (uuid != global::config::uuid) {
+              Player* temp_player = get_player_from_uuid(uuid);
+              if (temp_player) {
+                temp_player->location.x = stof(x);
+                temp_player->location.y = stof(y);
+                temp_player->location.z = stof(z);
 
-        size_t s1 = player_object.find(' ');
-        size_t s2 = player_object.find(' ', s1 + 1);
-        size_t s3 = player_object.find(' ', s2 + 1);
-
-        if (s1 != string::npos && s2 != string::npos && s3 != string::npos) {
-          string uuid = player_object.substr(0, s1);
-          string x = player_object.substr(s1 + 1, s2 - s1 - 1);
-          string y = player_object.substr(s2 + 1, s3 - s2 - 1);
-          string z = player_object.substr(s3 + 1);
-
-          if (uuid != global::config::uuid) {
-            Player* temp_player = get_player_from_uuid(uuid);
-            if (temp_player) {
-              temp_player->location.x = stof(x);
-              temp_player->location.y = stof(y);
-              temp_player->location.z = stof(z);
-
-              log_debug(x + ", " + y + ", " + z);
+                log_debug(x + ", " + y + ", " + z);
+              }
             }
           }
+          start = end + 1;
         }
-        start = end + 1;
+        break;
       }
     }
-
   }
 
   // encrypted (chat messages, ecc)
   else if (enet_event.channelID == 2) {
-    if (!global::encryption_key.empty()) {
-      string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, global::encryption_key);
-      log_debug(decrypted_string.substr(0, decrypted_string.find(']') + 1));
-    }
+    if (global::encryption_key.empty()) return;
+
+    string decrypted_string = shared::crypto::decrypt_string_with_key(pkt_data_string, global::encryption_key);
+    log_debug(decrypted_string.substr(0, decrypted_string.find(']') + 1));
   }
-  return 0;
 }
 
-int enet_event_disconnected(const ENetEvent &enet_event) {
+void enet_event_disconnected(const ENetEvent &enet_event) {
   log_debug("disconnected");
   global::enet::is_connected = false;
   global::status_connection = STATUS_CONNECTION_NOT_CONNECTED;
   global::status_menu = STATUS_MENU_DISCONNECTED_FROM_SERVER;
   global::online_players.clear();
-
-  return 0;
 }
 
 int connect_to_server(const string& ip, const string& port) {
