@@ -46,11 +46,11 @@ namespace config {
     using namespace YAML;
 
     Node config = LoadFile("config.yaml");
-    global::config::uuid = config["uuid"].as<string>();
-    global::config::name = config["name"].as<string>();
-    global::config::show_fps = config["show_fps"].as<bool>();
-    global::config::log_debug = config["log_debug"].as<bool>();
-    global::config::debug_console = config["debug_console"].as<bool>();
+    uuid = config["uuid"].as<string>();
+    name = config["name"].as<string>();
+    show_fps = config["show_fps"].as<bool>();
+    log_debug = config["log_debug"].as<bool>();
+    debug_console = config["debug_console"].as<bool>();
 
     return true;
   }
@@ -67,7 +67,7 @@ namespace config {
 
     file_out << config;
     file_out.close();
-    global::config::name = t_string;
+    name = t_string;
   }
 
   void add_config_comment(std::ofstream &file_out) {

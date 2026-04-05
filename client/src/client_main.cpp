@@ -29,25 +29,20 @@ int main() {
   }
 
 
-  if (!shared::utils::is_valid_uuid(global::config::uuid)) {
+  if (!shared::utils::is_valid_uuid(config::uuid)) {
     return 8;
   }
-
-  log_debug(global::config::uuid);
-  log_debug(global::config::name);
 
   if (create_enet_host() != 0) {
     return 6;
   }
 
-  // log_debug(to_string(shared::network::get_packet_type("[1]ciao")));
-
-  if (global::config::debug_console) {
+  if (config::debug_console) {
     console_init();
   }
   create_log_file();
 
-  if (!global::config::name.empty()) {
+  if (!config::name.empty()) {
     global::status_menu = STATUS_MENU_MAIN_MENU;
   }
 

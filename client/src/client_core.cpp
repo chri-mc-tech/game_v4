@@ -10,6 +10,7 @@
 
 #include <raymath.h>
 
+#include "client_config.h"
 #include "client_logger.h"
 #include "client_ui.h"
 #include "shared_crypto.h"
@@ -29,8 +30,8 @@ int client_run() {
 
   start_graphics();
 
-  global::main_player.name = global::config::name;
-  global::main_player.uuid = global::config::uuid;
+  global::main_player.name = config::name;
+  global::main_player.uuid = config::uuid;
 
   constexpr double TICK_RATE = 40.0;
   constexpr double TICK_TIME = 1.0 / TICK_RATE;
@@ -111,17 +112,12 @@ int update_camera() {
     if (IsCursorHidden()) {
       float frame_speed = speed * static_cast<float>(delta_time);
 
-      if (!check_collision()) {
         next_movement = {
           (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
           (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
           (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
         };
-      }
 
-      else {
-        next_movement = Vector3Subtract({0, 0, 0}, last_movement);
-      }
 
       UpdateCameraPro(&graphics::camera, next_movement,
           (Vector3){GetMouseDelta().x * 0.05f, GetMouseDelta().y * 0.05f, 0.0f},
@@ -137,6 +133,7 @@ int update_camera() {
 
   return 0;
 }
+
 
 int render() {
   using global::speed;
@@ -213,6 +210,25 @@ void rendering_menu() {
 
 
   switch (global::status_menu) {
+    case STATUS_MENU_WAITING_USER_INPUT_NAME: {
+      get_keyboard_input();
+
+      ui::draw_centered_text("Username:", window_width/2, window_height/2 - 50, WHITE);
+      ui::draw_centered_text(input_string, window_width/2, window_height/2, WHITE);
+      ui::button_continue.render(window_width / 2 - 125, window_height - 70);
+
+      if (is_button_clicked(ui::button_continue)) {
+        if (shared::utils::is_valid_nickname(input_string)) {
+          config::save_new_nickname(input_string);
+          input_string.clear();
+          global::status_menu = STATUS_MENU_MAIN_MENU;
+        }
+      }
+
+
+
+      break;
+    }
     case STATUS_MENU_MAIN_MENU: {
 
       ui::button_singleplayer.render(window_width/2 - 100,window_height/2 - 60);
@@ -263,6 +279,11 @@ void rendering_menu() {
 
     case STATUS_MENU_CONNECTING: {
       ui::draw_centered_text("connecting", window_width/2, window_height/2, WHITE);
+      if (std::chrono::steady_clock::now() - enet::start_connection_time >= std::chrono::seconds(6)) {
+        if (global::status_connection == STATUS_CONNECTION_NOT_CONNECTED) {
+          global::status_menu = STATUS_MENU_DISCONNECTED_FROM_SERVER;
+        }
+      }
 
       break;
     }
@@ -349,39 +370,6 @@ void start_graphics() {
   camera.projection = CAMERA_PERSPECTIVE;
 
   SetExitKey(KEY_NULL);
-}
-
-void draw_player_model() {
-  using namespace global;
-  DrawCube(
-  Vector3Add(Vector3(main_player.location), Vector3({0, player_height / 2, 0})),
-  player_width, player_height, player_width, {0, 0, 0, 80});
-
-}
-
-bool check_collision() {
-  using namespace global;
-
-  for (auto &b : world) {
-    if (!b.solid) continue;
-
-    if (abs(b.x - main_player.location.x) > 2) continue;
-    if (abs(b.y - main_player.location.y) > 3) continue;
-    if (abs(b.z - main_player.location.z) > 2) continue;
-
-    BoundingBox blockBox = {
-      (Vector3){ float(b.x), float(b.y) - 0.5f, float(b.z) },
-      (Vector3){ float(b.x) + 1.0f, float(b.y) + 0.5f, float(b.z) + 1.0f }
-    };
-
-    DrawBoundingBox(blockBox, RED);
-
-    if (CheckCollisionBoxes(hitbox, blockBox)) {
-      return true;
-    }
-  }
-  return false;
-
 }
 
 void get_keyboard_input() {

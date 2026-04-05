@@ -116,7 +116,7 @@ namespace global {
 namespace global::enet {
   inline ENetHost* enet_client = nullptr;
   inline ENetPeer* connected_server_peer;
-  inline bool is_connected;
+  inline std::chrono::time_point<std::chrono::steady_clock> start_connection_time;
 }
 
 namespace global::graphics {
@@ -129,12 +129,4 @@ namespace global::graphics {
   inline Font font;
 
   inline Camera3D camera = { 0 };
-}
-
-namespace global::config {
-  inline string uuid;
-  inline string name;
-  inline bool log_debug;
-  inline bool show_fps;
-  inline bool debug_console;
 }

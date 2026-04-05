@@ -1,6 +1,7 @@
 #include "client_network.h"
 #include "client_global.h"
 #include "client_ui.h"
+#include "client_config.h"
 
 #include <thread>
 #include <unistd.h>
@@ -36,10 +37,9 @@ void enet_loop() {
 
 void enet_event_connected(const ENetEvent &enet_event) {
   log_debug("connected");
-  global::enet::is_connected = true;
   global::status_connection = STATUS_CONNECTION_CONNECTED;
 
-  string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID) + global::config::name + " " + global::config::uuid;
+  string to_send = shared::network::pkt_type(PKT_FROM_CLIENT_NAME_AND_UUID) + config::name + " " + config::uuid;
   ENetPacket *temp_packet = enet_packet_create(to_send.c_str(), to_send.length(), ENET_PACKET_FLAG_RELIABLE);
   enet_peer_send(global::enet::connected_server_peer, 0, temp_packet);
 }
@@ -110,7 +110,7 @@ void enet_event_receive(const ENetEvent &enet_event) {
           string uuid = player_object.substr(0, space);
           string name = player_object.substr(space + 1);
           // log_debug(uuid + "|" + name);
-          if (uuid != global::config::uuid) {
+          if (uuid != config::uuid) {
             Player temp_player;
             temp_player.name = name;
             temp_player.uuid = uuid;
@@ -129,7 +129,7 @@ void enet_event_receive(const ENetEvent &enet_event) {
         string uuid = pkt_data_string.substr(0, space);
         string name = pkt_data_string.substr(space + 1);
         // log_debug(uuid + "|" + name);
-        if (uuid != global::config::uuid) {
+        if (uuid != config::uuid) {
           Player temp_player;
           temp_player.uuid = uuid;
           temp_player.name = name;
@@ -164,7 +164,7 @@ void enet_event_receive(const ENetEvent &enet_event) {
             string y = player_object.substr(s2 + 1, s3 - s2 - 1);
             string z = player_object.substr(s3 + 1);
 
-            if (uuid != global::config::uuid) {
+            if (uuid != config::uuid) {
               Player* temp_player = get_player_from_uuid(uuid);
               if (temp_player) {
                 temp_player->location.x = stof(x);
@@ -193,7 +193,6 @@ void enet_event_receive(const ENetEvent &enet_event) {
 
 void enet_event_disconnected(const ENetEvent &enet_event) {
   log_debug("disconnected");
-  global::enet::is_connected = false;
   global::status_connection = STATUS_CONNECTION_NOT_CONNECTED;
   global::status_menu = STATUS_MENU_DISCONNECTED_FROM_SERVER;
   global::online_players.clear();
@@ -205,32 +204,13 @@ int connect_to_server(const string& ip, const string& port) {
   server_to_connect.port = static_cast<enet_uint16>(std::stoul(port));
   global::enet::connected_server_peer = enet_host_connect(global::enet::enet_client, &server_to_connect, 3, 0);
 
-  std::jthread thread_wait_server_connection(wait_server_connection);
-  thread_wait_server_connection.detach();
+  global::enet::start_connection_time = std::chrono::steady_clock::now();
+
   return 0;
 }
 
-// async function
-void wait_server_connection() {
-  std::this_thread::sleep_for(std::chrono::seconds(6));
-  if (!global::enet::is_connected) {
-    if (global::status_connection == STATUS_MENU_CONNECTING) {
-      global::status_menu = STATUS_MENU_DISCONNECTED_FROM_SERVER;
-      global::status_connection = STATUS_CONNECTION_NOT_CONNECTED;
-      enet_peer_reset(global::enet::connected_server_peer);
-    }
-  }
-}
-
-// async function
-void every_second_log_debug(const string& text) {
-
-  std::this_thread::sleep_for(std::chrono::seconds(1));
-}
-
-
 void send_location() {
-  if (global::enet::is_connected) {
+  if (global::status_connection == STATUS_CONNECTION_ENCRYPTED) {
     shared::network::send_packet(
       global::enet::connected_server_peer,
       PKT_FROM_CLIENT_COORDS,
