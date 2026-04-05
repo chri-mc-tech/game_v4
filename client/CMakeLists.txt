@@ -15,6 +15,8 @@ add_executable(client WIN32
         include/client_config.h
         src/client_logger.cpp
         include/client_logger.h
+        src/client_world.cpp
+        include/client_world.h
 )
 
 target_include_directories(client PRIVATE include)

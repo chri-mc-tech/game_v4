@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "client_logger.h"
+#include "client_world.h"
 #include "shared_crypto.h"
 #include "shared_global.h"
 #include "shared_network.h"
@@ -178,6 +179,9 @@ void enet_event_receive(const ENetEvent &enet_event) {
           start = end + 1;
         }
         break;
+      }
+      case PKT_FROM_SERVER_CHUNK: {
+        world::render_chunk(pkt_data_string.erase(0, pkt_data_string.find(']') + 1));
       }
     }
   }
