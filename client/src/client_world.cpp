@@ -16,7 +16,9 @@ namespace world {
     while (blocks_string.find(';') != std::string::npos) {
       string block = blocks_string.substr(0, blocks_string.find_first_of(';'));
       blocks_string = blocks_string.substr(blocks_string.find_first_of(';') + 1);
-      log_debug(block);
+      if (!block.empty()) {
+        log_debug(block);
+      }
     }
 
   }
