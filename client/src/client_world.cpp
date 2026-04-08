@@ -1,25 +1,70 @@
 #include "client_world.h"
 
 #include "client_logger.h"
+#include <raylib.h>
 
 namespace world {
-  void render_chunk(const string& input_string) {
-    log_debug(input_string);
+  void save_chunk(const string& input_string) {
+    Chunk chunk;
+    string chunk_string = input_string.substr(0, input_string.find_first_of(';'));
+    log_debug(chunk_string);
+    chunk.x = stoi(chunk_string.substr(0, chunk_string.find(' ')));
+    chunk.z = stoi(chunk_string.substr(chunk_string.find(' ') + 1));
 
-    string chunk = input_string.substr(0, input_string.find_first_of(';'));
-    log_debug(chunk);
-    string chunk_x = chunk.substr(0, input_string.find(' '));
-    string chunk_y = chunk.substr(input_string.find(' '));
+    for (int x = 0; x < SIZE_X; ++x)
+      for (int y = 0; y < SIZE_Y; ++y)
+        for (int z = 0; z < SIZE_Z; ++z)
+          chunk.blocks[x][y][z] = 0;
 
-    string blocks_string = input_string.substr(input_string.find_first_of(';'));
+    string blocks_string = input_string.substr(input_string.find_first_of(';') + 1);
 
     while (blocks_string.find(';') != std::string::npos) {
       string block = blocks_string.substr(0, blocks_string.find_first_of(';'));
       blocks_string = blocks_string.substr(blocks_string.find_first_of(';') + 1);
-      if (!block.empty()) {
-        log_debug(block);
-      }
+      size_t p1 = block.find(',');
+      size_t p2 = block.find(',', p1 + 1);
+      size_t p3 = block.find(',', p2 + 1);
+
+      if (p1 == string::npos || p2 == string::npos || p3 == string::npos) continue;
+
+      int type = stoi(block.substr(0, p1));
+      int x = stoi(block.substr(p1 + 1, p2 - p1 - 1));
+      int y = stoi(block.substr(p2 + 1, p3 - p2 - 1));
+      int z = stoi(block.substr(p3 + 1));
+
+      chunk.blocks[x][y][z] = type;
+
+    }
+    chunks.emplace(chunk_string, chunk);
+  }
+
+  void render_chunk(const string& chunk_key) {
+    auto it = chunks.find(chunk_key);
+    if (it == chunks.end()) {
+      log_debug("Chunk not found: " + chunk_key);
+      return;
     }
 
+    Chunk& chunk = it->second;
+
+    for (int x = 0; x < SIZE_X; ++x) {
+      for (int y = 0; y < SIZE_Y; ++y) {
+        for (int z = 0; z < SIZE_Z; ++z) {
+          int type = chunk.blocks[x][y][z];
+          if (type <= 0) continue;
+
+          Color color;
+          switch (type) {
+            case 1: color = BLUE; break;
+            case 2: color = LIME; break;
+            default: color = WHITE; break;
+          }
+
+          DrawCube(
+              (Vector3){static_cast<float>(x) + 0.5f, static_cast<float>(y), static_cast<float>(z) + 0.5f},
+              1.0f, 1.0f, 1.0f, color);
+        }
+      }
+    }
   }
 }

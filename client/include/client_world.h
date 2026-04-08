@@ -11,5 +11,6 @@ public:
 
 namespace world {
   inline std::unordered_map<string, Chunk> chunks;
-  void render_chunk(const string& input_string);
+  void save_chunk(const string& input_string);
+  void render_chunk(const string& chunk_key);
 }

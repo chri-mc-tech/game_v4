@@ -13,6 +13,7 @@
 #include "client_config.h"
 #include "client_logger.h"
 #include "client_ui.h"
+#include "client_world.h"
 #include "shared_crypto.h"
 #include "shared_network.h"
 #include "shared_utils.h"
@@ -163,6 +164,7 @@ void rendering_3D() {
     BeginMode3D(camera);
 
     // render_test_cubes();
+    world::render_chunk("0 0");
 
     hitbox = {
       Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),

@@ -181,7 +181,7 @@ void enet_event_receive(const ENetEvent &enet_event) {
         break;
       }
       case PKT_FROM_SERVER_CHUNK: {
-        world::render_chunk(pkt_data_string.erase(0, pkt_data_string.find(']') + 1));
+        world::save_chunk(pkt_data_string.erase(0, pkt_data_string.find(']') + 1));
       }
     }
   }
