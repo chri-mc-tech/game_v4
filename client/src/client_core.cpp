@@ -99,12 +99,13 @@ int update_window() {
     if (IsCursorHidden()) {
       float wheel = GetMouseWheelMove();
       if (wheel != 0) {
-        speed += (wheel * speed * 30.0f) * static_cast<float>(delta_time);
+        speed += (wheel * speed * 50.0f) * static_cast<float>(delta_time);
       }
     }
   }
   return 0;
 }
+
 
 int update_camera() {
   using namespace global;
@@ -171,7 +172,7 @@ void rendering_3D() {
       Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
     };
 
-    // DrawBoundingBox(hitbox, RED);
+    DrawBoundingBox(hitbox, RED);
 
     DrawGrid(100, 1.0f);
     EndMode3D();
@@ -322,38 +323,6 @@ void rendering_menu() {
 
 }
 
-void create_test_cubes() {
-  for (int x = 0; x < 50; x++) {
-    for (int z = 0; z < 50; z++) {
-      global::cube_colors[x][z] = (Color){
-        static_cast<unsigned char>(rand() % 10),
-        static_cast<unsigned char>(rand() % 30),
-        static_cast<unsigned char>(rand() % 200),
-        255
-      };
-      Block b;
-      b.x = x;
-      b.y = 0;
-      b.z = z;
-      b.solid = true;
-      global::world.push_back(b);
-    }
-  }
-}
-
-void render_test_cubes() {
-  for (int x = 0; x < 50; x++) {
-    for (int z = 0; z < 50; z++) {
-
-      DrawCube(
-        (Vector3){ static_cast<float>(x) + 0.5f, 0, static_cast<float>(z) + 0.5f},
-        1.0f, 1.0f, 1.0f,
-        global::cube_colors[x][z]
-      );
-
-    }
-  }
-}
 
 void start_graphics() {
   using namespace global::graphics;

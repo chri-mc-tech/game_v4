@@ -49,22 +49,12 @@ enum debug_menu {
   DEBUG_MENU_ADVANCED
 };
 
-class Block {
-public:
-  int x = 0;
-  int y = 0;
-  int z = 0;
-  bool solid = false;
-};
-
 namespace global {
   inline int status_connection = STATUS_CONNECTION_NOT_CONNECTED;
   inline int status_menu = STATUS_MENU_WAITING_USER_INPUT_NAME;
   inline int status_game = STATUS_GAME_NONE;
   inline bool running;
   inline std::unordered_map<string, Player> online_players;
-  inline int frames;
-  inline int fps;
   inline Integer client_private_key;
   inline Integer client_public_key;
   inline Integer server_public_key;
@@ -79,8 +69,6 @@ namespace global {
   inline float camera_height = 1.6f; // 1.6
 
   inline BoundingBox hitbox;
-
-  inline std::vector<Block> world;
 
   // physics variables
   inline float speed = 2.0f;
@@ -103,11 +91,6 @@ namespace global {
   inline Vector3 last_movement;
   inline Vector3 next_movement;
 
-
-  // debug
-  static Color cube_colors[50][50];
-  //
-
   // background test
   inline Texture2D background;
 
@@ -128,5 +111,5 @@ namespace global::graphics {
 
   inline Font font;
 
-  inline Camera3D camera = { 0 };
+  inline Camera3D camera;
 }
