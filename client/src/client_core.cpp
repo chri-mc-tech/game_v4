@@ -144,10 +144,38 @@ int update_camera() {
       main_player.block_y = static_cast<int>(floor(main_player.location.y));
       main_player.block_z = static_cast<int>(floor(main_player.location.z));
 
-      int player_chunk_x = floor(main_player.block_x / 16);
-      int player_chunk_z = floor(main_player.block_z / 16);
-      log_debug(std::to_string(player_chunk_x));
-      log_debug(std::to_string(player_chunk_z));
+      int player_chunk_x = static_cast<int>(floor(static_cast<double>(main_player.block_x) / 16.0));
+      int player_chunk_z = static_cast<int>(floor(static_cast<double>(main_player.block_z) / 16.0));
+
+      for (auto chunk : world::chunks) {
+        if (abs(chunk.second.x - player_chunk_x) > 1) continue;
+        if (abs(chunk.second.z - player_chunk_z) > 1) continue;
+
+        for (int x = 0; x < SIZE_X; x++) {
+          for (int y = 0; y < SIZE_Y; y++) {
+            for (int z = 0; z < SIZE_Z; z++) {
+              if (abs(x - main_player.block_x) > 2) continue;
+              if (abs(y - main_player.block_y) > 3) continue;
+              if (abs(z - main_player.block_z) > 2) continue;
+
+              int block_type = chunk.second.blocks[x][y][z];
+
+              if (block_type == 0) continue;
+
+              BoundingBox block_hitbox = {
+                (Vector3){ static_cast<float>(x), static_cast<float>(y) - 0.5f, static_cast<float>(z) },
+                (Vector3){ static_cast<float>(x) + 1.0f, static_cast<float>(y) + 0.5f, static_cast<float>(z) + 1.0f }
+              };
+
+              DrawBoundingBox(block_hitbox, RED);
+
+              if (CheckCollisionBoxes(hitbox, block_hitbox)) {
+                log_debug("collision");
+              }
+            }
+          }
+        }
+      }
 
     }
   }
