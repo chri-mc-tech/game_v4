@@ -128,21 +128,26 @@ int update_camera() {
     if (IsCursorHidden()) {
       float frame_speed = speed * static_cast<float>(delta_time);
 
-        next_movement = {
-          (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
-          (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
-          (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
-        };
-
+      next_movement = {
+        (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
+        (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
+        (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
+      };
 
       UpdateCameraPro(&graphics::camera, next_movement,
-          (Vector3){GetMouseDelta().x * 0.05f, GetMouseDelta().y * 0.05f, 0.0f},
-          0);
+        (Vector3){GetMouseDelta().x * 0.05f, GetMouseDelta().y * 0.05f, 0.0f},
+        0);
 
       main_player.location = graphics::camera.position;
       main_player.location.y -= camera_height;
+      main_player.block_x = static_cast<int>(floor(main_player.location.x));
+      main_player.block_y = static_cast<int>(floor(main_player.location.y));
+      main_player.block_z = static_cast<int>(floor(main_player.location.z));
 
-      last_movement = next_movement;
+      int player_chunk_x = floor(main_player.block_x / 16);
+      int player_chunk_z = floor(main_player.block_z / 16);
+      log_debug(std::to_string(player_chunk_x));
+      log_debug(std::to_string(player_chunk_z));
 
     }
   }
@@ -247,8 +252,6 @@ void rendering_menu() {
           global::status_menu = STATUS_MENU_MAIN_MENU;
         }
       }
-
-
 
       break;
     }
