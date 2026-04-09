@@ -144,27 +144,35 @@ int update_camera() {
       main_player.block_y = static_cast<int>(floor(main_player.location.y));
       main_player.block_z = static_cast<int>(floor(main_player.location.z));
 
-      int player_chunk_x = static_cast<int>(floor(static_cast<double>(main_player.block_x) / 16.0));
-      int player_chunk_z = static_cast<int>(floor(static_cast<double>(main_player.block_z) / 16.0));
+      main_player.chunk_x = static_cast<int>(floor(static_cast<double>(main_player.block_x) / 16.0));
+      main_player.chunk_z = static_cast<int>(floor(static_cast<double>(main_player.block_z) / 16.0));
 
-      for (auto chunk : world::chunks) {
-        if (abs(chunk.second.x - player_chunk_x) > 1) continue;
-        if (abs(chunk.second.z - player_chunk_z) > 1) continue;
+      for (const auto& chunk : world::chunks) {
+        if (abs(chunk.second.x - main_player.chunk_x) > 2) continue;
+        if (abs(chunk.second.z - main_player.chunk_z) > 2) continue;
+
+        std::cout << main_player.chunk_x << "\n";
+        std::cout << main_player.chunk_z << "\n";
+
 
         for (int x = 0; x < SIZE_X; x++) {
           for (int y = 0; y < SIZE_Y; y++) {
             for (int z = 0; z < SIZE_Z; z++) {
-              if (abs(x - main_player.block_x) > 2) continue;
+
+              float global_x = chunk.second.x * 16 + x;
+              float global_z = chunk.second.z * 16 + z;
+
+              if (abs(global_x - main_player.block_x) > 2) continue;
               if (abs(y - main_player.block_y) > 3) continue;
-              if (abs(z - main_player.block_z) > 2) continue;
+              if (abs(global_z - main_player.block_z) > 2) continue;
 
               int block_type = chunk.second.blocks[x][y][z];
 
               if (block_type == 0) continue;
 
               BoundingBox block_hitbox = {
-                (Vector3){ static_cast<float>(x), static_cast<float>(y) - 0.5f, static_cast<float>(z) },
-                (Vector3){ static_cast<float>(x) + 1.0f, static_cast<float>(y) + 0.5f, static_cast<float>(z) + 1.0f }
+                (Vector3){ global_x, y - 0.5f, global_z },
+                (Vector3){ global_x + 1.0f, y + 0.5f, global_z + 1.0f }
               };
 
               DrawBoundingBox(block_hitbox, RED);

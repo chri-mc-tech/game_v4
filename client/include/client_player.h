@@ -18,6 +18,8 @@ public:
   int block_x;
   int block_y;
   int block_z;
+  int chunk_x;
+  int chunk_z;
 };
 
 Player * get_player_from_uuid(const string& uuid);
