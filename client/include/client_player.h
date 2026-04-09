@@ -20,6 +20,7 @@ public:
   int block_z;
   int chunk_x;
   int chunk_z;
+  BoundingBox hitbox;
 };
 
 Player * get_player_from_uuid(const string& uuid);

@@ -129,15 +129,15 @@ int update_camera() {
     if (IsCursorHidden()) {
       float frame_speed = speed * static_cast<float>(delta_time);
 
-      next_movement = {
+      UpdateCameraPro(&graphics::camera, {
         (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
         (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
         (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
-      };
-
-      UpdateCameraPro(&graphics::camera, next_movement,
+        },
         (Vector3){GetMouseDelta().x * 0.05f, GetMouseDelta().y * 0.05f, 0.0f},
         0);
+
+      Vector3 old_location = main_player.location;
 
       main_player.location = graphics::camera.position;
       main_player.location.y -= camera_height;
@@ -176,7 +176,10 @@ int update_camera() {
                 (Vector3){ global_x + 1.0f, y + 0.5f, global_z + 1.0f }
               };
 
-              DrawBoundingBox(block_hitbox, RED);
+              main_player.hitbox = {
+                Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
+                Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
+              };
 
               if (CheckCollisionBoxes(hitbox, block_hitbox)) {
                 log_debug("collision");
@@ -224,12 +227,7 @@ void rendering_3D() {
     world::render_chunk("0 0");
     world::render_chunk("-1 -1");
 
-    hitbox = {
-      Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
-      Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
-    };
-
-    DrawBoundingBox(hitbox, RED);
+    DrawBoundingBox(main_player.hitbox, RED);
 
     switch (global::debug_grid) {
       case DEBUG_GRID_BLOCKS: DrawGrid(800, 1.0f); break;
