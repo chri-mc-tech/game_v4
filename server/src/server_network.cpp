@@ -204,6 +204,10 @@ void enet_event_receive(const ENetEvent &enet_event) {
           std::string packet = world::create_chunk_string(world::get_chunk_key(0, 0));
           std::cout << packet << "\n";
           shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CHUNK, packet, 1, ENET_PACKET_FLAG_RELIABLE);
+
+          packet = world::create_chunk_string(world::get_chunk_key(-1, -1));
+          std::cout << packet << "\n";
+          shared::network::send_packet(enet_event.peer, PKT_FROM_SERVER_CHUNK, packet, 1, ENET_PACKET_FLAG_RELIABLE);
           //////////////////////
         }
         break;

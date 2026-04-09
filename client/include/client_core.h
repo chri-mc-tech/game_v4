@@ -20,6 +20,7 @@ void start_graphics();
 void update_modifier();
 void create_test_cubes();
 void render_test_cubes();
+int update_input();
 int update_window();
 int update_camera();
 void update_player();

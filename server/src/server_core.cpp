@@ -26,6 +26,7 @@ int server_run()
   auto last = std::chrono::high_resolution_clock::now();
 
   world::load_chunk(0, 0);
+  world::load_chunk(-1, -1);
 
   while (global::running) {
     auto frame_start = std::chrono::high_resolution_clock::now();

@@ -49,6 +49,12 @@ enum debug_menu {
   DEBUG_MENU_ADVANCED
 };
 
+enum debug_grid {
+  DEBUG_GRID_OFF,
+  DEBUG_GRID_BLOCKS,
+  DEBUG_GRID_CHUNKS
+};
+
 namespace global {
   inline int status_connection = STATUS_CONNECTION_NOT_CONNECTED;
   inline int status_menu = STATUS_MENU_WAITING_USER_INPUT_NAME;
@@ -61,7 +67,10 @@ namespace global {
   inline Integer shared_key;
   inline SecByteBlock encryption_key;
   inline Player main_player;
-  inline int debug_menu;
+
+
+  inline int debug_menu = DEBUG_MENU_CLOSED;
+  inline int debug_grid = DEBUG_GRID_OFF;
 
   // inline bool is_third_person = false;
   inline float player_height = 1.8f; // 1.8

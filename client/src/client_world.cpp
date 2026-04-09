@@ -47,6 +47,9 @@ namespace world {
 
     Chunk& chunk = it->second;
 
+    int to_add_x = stoi(chunk_key.substr(0, chunk_key.find(' '))) * 16;
+    int to_add_z = stoi(chunk_key.substr(chunk_key.find(' ') + 1)) * 16;
+
     for (int x = 0; x < SIZE_X; ++x) {
       for (int y = 0; y < SIZE_Y; ++y) {
         for (int z = 0; z < SIZE_Z; ++z) {
@@ -61,7 +64,7 @@ namespace world {
           }
 
           DrawCube(
-              (Vector3){static_cast<float>(x) + 0.5f, static_cast<float>(y), static_cast<float>(z) + 0.5f},
+              (Vector3){static_cast<float>(x) + to_add_x + 0.5f, static_cast<float>(y), static_cast<float>(z) + to_add_z + 0.5f},
               1.0f, 1.0f, 1.0f, color);
         }
       }

@@ -59,6 +59,7 @@ int client_run() {
     accumulator += global::delta_time;
 
     enet_loop();
+    update_input();
     update_window();
     update_camera();
     render();
@@ -75,6 +76,19 @@ int client_run() {
   return 0;
 }
 
+int update_input() {
+  if (GetKeyPressed() == KEY_F8) {
+    switch (global::debug_grid) {
+      case DEBUG_GRID_OFF: global::debug_grid = DEBUG_GRID_BLOCKS; break;
+      case DEBUG_GRID_BLOCKS:global::debug_grid = DEBUG_GRID_CHUNKS; break;
+      case DEBUG_GRID_CHUNKS:global::debug_grid = DEBUG_GRID_OFF; break;
+
+    }
+  }
+
+  return 0;
+
+}
 
 int update_window() {
   using global::speed;
@@ -166,6 +180,7 @@ void rendering_3D() {
 
     // render_test_cubes();
     world::render_chunk("0 0");
+    world::render_chunk("-1 -1");
 
     hitbox = {
       Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
@@ -174,7 +189,12 @@ void rendering_3D() {
 
     DrawBoundingBox(hitbox, RED);
 
-    DrawGrid(100, 1.0f);
+    switch (global::debug_grid) {
+      case DEBUG_GRID_BLOCKS: DrawGrid(800, 1.0f); break;
+      case DEBUG_GRID_CHUNKS: DrawGrid(50, 16.0f); break;
+
+    }
+
     EndMode3D();
   }
 
@@ -220,7 +240,7 @@ void rendering_menu() {
       ui::draw_centered_text(input_string, window_width/2, window_height/2, WHITE);
       ui::button_continue.render(window_width / 2 - 125, window_height - 70);
 
-      if (is_button_clicked(ui::button_continue)) {
+      if (is_button_clicked(ui::button_continue) || IsKeyPressed(KEY_ENTER)) {
         if (shared::utils::is_valid_nickname(input_string)) {
           config::save_new_nickname(input_string);
           input_string.clear();
@@ -262,7 +282,7 @@ void rendering_menu() {
       ui::draw_centered_text(input_string, window_width/2, window_height/2, WHITE);
       ui::button_continue.render(window_width / 2 - 125, window_height - 70);
 
-      if (is_button_clicked(ui::button_continue)) {
+      if (is_button_clicked(ui::button_continue) || IsKeyPressed(KEY_ENTER)) {
         global::status_menu = STATUS_MENU_CONNECTING;
         if (input_string.find(':') == string::npos) {
           connect_to_server(input_string);
@@ -298,7 +318,7 @@ void rendering_menu() {
       ui::draw_centered_text(input_string, window_width/2, window_height/2, WHITE);
       ui::button_continue.render(window_width / 2 - 125, window_height - 70);
 
-      if (is_button_clicked(ui::button_continue)) {
+      if (is_button_clicked(ui::button_continue) || IsKeyPressed(KEY_ENTER)) {
         global::status_menu = STATUS_MENU_VOID;
         auto hashed_pass = shared::crypto::hash_password(input_string);
         log_info(input_string);
@@ -313,7 +333,7 @@ void rendering_menu() {
       ui::draw_centered_text("Disconnected from server", window_width/2, window_height/2 - 50, WHITE);
       ui::button_continue.render(window_width / 2 - 125, window_height - 70);
 
-      if (is_button_clicked(ui::button_continue)) {
+      if (is_button_clicked(ui::button_continue) || IsKeyPressed(KEY_ENTER)) {
         global::status_menu = STATUS_MENU_MAIN_MENU;
       }
     }
