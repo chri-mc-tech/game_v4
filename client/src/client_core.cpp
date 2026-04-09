@@ -29,6 +29,8 @@ bool initialize_libraries() {
 int client_run() {
   global::running = true;
 
+  // global::background = LoadTexture("background.png");
+
   start_graphics();
 
   global::main_player.name = config::name;
@@ -44,7 +46,6 @@ int client_run() {
   global::graphics::font = LoadFontEx("Archivo-SemiBold.ttf", 64, nullptr, 0);
   ui::create_all_buttons();
 
-  global::background = LoadTexture("background.png");
 
   while (global::running) {
     if (WindowShouldClose()) {
@@ -388,6 +389,9 @@ void start_graphics() {
   using namespace global;
 
   InitWindow(window_width, window_height, "game");
+
+  auto logo = LoadImage("logo.png");
+  SetWindowIcon(logo);
 
   SetWindowState(FLAG_WINDOW_RESIZABLE);
   SetWindowMinSize(640, 360);

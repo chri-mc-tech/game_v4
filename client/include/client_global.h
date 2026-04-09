@@ -68,7 +68,6 @@ namespace global {
   inline SecByteBlock encryption_key;
   inline Player main_player;
 
-
   inline int debug_menu = DEBUG_MENU_CLOSED;
   inline int debug_grid = DEBUG_GRID_OFF;
 
