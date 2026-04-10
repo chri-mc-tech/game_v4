@@ -208,11 +208,6 @@ int update_camera() {
         }
       }
 
-      main_player.hitbox = {
-        Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
-        Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
-      };
-
       if (colliosion_x) {
         graphics::camera.position.x = old_camera_location.x;
         graphics::camera.target.x = old_camera_target.x;
@@ -238,6 +233,11 @@ int update_camera() {
 
       main_player.chunk_x = static_cast<int>(floor(static_cast<double>(main_player.block_x) / 16.0));
       main_player.chunk_z = static_cast<int>(floor(static_cast<double>(main_player.block_z) / 16.0));
+
+      main_player.hitbox = {
+        Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
+        Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
+      };
     }
   }
 
