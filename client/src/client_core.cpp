@@ -78,12 +78,26 @@ int client_run() {
 }
 
 int update_input() {
-  if (GetKeyPressed() == KEY_F8) {
+  if (IsKeyPressed(KEY_F8)) {
     switch (global::debug_grid) {
       case DEBUG_GRID_OFF: global::debug_grid = DEBUG_GRID_BLOCKS; break;
       case DEBUG_GRID_BLOCKS:global::debug_grid = DEBUG_GRID_CHUNKS; break;
       case DEBUG_GRID_CHUNKS:global::debug_grid = DEBUG_GRID_OFF; break;
 
+    }
+  }
+
+  if (IsKeyPressed(KEY_F3)) {
+    if (global::debug_menu == DEBUG_MENU_CLOSED) {
+      if (IsKeyDown(KEY_LEFT_SHIFT)) {
+        global::debug_menu = DEBUG_MENU_ADVANCED;
+      }
+      else {
+        global::debug_menu = DEBUG_MENU_DEFAULT;
+      }
+    }
+    else {
+      global::debug_menu = DEBUG_MENU_CLOSED;
     }
   }
 
@@ -215,7 +229,16 @@ int update_camera() {
       if (colliosion_y) {
         graphics::camera.position.y = old_camera_location.y;
         graphics::camera.target.y = old_camera_target.y;
+
+        // using Z as vertical axis because movement is camera-relative, not global axes:
+        // X = forward/backward, Y = left/right, Z = up/down
+        if (movement.z < 0) {
+          is_grounded = true;
+        }
+
       }
+      else {is_grounded = false;}
+
       if (colliosion_z) {
         graphics::camera.position.z = old_camera_location.z;
         graphics::camera.target.z = old_camera_target.z;
@@ -300,33 +323,45 @@ void rendering_menu() {
   using namespace global;
   using namespace global::graphics;
 
-  DrawFPS(10, 10);
+  if (global::debug_menu >= DEBUG_MENU_DEFAULT) {
+    string debug_menu_string;
+    string debug_menu_advanced_string;
 
-  DrawText((
-    "menu: " + std::to_string(global::status_menu) +
-    "\nconn: " + std::to_string(global::status_connection) +
-    "\ngame: " + std::to_string(global::status_game)
-    ).c_str(),
-    10, 30, 20, WHITE);
+    debug_menu_string =
+      "fps: " + std::to_string(GetFPS()) +
+      "\nmenu: " + std::to_string(global::status_menu) +
+      "\nconn: " + std::to_string(global::status_connection) +
+      "\ngame: " + std::to_string(global::status_game);
 
-  if (global::status_game == STATUS_GAME_PLAYING) {
 
-    float x = main_player.location.x;
-    float y = main_player.location.y;
-    float z = main_player.location.z;
+    if (global::status_game == STATUS_GAME_PLAYING) {
+      float x = main_player.location.x;
+      float y = main_player.location.y;
+      float z = main_player.location.z;
 
-    int block_x = static_cast<int>(floor(main_player.location.x));
-    int block_y = static_cast<int>(floor(main_player.location.y));
-    int block_z = static_cast<int>(floor(main_player.location.z));
-    
-    DrawText(("coords: " + std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(z)).c_str(),
-      10, 100, 20, WHITE);
-    
-    DrawText(("block: " + std::to_string(block_x) + " " + std::to_string(block_y) + " " + std::to_string(block_z)).c_str(),
-      10, 130, 20, WHITE);
+      int block_x = static_cast<int>(floor(main_player.location.x));
+      int block_y = static_cast<int>(floor(main_player.location.y));
+      int block_z = static_cast<int>(floor(main_player.location.z));
+      debug_menu_advanced_string += "\ncoords: " + std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(z);
 
+      /*
+      string is_grounded_string;
+      if (is_grounded) {is_grounded_string = "true";}
+      else {is_grounded_string = "false";}
+      DrawText(("is grounded?: " + is_grounded_string).c_str(),
+        10, 160, 20, WHITE);
+        */
+
+
+      debug_menu_string += "\nblock: " + std::to_string(block_x) + " " + std::to_string(block_y) + " " + std::to_string(block_z);
+    }
+
+    DrawTextEx(font, debug_menu_string.c_str(), {10, 10}, 24, 0.5, WHITE);
+    if (global::debug_menu == DEBUG_MENU_ADVANCED) {
+
+      DrawTextEx(font, debug_menu_advanced_string.c_str(), {static_cast<float>(window_width/2), 10}, 24, 0.5, WHITE);
+    }
   }
-
 
   switch (global::status_menu) {
     case STATUS_MENU_WAITING_USER_INPUT_NAME: {

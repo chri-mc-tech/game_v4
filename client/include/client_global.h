@@ -85,7 +85,7 @@ namespace global {
   inline float speed = 2.0f;
   inline float velocityY = 0.0f;
   inline constexpr float GRAVITY = -9.81f;
-  inline bool isGrounded = false;
+  inline bool is_grounded = false;
   //
 
   inline string input_string;
