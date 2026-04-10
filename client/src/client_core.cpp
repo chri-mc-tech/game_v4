@@ -129,11 +129,13 @@ int update_camera() {
     if (IsCursorHidden()) {
       float frame_speed = speed * static_cast<float>(delta_time);
 
-      UpdateCameraPro(&graphics::camera, {
+      Vector3 movement = {
         (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
         (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
         (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
-        },
+        };
+
+      UpdateCameraPro(&graphics::camera, movement,
         (Vector3){GetMouseDelta().x * 0.05f, GetMouseDelta().y * 0.05f, 0.0f},
         0);
 
@@ -148,13 +150,26 @@ int update_camera() {
       main_player.chunk_x = static_cast<int>(floor(static_cast<double>(main_player.block_x) / 16.0));
       main_player.chunk_z = static_cast<int>(floor(static_cast<double>(main_player.block_z) / 16.0));
 
+      last_collision_hitbox_x = {
+        Vector3Add(main_player.hitbox.min, {(main_player.location.x - old_location.x), 0, 0}),
+        Vector3Add(main_player.hitbox.max, {(main_player.location.x - old_location.x), 0, 0})
+      };
+      last_collision_hitbox_y = {
+        Vector3Add(main_player.hitbox.min, {0, (main_player.location.y - old_location.y), 0}),
+        Vector3Add(main_player.hitbox.max, {0, (main_player.location.y - old_location.y), 0})
+      };
+      last_collision_hitbox_z = {
+        Vector3Add(main_player.hitbox.min, {0, 0, (main_player.location.z - old_location.z)}),
+        Vector3Add(main_player.hitbox.max, {0, 0, (main_player.location.z - old_location.z)})
+      };
+
+      bool colliosion_x;
+      bool colliosion_y;
+      bool colliosion_z;
+
       for (const auto& chunk : world::chunks) {
         if (abs(chunk.second.x - main_player.chunk_x) > 2) continue;
         if (abs(chunk.second.z - main_player.chunk_z) > 2) continue;
-
-        std::cout << main_player.chunk_x << "\n";
-        std::cout << main_player.chunk_z << "\n";
-
 
         for (int x = 0; x < SIZE_X; x++) {
           for (int y = 0; y < SIZE_Y; y++) {
@@ -176,19 +191,34 @@ int update_camera() {
                 (Vector3){ global_x + 1.0f, y + 0.5f, global_z + 1.0f }
               };
 
+              if (CheckCollisionBoxes(last_collision_hitbox_x, block_hitbox)) {
+                colliosion_x = true;
+              }
+              if (CheckCollisionBoxes(last_collision_hitbox_y, block_hitbox)) {
+                colliosion_y = true;
+              }
+              if (CheckCollisionBoxes(last_collision_hitbox_z, block_hitbox)) {
+                colliosion_z = true;
+              }
               main_player.hitbox = {
                 Vector3Add(Vector3(main_player.location), Vector3({- (player_width / 2), 0, - (player_width / 2)})),
                 Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
               };
 
-              if (CheckCollisionBoxes(hitbox, block_hitbox)) {
-                log_debug("collision");
-              }
             }
           }
         }
       }
 
+      if (colliosion_x) {
+        log_debug("x");
+      }
+      if (colliosion_y) {
+        log_debug("y");
+      }
+      if (colliosion_z) {
+        log_debug("z");
+      }
     }
   }
 
@@ -227,7 +257,14 @@ void rendering_3D() {
     world::render_chunk("0 0");
     world::render_chunk("-1 -1");
 
-    DrawBoundingBox(main_player.hitbox, RED);
+
+
+    //DrawBoundingBox(main_player.hitbox, RED);
+
+    DrawBoundingBox(last_collision_hitbox_x, BLUE);
+    DrawBoundingBox(last_collision_hitbox_y, GREEN);
+    DrawBoundingBox(last_collision_hitbox_z, YELLOW);
+
 
     switch (global::debug_grid) {
       case DEBUG_GRID_BLOCKS: DrawGrid(800, 1.0f); break;

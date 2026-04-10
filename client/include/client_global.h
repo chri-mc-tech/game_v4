@@ -77,6 +77,9 @@ namespace global {
   inline float camera_height = 1.6f; // 1.6
 
   inline BoundingBox hitbox;
+  inline BoundingBox last_collision_hitbox_x;
+  inline BoundingBox last_collision_hitbox_y;
+  inline BoundingBox last_collision_hitbox_z;
 
   // physics variables
   inline float speed = 2.0f;
