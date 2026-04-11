@@ -83,9 +83,11 @@ namespace global {
 
   // physics variables
   inline float speed = 2.0f;
-  inline float velocityY = 0.0f;
-  inline constexpr float GRAVITY = -9.81f;
+  inline float jump_speed = 4.0f;
+  inline float velocity_Y = 0.0f;
+  inline constexpr float GRAVITY = 9.81f;
   inline bool is_grounded = false;
+  inline bool hit_ground = false;
   //
 
   inline string input_string;

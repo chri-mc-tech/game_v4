@@ -143,15 +143,28 @@ int update_camera() {
     if (IsCursorHidden()) {
       float frame_speed = speed * static_cast<float>(delta_time);
 
-      Vector3 movement = {
-        (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
-        (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
-        (static_cast<float>(IsKeyDown(KEY_SPACE)) - static_cast<float>(IsKeyDown(KEY_LEFT_SHIFT))) * frame_speed
-        };
+      //delta time = 0.00xxx
 
       Vector3 old_player_location = main_player.location;
       Vector3 old_camera_location = graphics::camera.position;
       Vector3 old_camera_target = graphics::camera.target;
+
+      if (!is_grounded) {
+        velocity_Y -= GRAVITY * delta_time;
+      }
+      else {
+        velocity_Y = -GRAVITY * delta_time;
+        if (IsKeyPressed(KEY_SPACE)) {
+          velocity_Y = jump_speed;
+          is_grounded = false;
+        }
+      }
+
+      Vector3 movement = {
+        (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
+        (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
+        velocity_Y * static_cast<float>(delta_time)
+        };
 
       UpdateCameraPro(&graphics::camera, movement,
         (Vector3){0, 0, 0},
@@ -179,9 +192,9 @@ int update_camera() {
         Vector3Add(main_player.hitbox.max, {0, 0, (main_player.location.z - old_player_location.z)})
       };
 
-      bool colliosion_x = false;
-      bool colliosion_y = false;
-      bool colliosion_z = false;
+      bool collision_x = false;
+      bool collision_y = false;
+      bool collision_z = false;
 
       for (const auto& chunk : world::chunks) {
         if (abs(chunk.second.x - main_player.chunk_x) > 2) continue;
@@ -208,13 +221,13 @@ int update_camera() {
               };
 
               if (CheckCollisionBoxes(last_collision_hitbox_x, block_hitbox)) {
-                colliosion_x = true;
+                collision_x = true;
               }
               if (CheckCollisionBoxes(last_collision_hitbox_y, block_hitbox)) {
-                colliosion_y = true;
+                collision_y = true;
               }
               if (CheckCollisionBoxes(last_collision_hitbox_z, block_hitbox)) {
-                colliosion_z = true;
+                collision_z = true;
               }
 
             }
@@ -222,24 +235,24 @@ int update_camera() {
         }
       }
 
-      if (colliosion_x) {
+      if (collision_x) {
         graphics::camera.position.x = old_camera_location.x;
         graphics::camera.target.x = old_camera_target.x;
       }
-      if (colliosion_y) {
+      if (collision_y) {
         graphics::camera.position.y = old_camera_location.y;
         graphics::camera.target.y = old_camera_target.y;
 
-        // using Z as vertical axis because movement is camera-relative, not global axes:
-        // X = forward/backward, Y = left/right, Z = up/down
-        if (movement.z < 0) {
+        if (velocity_Y < 0) {
           is_grounded = true;
         }
 
       }
-      else {is_grounded = false;}
+      else {
+        is_grounded = false;
+      }
 
-      if (colliosion_z) {
+      if (collision_z) {
         graphics::camera.position.z = old_camera_location.z;
         graphics::camera.target.z = old_camera_target.z;
       }
@@ -333,35 +346,29 @@ void rendering_menu() {
       "\nconn: " + std::to_string(global::status_connection) +
       "\ngame: " + std::to_string(global::status_game);
 
+    float x = main_player.location.x;
+    float y = main_player.location.y;
+    float z = main_player.location.z;
 
-    if (global::status_game == STATUS_GAME_PLAYING) {
-      float x = main_player.location.x;
-      float y = main_player.location.y;
-      float z = main_player.location.z;
+    int block_x = static_cast<int>(floor(main_player.location.x));
+    int block_y = static_cast<int>(floor(main_player.location.y));
+    int block_z = static_cast<int>(floor(main_player.location.z));
+    debug_menu_advanced_string = "coords: " + std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(z);
 
-      int block_x = static_cast<int>(floor(main_player.location.x));
-      int block_y = static_cast<int>(floor(main_player.location.y));
-      int block_z = static_cast<int>(floor(main_player.location.z));
-      debug_menu_advanced_string += "\ncoords: " + std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(z);
+    string is_grounded_string;
+    if (is_grounded) {is_grounded_string = "true";}
+    else {is_grounded_string = "false";}
+    debug_menu_advanced_string += "\nis grounded?: " + is_grounded_string;
 
-      /*
-      string is_grounded_string;
-      if (is_grounded) {is_grounded_string = "true";}
-      else {is_grounded_string = "false";}
-      DrawText(("is grounded?: " + is_grounded_string).c_str(),
-        10, 160, 20, WHITE);
-        */
-
-
-      debug_menu_string += "\nblock: " + std::to_string(block_x) + " " + std::to_string(block_y) + " " + std::to_string(block_z);
-    }
+    debug_menu_string += "\nblock: " + std::to_string(block_x) + " " + std::to_string(block_y) + " " + std::to_string(block_z);
 
     DrawTextEx(font, debug_menu_string.c_str(), {10, 10}, 24, 0.5, WHITE);
-    if (global::debug_menu == DEBUG_MENU_ADVANCED) {
 
+    if (global::debug_menu == DEBUG_MENU_ADVANCED) {
       DrawTextEx(font, debug_menu_advanced_string.c_str(), {static_cast<float>(window_width/2), 10}, 24, 0.5, WHITE);
     }
   }
+
 
   switch (global::status_menu) {
     case STATUS_MENU_WAITING_USER_INPUT_NAME: {
