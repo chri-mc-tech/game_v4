@@ -35,12 +35,12 @@ enum status_menu {
   STATUS_MENU_IN_GAME,
   STATUS_MENU_DISCONNECTED_FROM_SERVER,
   STATUS_MENU_VOID,
+  STATUS_MENU_PAUSE,
 };
 
 enum status_game {
   STATUS_GAME_NONE,
   STATUS_GAME_PLAYING,
-  STATUS_GAME_PAUSED
 };
 
 enum debug_menu {
@@ -68,8 +68,11 @@ namespace global {
   inline SecByteBlock encryption_key;
   inline Player main_player;
 
+  // debug
   inline int debug_menu = DEBUG_MENU_CLOSED;
   inline int debug_grid = DEBUG_GRID_OFF;
+  inline bool show_hitbox = false;
+  inline bool show_collision_hitbox = false;
 
   // inline bool is_third_person = false;
   inline float player_height = 1.8f; // 1.8
