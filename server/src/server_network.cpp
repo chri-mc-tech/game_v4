@@ -253,14 +253,16 @@ void send_players_location() {
       string uuid = temp_player.first;
       string str_x = to_string(temp_player.second.location_x);
       string str_y = to_string(temp_player.second.location_y);
+      string str_z = to_string(temp_player.second.location_z);
 
-      packet_string += uuid + " " + str_x.substr(0, str_x.find('.') + 3) + " " + str_y.substr(0, str_y.find('.') + 3);
+      packet_string += uuid + " " + str_x.substr(0, str_x.find('.') + 3) + " " + str_y.substr(0, str_y.find('.') + 3) + " " + str_z.substr(0, str_z.find('.') + 3);
 
       first = false;
     }
   }
 
   // send the string to all players
+  log_debug(packet_string);
   for (const auto& temp_player : global::online_players) {
     if (temp_player.second.player_status == PLAYER_STATUS_AUTHENTICATED) {
       shared::network::send_packet(temp_player.second.peer, PKT_FROM_SERVER_COORDS, packet_string, 1, 0);

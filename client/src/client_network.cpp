@@ -215,12 +215,22 @@ int connect_to_server(const string& ip, const string& port) {
 
 void send_location() {
   if (global::status_connection == STATUS_CONNECTION_ENCRYPTED) {
-    shared::network::send_packet(
-      global::enet::connected_server_peer,
-      PKT_FROM_CLIENT_COORDS,
-      std::to_string(global::main_player.location.x) + " " +
-      std::to_string(global::main_player.location.y) + " " +
-      std::to_string(global::main_player.location.z),
-      1, 0);
+    if (global::status_game == STATUS_GAME_PLAYING) {
+
+      float x = global::main_player.location.x;
+      float y = global::main_player.location.y;
+      float z = global::main_player.location.z;
+
+      const string to_send =
+        std::to_string(x).substr(0, std::to_string(x).find('.') + 3) + " " +
+        std::to_string(y).substr(0, std::to_string(y).find('.') + 3) + " " +
+        std::to_string(z).substr(0, std::to_string(z).find('.') + 3);
+
+      shared::network::send_packet(
+        global::enet::connected_server_peer,
+        PKT_FROM_CLIENT_COORDS,
+        to_send,
+        1, 0);
+    }
   }
 }

@@ -85,11 +85,21 @@ namespace global {
   inline BoundingBox last_collision_hitbox_z;
 
   // physics variables
-  inline float speed = 2.0f;
-  inline float jump_speed = 6.9f;
+  inline float max_walk_horizontal_speed = 3.0f;
+  inline float max_run_horizontal_speed = 4.0f;
+
+  inline float now_max_horizontal_speed = max_walk_horizontal_speed;
+
+  inline float horizontal_acceleration = 25.0f;
+  inline float horizontal_friction = 18.0f;
+  inline float current_velocity_forward = 0.0f;
+  inline float current_velocity_side = 0.0f;
+
+  inline float jump_speed = 7.85f;
   inline float velocity_Y = 0.0f;
-  inline constexpr float GRAVITY = 20.0f;
+  inline constexpr float GRAVITY = 24.0f;
   inline bool is_grounded = false;
+  inline float coyote_timer;
   //
 
   inline string input_string;

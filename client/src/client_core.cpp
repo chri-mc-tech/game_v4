@@ -57,7 +57,13 @@ int client_run() {
     global::delta_time = std::chrono::duration<double>(now - last).count();
     last = now;
 
+    if (global::delta_time > 0.1) global::delta_time = 0.1;
+
     accumulator += global::delta_time;
+
+    if (accumulator > 1.0) {
+      accumulator = TICK_TIME;
+    }
 
     enet_loop();
     update_input();
@@ -77,7 +83,7 @@ int client_run() {
   return 0;
 }
 
-int update_input() {
+void update_input() {
   static bool f3_used = false;
 
   if (IsKeyPressed(KEY_F3)) {
@@ -115,11 +121,9 @@ int update_input() {
       global::debug_menu = DEBUG_MENU_CLOSED;
     }
   }
-  return 0;
 }
 
-int update_window() {
-  using global::speed;
+void update_window() {
   using namespace global;
 
   if (IsWindowResized()) {
@@ -139,24 +143,21 @@ int update_window() {
       }
     }
   }
-  return 0;
 }
 
 
-int update_camera() {
+void update_camera() {
   using namespace global;
 
   if (global::status_game == STATUS_GAME_PLAYING) {
     if (IsKeyDown(KEY_LEFT_CONTROL)) {
-      speed = 3.0f;
+      now_max_horizontal_speed = max_run_horizontal_speed;
     }
     else {
-      speed = 2.0f;
+      now_max_horizontal_speed = max_walk_horizontal_speed;
     }
 
-    float frame_speed = speed * static_cast<float>(delta_time);
-
-    //delta time = 0.00xxx
+    // delta time ≈ 0.00xxx
 
     Vector3 old_player_location = main_player.location;
     Vector3 old_camera_location = graphics::camera.position;
@@ -164,25 +165,93 @@ int update_camera() {
 
     if (!is_grounded) {
       velocity_Y -= GRAVITY * delta_time;
+    } else {
+      velocity_Y = -GRAVITY * delta_time;
+    }
+
+
+    if (IsKeyDown(KEY_SPACE) && is_grounded) {
+      velocity_Y = jump_speed;
+      is_grounded = false;
+    }
+
+    if (velocity_Y < -100) {
+      velocity_Y = -100;
+    }
+
+    float w_s_movement = static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S));
+    float d_a_movement = static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A));
+
+    if (w_s_movement != 0) {
+      current_velocity_forward += w_s_movement * horizontal_acceleration * delta_time;
     }
     else {
-      velocity_Y = -GRAVITY * delta_time;
-      if (IsKeyPressed(KEY_SPACE)) {
-        velocity_Y = jump_speed;
-        is_grounded = false;
+      if (current_velocity_forward > 0) {
+        if (current_velocity_forward - horizontal_friction * delta_time < 0) {
+          current_velocity_forward = 0;
+        }
+        else {
+          current_velocity_forward -= horizontal_friction * delta_time;
+        }
+      }
+      else if (current_velocity_forward < 0) {
+        if (current_velocity_forward + horizontal_friction * delta_time > 0) {
+          current_velocity_forward = 0;
+        }
+        else {
+          current_velocity_forward += horizontal_friction * delta_time;
+        }
+      }
+      else {
+        current_velocity_forward = 0;
       }
     }
+
+    if (d_a_movement != 0) {
+      current_velocity_side += d_a_movement * horizontal_acceleration * delta_time;
+    }
+    else {
+      if (current_velocity_side > 0) {
+        if (current_velocity_side - horizontal_friction * delta_time < 0) {
+          current_velocity_side = 0;
+        }
+        else {
+          current_velocity_side -= horizontal_friction * delta_time;
+        }
+      }
+      else if (current_velocity_side < 0) {
+        if (current_velocity_side + horizontal_friction * delta_time > 0) {
+          current_velocity_side = 0;
+        }
+        else {
+          current_velocity_side += horizontal_friction * delta_time;
+        }
+      }
+      else {
+        current_velocity_side = 0;
+      }
+    }
+
+    current_velocity_forward = Clamp(current_velocity_forward, -now_max_horizontal_speed, now_max_horizontal_speed);
+    current_velocity_side = Clamp(current_velocity_side, -now_max_horizontal_speed, now_max_horizontal_speed);
+
 
     Vector3 movement = {0, 0, 0};
     if (IsCursorHidden()) {
       movement = {
-        (static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S))) * frame_speed,
-        (static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A))) * frame_speed,
+        current_velocity_forward * static_cast<float>(delta_time),
+        current_velocity_side * static_cast<float>(delta_time),
         0
         };
     }
 
     movement.z = velocity_Y * static_cast<float>(delta_time);
+    log_debug(std::to_string(velocity_Y));
+
+
+    if (main_player.location.y < -100) {
+      teleport_player({0.5, 3, 0.5});
+    }
 
     update_player_location(movement, {0, 0, 0});
 
@@ -223,8 +292,8 @@ int update_camera() {
             if (block_type == 0) continue;
 
             BoundingBox block_hitbox = {
-              (Vector3){ global_x, static_cast<float>(y), global_z },
-              (Vector3){ global_x + 1.0f, y + 1.0f, global_z + 1.0f }
+              {global_x, static_cast<float>(y), global_z},
+              {global_x + 1.0f, y + 1.0f, global_z + 1.0f}
             };
 
             if (CheckCollisionBoxes(last_collision_hitbox_x, block_hitbox)) {
@@ -252,9 +321,7 @@ int update_camera() {
       if (velocity_Y < 0) {
         is_grounded = true;
       }
-
-    }
-    else {
+    } else {
       is_grounded = false;
     }
 
@@ -276,13 +343,10 @@ int update_camera() {
       Vector3Add(Vector3(main_player.location), Vector3({+ (player_width / 2), player_height, + (player_width / 2)})),
     };
   }
-
-  return 0;
 }
 
 
 int render() {
-  using global::speed;
   using namespace global;
   using graphics::camera;
 
@@ -552,4 +616,31 @@ void update_player_location(const Vector3 t_movement, const Vector3 t_rotation) 
 
   main_player.chunk_x = static_cast<int>(floor(static_cast<double>(main_player.block_x) / 16.0));
   main_player.chunk_z = static_cast<int>(floor(static_cast<double>(main_player.block_z) / 16.0));
+}
+
+void teleport_player(Vector3 new_pos) {
+  using namespace global;
+  using namespace global::graphics;
+
+  Vector3 forward = Vector3Subtract(camera.target, camera.position);
+  camera.position = new_pos;
+  camera.target = Vector3Add(new_pos, forward);
+
+  main_player.location = camera.position;
+  main_player.location.y -= camera_height;
+
+  main_player.block_x = static_cast<int>(floor(main_player.location.x));
+  main_player.block_y = static_cast<int>(floor(main_player.location.y));
+  main_player.block_z = static_cast<int>(floor(main_player.location.z));
+
+  main_player.chunk_x = static_cast<int>(floor(static_cast<double>(main_player.block_x) / 16.0));
+  main_player.chunk_z = static_cast<int>(floor(static_cast<double>(main_player.block_z) / 16.0));
+
+  velocity_Y = 0.0f;
+  is_grounded = false;
+
+  main_player.hitbox = {
+    Vector3Add(main_player.location, {- (player_width / 2), 0, - (player_width / 2)}),
+    Vector3Add(main_player.location, {+ (player_width / 2), player_height, + (player_width / 2)}),
+  };
 }
