@@ -54,7 +54,7 @@ int client_run() {
     }
 
     auto now = std::chrono::high_resolution_clock::now();
-    global::delta_time = std::chrono::duration<double>(now - last).count();
+    global::delta_time = std::chrono::duration<float>(now - last).count();
     last = now;
 
     if (global::delta_time > 0.1) global::delta_time = 0.1;
@@ -96,6 +96,7 @@ void update_input() {
         case DEBUG_GRID_OFF: global::debug_grid = DEBUG_GRID_BLOCKS; break;
         case DEBUG_GRID_BLOCKS: global::debug_grid = DEBUG_GRID_CHUNKS; break;
         case DEBUG_GRID_CHUNKS: global::debug_grid = DEBUG_GRID_OFF; break;
+        default: break;
       }
       f3_used = true;
     }
@@ -239,13 +240,13 @@ void update_camera() {
     Vector3 movement = {0, 0, 0};
     if (IsCursorHidden()) {
       movement = {
-        current_velocity_forward * static_cast<float>(delta_time),
-        current_velocity_side * static_cast<float>(delta_time),
+        current_velocity_forward * delta_time,
+        current_velocity_side * delta_time,
         0
         };
     }
 
-    movement.z = velocity_Y * static_cast<float>(delta_time);
+    movement.z = velocity_Y * delta_time;
     log_debug(std::to_string(velocity_Y));
 
 
@@ -280,8 +281,8 @@ void update_camera() {
         for (int y = 0; y < SIZE_Y; y++) {
           for (int z = 0; z < SIZE_Z; z++) {
 
-            float global_x = chunk.second.x * 16 + x;
-            float global_z = chunk.second.z * 16 + z;
+            int global_x = chunk.second.x * 16 + x;
+            int global_z = chunk.second.z * 16 + z;
 
             if (abs(global_x - main_player.block_x) > 2) continue;
             if (abs(y - main_player.block_y) > 3) continue;
@@ -292,8 +293,8 @@ void update_camera() {
             if (block_type == 0) continue;
 
             BoundingBox block_hitbox = {
-              {global_x, static_cast<float>(y), global_z},
-              {global_x + 1.0f, y + 1.0f, global_z + 1.0f}
+              {static_cast<float>(global_x), static_cast<float>(y), static_cast<float>(global_z)},
+              {static_cast<float>(global_x) + 1.0f, static_cast<float>(y) + 1.0f, static_cast<float>(global_z) + 1.0f}
             };
 
             if (CheckCollisionBoxes(last_collision_hitbox_x, block_hitbox)) {
@@ -389,7 +390,7 @@ void rendering_3D() {
     switch (global::debug_grid) {
       case DEBUG_GRID_BLOCKS: DrawGrid(800, 1.0f); break;
       case DEBUG_GRID_CHUNKS: DrawGrid(50, 16.0f); break;
-
+      default: break;
     }
 
     EndMode3D();
@@ -430,7 +431,7 @@ void rendering_menu() {
     DrawTextEx(font, debug_menu_string.c_str(), {10, 10}, 24, 0.5, WHITE);
 
     if (global::debug_menu == DEBUG_MENU_ADVANCED) {
-      DrawTextEx(font, debug_menu_advanced_string.c_str(), {static_cast<float>(window_width/2), 10}, 24, 0.5, WHITE);
+      DrawTextEx(font, debug_menu_advanced_string.c_str(), {static_cast<float>(window_width)/2, 10}, 24, 0.5, WHITE);
     }
   }
 
@@ -545,10 +546,8 @@ void rendering_menu() {
       }
     }
     case STATUS_MENU_PAUSE: {
-
     }
-
-
+    default: break;;
   }
 
 }
@@ -589,7 +588,7 @@ void get_keyboard_input() {
   }
 
   if (char_pressed != 0) {
-    input_string += char_pressed;
+    input_string += static_cast<char>(char_pressed);
   }
 }
 
