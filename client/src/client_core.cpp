@@ -91,14 +91,16 @@ int update_input() {
         case DEBUG_GRID_BLOCKS: global::debug_grid = DEBUG_GRID_CHUNKS; break;
         case DEBUG_GRID_CHUNKS: global::debug_grid = DEBUG_GRID_OFF; break;
       }
+      f3_used = true;
     }
     else if (IsKeyPressed(KEY_H)) {
       global::show_hitbox = !global::show_hitbox;
+      f3_used = true;
     }
     else if (IsKeyPressed(KEY_C)) {
       global::show_collision_hitbox = !global::show_collision_hitbox;
+      f3_used = true;
     }
-    f3_used = true;
   }
   else if (IsKeyReleased(KEY_F3) && !f3_used) {
     if (global::debug_menu == DEBUG_MENU_CLOSED) {
@@ -221,8 +223,8 @@ int update_camera() {
             if (block_type == 0) continue;
 
             BoundingBox block_hitbox = {
-              (Vector3){ global_x, y - 0.5f, global_z },
-              (Vector3){ global_x + 1.0f, y + 0.5f, global_z + 1.0f }
+              (Vector3){ global_x, static_cast<float>(y), global_z },
+              (Vector3){ global_x + 1.0f, y + 1.0f, global_z + 1.0f }
             };
 
             if (CheckCollisionBoxes(last_collision_hitbox_x, block_hitbox)) {
@@ -501,9 +503,9 @@ void start_graphics() {
   SetWindowMinSize(640, 360);
   SetWindowMaxSize(7680, 4320);
 
-  camera.position = (Vector3){ 0.0f, 0 + camera_height + 0.6f, 0.0f }; // + 0.6f is to not spawn inside the block
-  camera.target = (Vector3){ 0.0f, 0 + camera_height + 0.6f, 1.0f };
-  camera.up = (Vector3){ 0.0f, 2.0f, 0.0f };
+  camera.position = (Vector3){ 0.0f, 1 + camera_height + 0.2f, 0.0f }; // + 0.2f is to not spawn inside the block
+  camera.target = (Vector3){ 0.0f, 1 + camera_height + 0.2f, 1.0f };
+  camera.up = (Vector3){ 0.0f, 3.0f, 0.0f };
   camera.fovy = 90.0f;
   camera.projection = CAMERA_PERSPECTIVE;
 

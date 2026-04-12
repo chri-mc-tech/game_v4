@@ -15,6 +15,8 @@ public:
   string uuid;
   string name;
   Vector3 location;
+
+
   int block_x;
   int block_y;
   int block_z;

@@ -64,7 +64,7 @@ namespace world {
           }
 
           DrawCube(
-              (Vector3){static_cast<float>(x) + to_add_x + 0.5f, static_cast<float>(y), static_cast<float>(z) + to_add_z + 0.5f},
+              (Vector3){static_cast<float>(x) + to_add_x + 0.5f, static_cast<float>(y) + 0.5f, static_cast<float>(z) + to_add_z + 0.5f},
               1.0f, 1.0f, 1.0f, color);
         }
       }
