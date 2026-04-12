@@ -78,16 +78,24 @@ int client_run() {
 }
 
 int update_input() {
-  if (IsKeyPressed(KEY_F8)) {
-    switch (global::debug_grid) {
-      case DEBUG_GRID_OFF: global::debug_grid = DEBUG_GRID_BLOCKS; break;
-      case DEBUG_GRID_BLOCKS:global::debug_grid = DEBUG_GRID_CHUNKS; break;
-      case DEBUG_GRID_CHUNKS:global::debug_grid = DEBUG_GRID_OFF; break;
-
-    }
-  }
+  static bool f3_used = false;
 
   if (IsKeyPressed(KEY_F3)) {
+    f3_used = false;
+  }
+
+  if (IsKeyDown(KEY_F3)) {
+    if (IsKeyPressed(KEY_G)) {
+      switch (global::debug_grid) {
+        case DEBUG_GRID_OFF: global::debug_grid = DEBUG_GRID_BLOCKS; break;
+        case DEBUG_GRID_BLOCKS: global::debug_grid = DEBUG_GRID_CHUNKS; break;
+        case DEBUG_GRID_CHUNKS: global::debug_grid = DEBUG_GRID_OFF; break;
+      }
+
+      f3_used = true;
+    }
+  }
+  else if (IsKeyReleased(KEY_F3) && !f3_used) {
     if (global::debug_menu == DEBUG_MENU_CLOSED) {
       if (IsKeyDown(KEY_LEFT_SHIFT)) {
         global::debug_menu = DEBUG_MENU_ADVANCED;
@@ -100,9 +108,7 @@ int update_input() {
       global::debug_menu = DEBUG_MENU_CLOSED;
     }
   }
-
   return 0;
-
 }
 
 int update_window() {
@@ -141,6 +147,14 @@ int update_camera() {
 
   if (global::status_game == STATUS_GAME_PLAYING) {
     if (IsCursorHidden()) {
+
+      if (IsKeyDown(KEY_LEFT_CONTROL)) {
+        speed = 3.0f;
+      }
+      else {
+        speed = 2.0f;
+      }
+
       float frame_speed = speed * static_cast<float>(delta_time);
 
       //delta time = 0.00xxx
@@ -499,10 +513,10 @@ void start_graphics() {
   SetWindowMinSize(640, 360);
   SetWindowMaxSize(7680, 4320);
 
-  camera.position = (Vector3){ 0.0f, camera_height + 0.6f, 0.0f };
-  camera.target = (Vector3){ 0.0f, camera_height + 0.6f, 1.0f };
+  camera.position = (Vector3){ 0.0f, 0 + camera_height + 0.6f, 0.0f }; // + 0.6f is to not spawn inside the block
+  camera.target = (Vector3){ 0.0f, 0 + camera_height + 0.6f, 1.0f };
   camera.up = (Vector3){ 0.0f, 2.0f, 0.0f };
-  camera.fovy = 70.0f;
+  camera.fovy = 90.0f;
   camera.projection = CAMERA_PERSPECTIVE;
 
   SetExitKey(KEY_NULL);
