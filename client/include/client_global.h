@@ -76,7 +76,6 @@ namespace global {
   inline bool show_hitbox = false;
   inline bool show_collision_hitbox = false;
 
-  // inline bool is_third_person = false;
   inline float player_height = 1.8f; // 1.8
   inline float player_width = 0.6f; // 0.6
   inline float camera_height = 1.6f; // 1.6
@@ -113,8 +112,9 @@ namespace global {
 
   inline float delta_time;
 
-  // background test
+  // textures
   inline Texture2D background;
+  inline int texture_filter = TEXTURE_FILTER_POINT;
 
 }
 

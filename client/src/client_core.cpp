@@ -10,6 +10,7 @@
 
 #include "client_config.h"
 #include "client_logger.h"
+#include "client_textures.h"
 #include "client_ui.h"
 #include "client_world.h"
 #include "shared_crypto.h"
@@ -43,6 +44,7 @@ int client_run() {
 
   global::graphics::font = LoadFontEx("Archivo-SemiBold.ttf", 64, nullptr, 0);
   ui::create_all_buttons();
+  textures::load_textures();
 
 
   while (global::running) {
@@ -104,6 +106,18 @@ void update_input() {
     }
     else if (IsKeyPressed(KEY_C)) {
       global::show_collision_hitbox = !global::show_collision_hitbox;
+      f3_used = true;
+    }
+    else if (IsKeyPressed(KEY_F)) {
+      using global::texture_filter;
+
+      switch (texture_filter) {
+        case TEXTURE_FILTER_POINT: texture_filter = TEXTURE_FILTER_BILINEAR; break;
+        case TEXTURE_FILTER_BILINEAR: texture_filter = TEXTURE_FILTER_TRILINEAR; break;
+        case TEXTURE_FILTER_TRILINEAR: texture_filter = TEXTURE_FILTER_POINT; break;
+        default: break;
+      }
+      textures::update_filter();
       f3_used = true;
     }
   }
@@ -296,9 +310,12 @@ int render() {
 
   BeginDrawing();
 
-  ClearBackground(BLACK);
-
-  // DrawTexture(background, 0, 0, WHITE);
+  if (global::status_game == STATUS_GAME_PLAYING) {
+    ClearBackground({30, 31, 108});
+  }
+  else {
+    ClearBackground(BLACK);
+  }
 
   // ClearBackground({ 30, 31, 108, 255 }); // day: SKYBLUE night: 30, 31, 108
   rendering_3D();
@@ -372,6 +389,14 @@ void rendering_menu() {
     if (is_grounded) {is_grounded_string = "true";}
     else {is_grounded_string = "false";}
     debug_menu_advanced_string += "\nis grounded?: " + is_grounded_string;
+
+    debug_menu_advanced_string += "\ntexture filter: ";
+    switch (texture_filter) {
+      case TEXTURE_FILTER_POINT: debug_menu_advanced_string += "POINT"; break;
+      case TEXTURE_FILTER_BILINEAR: debug_menu_advanced_string += "BILINEAR"; break;
+      case TEXTURE_FILTER_TRILINEAR: debug_menu_advanced_string += "TRILINEAR"; break;
+      default: break;
+    }
 
     debug_menu_string += "\nblock: " + std::to_string(block_x) + " " + std::to_string(block_y) + " " + std::to_string(block_z);
 

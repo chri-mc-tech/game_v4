@@ -1,7 +1,9 @@
 #include "client_world.h"
 
-#include "client_logger.h"
 #include <raylib.h>
+#include "client_logger.h"
+
+#include "client_textures.h"
 
 namespace world {
   void save_chunk(const string& input_string) {
@@ -56,16 +58,16 @@ namespace world {
           int type = chunk.blocks[x][y][z];
           if (type <= 0) continue;
 
-          Color color;
-          switch (type) {
-            case 1: color = BLUE; break;
-            case 2: color = LIME; break;
-            default: color = WHITE; break;
-          }
+          std::string texture_name;
+          if (type == 1) texture_name = "cobblestone";
+          else if (type == 2) texture_name = "dirt";
+          else texture_name = "no_texture";
 
-          DrawCube(
-              (Vector3){static_cast<float>(x) + to_add_x + 0.5f, static_cast<float>(y) + 0.5f, static_cast<float>(z) + to_add_z + 0.5f},
-              1.0f, 1.0f, 1.0f, color);
+          textures::draw_block(
+            (Vector3){(float)x + to_add_x + 0.5f, (float)y + 0.5f, (float)z + to_add_z + 0.5f},
+            texture_name,
+            WHITE
+          );
         }
       }
     }
