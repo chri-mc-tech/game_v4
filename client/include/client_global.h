@@ -5,6 +5,7 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <raylib.h>
+#include <raymath.h>
 
 #include <fstream>
 
@@ -99,22 +100,17 @@ namespace global {
   inline float velocity_Y = 0.0f;
   inline constexpr float GRAVITY = 24.0f;
   inline bool is_grounded = false;
-  inline float coyote_timer;
+  inline float coyote_timer; // to implement
   //
 
   inline string input_string;
 
   inline std::ofstream log_file;
 
-  inline int modifier;
-
   inline bool chat_open;
   inline bool inv_open;
 
   inline float delta_time;
-
-  inline Vector3 last_movement;
-  inline Vector3 next_movement;
 
   // background test
   inline Texture2D background;
@@ -130,9 +126,6 @@ namespace global::enet {
 namespace global::graphics {
   inline int window_width = 1280;
   inline int window_height = 720;
-
-  inline float render_scale_x = 1.0f;
-  inline float render_scale_y = 1.0f;
 
   inline Font font;
 

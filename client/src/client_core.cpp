@@ -8,8 +8,6 @@
 #include <thread>
 #include <yaml-cpp/yaml.h>
 
-#include <raymath.h>
-
 #include "client_config.h"
 #include "client_logger.h"
 #include "client_ui.h"
@@ -247,8 +245,6 @@ void update_camera() {
     }
 
     movement.z = velocity_Y * delta_time;
-    log_debug(std::to_string(velocity_Y));
-
 
     if (main_player.location.y < -100) {
       teleport_player({0.5, 3, 0.5});
@@ -373,7 +369,6 @@ void rendering_3D() {
 
     BeginMode3D(camera);
 
-    // render_test_cubes();
     world::render_chunk("0 0");
     world::render_chunk("-1 -1");
 
@@ -391,6 +386,11 @@ void rendering_3D() {
       case DEBUG_GRID_BLOCKS: DrawGrid(800, 1.0f); break;
       case DEBUG_GRID_CHUNKS: DrawGrid(50, 16.0f); break;
       default: break;
+    }
+
+    for (const auto& loop_player: online_players) {
+      DrawBoundingBox(loop_player.second.hitbox, RED);
+
     }
 
     EndMode3D();

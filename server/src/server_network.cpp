@@ -262,7 +262,6 @@ void send_players_location() {
   }
 
   // send the string to all players
-  log_debug(packet_string);
   for (const auto& temp_player : global::online_players) {
     if (temp_player.second.player_status == PLAYER_STATUS_AUTHENTICATED) {
       shared::network::send_packet(temp_player.second.peer, PKT_FROM_SERVER_COORDS, packet_string, 1, 0);
@@ -284,6 +283,7 @@ void send_player_list(ENetPeer* peer) {
   }
 
   shared::network::send_packet(peer, PKT_FROM_SERVER_PLAYER_LIST, packet_string, 1, ENET_PACKET_FLAG_RELIABLE);
+  log_debug(packet_string);
 }
 
 void send_a_player_has_connected(Player* connected_player) {
@@ -292,6 +292,7 @@ void send_a_player_has_connected(Player* connected_player) {
   for (const auto& temp_loop_player : global::online_players) {
       shared::network::send_packet(temp_loop_player.second.peer, PKT_FROM_SERVER_A_PLAYER_HAS_CONNECTED, packet_string, 1, ENET_PACKET_FLAG_RELIABLE);
   }
+  log_debug(packet_string);
 }
 
 void send_a_player_has_disconnected(string uuid) {
@@ -300,4 +301,5 @@ void send_a_player_has_disconnected(string uuid) {
   for (const auto& temp_loop_player : global::online_players) {
     shared::network::send_packet(temp_loop_player.second.peer, PKT_FROM_SERVER_A_PLAYER_HAS_DISCONNECTED, packet_string, 1, ENET_PACKET_FLAG_RELIABLE);
   }
+  log_debug(packet_string);
 }

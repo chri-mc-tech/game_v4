@@ -1,7 +1,8 @@
 #include "client_network.h"
+
+#include "client_config.h"
 #include "client_global.h"
 #include "client_ui.h"
-#include "client_config.h"
 
 #include <thread>
 #include <unistd.h>
@@ -173,6 +174,11 @@ void enet_event_receive(const ENetEvent &enet_event) {
                 temp_player->location.z = stof(z);
 
                 log_debug(x + ", " + y + ", " + z);
+                using namespace global;
+                temp_player->hitbox = {
+                  Vector3Add((temp_player->location), {- (player_width / 2), 0, - (player_width / 2)}),
+                  Vector3Add((temp_player->location), {+ (player_width / 2), player_height, + (player_width / 2)}),
+                };
               }
             }
           }
