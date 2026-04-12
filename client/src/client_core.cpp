@@ -150,7 +150,9 @@ void update_camera() {
 
   if (global::status_game == STATUS_GAME_PLAYING) {
     if (IsKeyDown(KEY_LEFT_CONTROL)) {
-      now_max_horizontal_speed = max_run_horizontal_speed;
+      if (is_grounded) {
+        now_max_horizontal_speed = max_run_horizontal_speed;
+      }
     }
     else {
       now_max_horizontal_speed = max_walk_horizontal_speed;
@@ -178,62 +180,7 @@ void update_camera() {
       velocity_Y = -100;
     }
 
-    float w_s_movement = static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S));
-    float d_a_movement = static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A));
-
-    if (w_s_movement != 0) {
-      current_velocity_forward += w_s_movement * horizontal_acceleration * delta_time;
-    }
-    else {
-      if (current_velocity_forward > 0) {
-        if (current_velocity_forward - horizontal_friction * delta_time < 0) {
-          current_velocity_forward = 0;
-        }
-        else {
-          current_velocity_forward -= horizontal_friction * delta_time;
-        }
-      }
-      else if (current_velocity_forward < 0) {
-        if (current_velocity_forward + horizontal_friction * delta_time > 0) {
-          current_velocity_forward = 0;
-        }
-        else {
-          current_velocity_forward += horizontal_friction * delta_time;
-        }
-      }
-      else {
-        current_velocity_forward = 0;
-      }
-    }
-
-    if (d_a_movement != 0) {
-      current_velocity_side += d_a_movement * horizontal_acceleration * delta_time;
-    }
-    else {
-      if (current_velocity_side > 0) {
-        if (current_velocity_side - horizontal_friction * delta_time < 0) {
-          current_velocity_side = 0;
-        }
-        else {
-          current_velocity_side -= horizontal_friction * delta_time;
-        }
-      }
-      else if (current_velocity_side < 0) {
-        if (current_velocity_side + horizontal_friction * delta_time > 0) {
-          current_velocity_side = 0;
-        }
-        else {
-          current_velocity_side += horizontal_friction * delta_time;
-        }
-      }
-      else {
-        current_velocity_side = 0;
-      }
-    }
-
-    current_velocity_forward = Clamp(current_velocity_forward, -now_max_horizontal_speed, now_max_horizontal_speed);
-    current_velocity_side = Clamp(current_velocity_side, -now_max_horizontal_speed, now_max_horizontal_speed);
-
+    calculate_player_speed();
 
     Vector3 movement = {0, 0, 0};
     if (IsCursorHidden()) {
@@ -533,6 +480,7 @@ void rendering_menu() {
         log_info(hashed_pass);
 
         shared::network::send_packet(enet::connected_server_peer, PKT_FROM_CLIENT_HASHED_PASSWORD, hashed_pass, 2, ENET_PACKET_FLAG_RELIABLE, &encryption_key);
+        input_string.clear();
       }
 
       break;
@@ -544,8 +492,37 @@ void rendering_menu() {
       if (is_button_clicked(ui::button_continue) || IsKeyPressed(KEY_ENTER)) {
         global::status_menu = STATUS_MENU_MAIN_MENU;
       }
+      break;
     }
     case STATUS_MENU_PAUSE: {
+      ui::button_settings.render(
+        window_width / 2 - static_cast<int>(ui::button_settings.rect.width / 2),
+        window_height / 2 - static_cast<int>(ui::button_settings.rect.height / 2)
+        );
+      ui::button_quit.render(
+        window_width / 2 - static_cast<int>(ui::button_quit.rect.width / 2),
+        window_height / 2 - static_cast<int>(ui::button_quit.rect.height / 2) + 60
+        );
+
+      if (is_button_clicked(ui::button_settings)) {
+        global::status_menu = STATUS_MENU_SETTINGS;
+      }
+      if (is_button_clicked(ui::button_quit)) {
+        enet_peer_disconnect_later(enet::connected_server_peer, 0);
+      }
+      break;
+    }
+    case STATUS_MENU_SETTINGS: {
+      ui::button_back.render(
+        window_width / 2 - static_cast<int>(ui::button_back.rect.width / 2),
+        window_height - 70
+        );
+
+      if (is_button_clicked(ui::button_back)) {
+        global::status_menu = STATUS_MENU_PAUSE;
+      }
+
+      break;
     }
     default: break;;
   }
@@ -642,4 +619,65 @@ void teleport_player(Vector3 new_pos) {
     Vector3Add(main_player.location, {- (player_width / 2), 0, - (player_width / 2)}),
     Vector3Add(main_player.location, {+ (player_width / 2), player_height, + (player_width / 2)}),
   };
+}
+
+void calculate_player_speed() {
+  using namespace global;
+
+  float w_s_movement = static_cast<float>(IsKeyDown(KEY_W)) - static_cast<float>(IsKeyDown(KEY_S));
+  float d_a_movement = static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A));
+
+  if (w_s_movement != 0) {
+    current_velocity_forward += w_s_movement * horizontal_acceleration * delta_time;
+  }
+  else {
+    if (current_velocity_forward > 0) {
+      if (current_velocity_forward - horizontal_friction * delta_time < 0) {
+        current_velocity_forward = 0;
+      }
+      else {
+        current_velocity_forward -= horizontal_friction * delta_time;
+      }
+    }
+    else if (current_velocity_forward < 0) {
+      if (current_velocity_forward + horizontal_friction * delta_time > 0) {
+        current_velocity_forward = 0;
+      }
+      else {
+        current_velocity_forward += horizontal_friction * delta_time;
+      }
+    }
+    else {
+      current_velocity_forward = 0;
+    }
+  }
+
+  if (d_a_movement != 0) {
+    current_velocity_side += d_a_movement * horizontal_acceleration * delta_time;
+  }
+  else {
+    if (current_velocity_side > 0) {
+      if (current_velocity_side - horizontal_friction * delta_time < 0) {
+        current_velocity_side = 0;
+      }
+      else {
+        current_velocity_side -= horizontal_friction * delta_time;
+      }
+    }
+    else if (current_velocity_side < 0) {
+      if (current_velocity_side + horizontal_friction * delta_time > 0) {
+        current_velocity_side = 0;
+      }
+      else {
+        current_velocity_side += horizontal_friction * delta_time;
+      }
+    }
+    else {
+      current_velocity_side = 0;
+    }
+  }
+
+  current_velocity_forward = Clamp(current_velocity_forward, -now_max_horizontal_speed, now_max_horizontal_speed);
+  current_velocity_side = Clamp(current_velocity_side, -now_max_horizontal_speed, now_max_horizontal_speed);
+
 }

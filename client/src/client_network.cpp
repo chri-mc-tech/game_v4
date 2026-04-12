@@ -204,6 +204,7 @@ void enet_event_receive(const ENetEvent &enet_event) {
 void enet_event_disconnected(const ENetEvent &enet_event) {
   log_debug("disconnected");
   global::status_connection = STATUS_CONNECTION_NOT_CONNECTED;
+  global::status_game = STATUS_GAME_NONE;
   global::status_menu = STATUS_MENU_DISCONNECTED_FROM_SERVER;
   global::online_players.clear();
 }

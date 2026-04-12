@@ -39,6 +39,14 @@ namespace ui {
 
     button_continue.create(250, 40, "Continue", 32);
 
+    button_back.create(150, 40, "Back", 32);
+
+    button_resume.create(250, 40, "Resume", 32);
+
+    button_settings.create(250, 40, "Settings", 32);
+
+    button_quit.create(150, 40, "Quit", 32);
+
   }
 
   void draw_centered_text(const string &text, int x, int y, Color color) {

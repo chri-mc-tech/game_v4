@@ -19,10 +19,17 @@ namespace ui {
 
   inline Button button_singleplayer;
   inline Button button_multiplayer;
+
   inline Button button_direct_connect;
   inline Button button_add_server;
   inline Button button_remove_server;
+
   inline Button button_continue;
+  inline Button button_back;
+
+  inline Button button_resume;
+  inline Button button_settings;
+  inline Button button_quit;
 
 
   void draw_centered_text(const std::string &text, int x, int y, Color color);

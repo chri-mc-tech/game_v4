@@ -37,6 +37,7 @@ enum status_menu {
   STATUS_MENU_DISCONNECTED_FROM_SERVER,
   STATUS_MENU_VOID,
   STATUS_MENU_PAUSE,
+  STATUS_MENU_SETTINGS,
 };
 
 enum status_game {
