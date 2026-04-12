@@ -92,15 +92,10 @@ Fixare memory leak server, probabilmente pacchetti vengono creati ma non distrut
 COSE DA AGGIUNGERE
 ---------------------
 
-PASSARE TUTTO IL RENDERING DA SDL A RAYLIB COSI DA AVERE RENDERING 3D
-
-Modificare status del player nel client e fare:
-chat aperta? bool
-stato connessione (connecting, encrypting, encrypted)
-stato menu
-
-Stati come autenticato ecc fare solo lato server per sicurezza
-
+!!
+AGGIUNGI CLIENT MANDA COORD AL SERVER, SERVER GESTISCE E RIMANDA A TUTTI I CLIENT
+RENDERING MULTIPLAYER
+!!
 -------
 
 Modificare tutti i enet_peer_disconnect che ci sono nel server verso i client
