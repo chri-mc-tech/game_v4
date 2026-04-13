@@ -28,6 +28,8 @@ int server_run()
   world::load_chunk(0, 0);
   world::load_chunk(-1, -1);
 
+  world::place_block(2, 10, 10, 10);
+
   while (global::running) {
     auto frame_start = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();

@@ -34,7 +34,8 @@ namespace world {
       while (file >> type >> comma >> x >> comma >> y >> comma >> z) {
         chunk.blocks[x][y][z] = type;
       }
-    } else {
+    }
+    else {
       std::filesystem::create_directory("world");
       std::ofstream new_file(file_name);
       new_file.close();

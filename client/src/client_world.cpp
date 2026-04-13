@@ -61,6 +61,7 @@ namespace world {
           std::string texture_name;
           if (type == 1) texture_name = "cobblestone";
           else if (type == 2) texture_name = "dirt";
+          else if (type == 3) texture_name = "glass";
           else texture_name = "no_texture";
 
           textures::draw_block(
