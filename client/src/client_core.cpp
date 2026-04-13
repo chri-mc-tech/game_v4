@@ -165,11 +165,25 @@ void update_camera() {
   if (global::status_game == STATUS_GAME_PLAYING) {
     if (IsKeyDown(KEY_LEFT_CONTROL)) {
       if (is_grounded) {
-        now_max_horizontal_speed = max_run_horizontal_speed;
+        current_max_horizontal_speed = max_run_horizontal_speed;
+        current_horizontal_acceleration = run_horizontal_acceleration;
+        current_horizontal_friction = horizontal_friction;
+      }
+      else {
+        current_horizontal_acceleration = air_run_horizontal_acceleration;
+        current_horizontal_friction = air_horizontal_friction;
       }
     }
     else {
-      now_max_horizontal_speed = max_walk_horizontal_speed;
+      current_max_horizontal_speed = max_walk_horizontal_speed;
+      if (is_grounded) {
+        current_horizontal_acceleration = horizontal_acceleration;
+        current_horizontal_friction = horizontal_friction;
+      }
+      else {
+        current_horizontal_acceleration = air_horizontal_acceleration;
+        current_horizontal_friction = air_horizontal_friction;
+      }
     }
 
     // delta time ≈ 0.00xxx
@@ -653,23 +667,23 @@ void calculate_player_speed() {
   float d_a_movement = static_cast<float>(IsKeyDown(KEY_D)) - static_cast<float>(IsKeyDown(KEY_A));
 
   if (w_s_movement != 0) {
-    current_velocity_forward += w_s_movement * horizontal_acceleration * delta_time;
+    current_velocity_forward += w_s_movement * current_horizontal_acceleration * delta_time;
   }
   else {
     if (current_velocity_forward > 0) {
-      if (current_velocity_forward - horizontal_friction * delta_time < 0) {
+      if (current_velocity_forward - current_horizontal_friction * delta_time < 0) {
         current_velocity_forward = 0;
       }
       else {
-        current_velocity_forward -= horizontal_friction * delta_time;
+        current_velocity_forward -= current_horizontal_friction * delta_time;
       }
     }
     else if (current_velocity_forward < 0) {
-      if (current_velocity_forward + horizontal_friction * delta_time > 0) {
+      if (current_velocity_forward + current_horizontal_friction * delta_time > 0) {
         current_velocity_forward = 0;
       }
       else {
-        current_velocity_forward += horizontal_friction * delta_time;
+        current_velocity_forward += current_horizontal_friction * delta_time;
       }
     }
     else {
@@ -678,23 +692,23 @@ void calculate_player_speed() {
   }
 
   if (d_a_movement != 0) {
-    current_velocity_side += d_a_movement * horizontal_acceleration * delta_time;
+    current_velocity_side += d_a_movement * current_horizontal_acceleration * delta_time;
   }
   else {
     if (current_velocity_side > 0) {
-      if (current_velocity_side - horizontal_friction * delta_time < 0) {
+      if (current_velocity_side - current_horizontal_friction * delta_time < 0) {
         current_velocity_side = 0;
       }
       else {
-        current_velocity_side -= horizontal_friction * delta_time;
+        current_velocity_side -= current_horizontal_friction * delta_time;
       }
     }
     else if (current_velocity_side < 0) {
-      if (current_velocity_side + horizontal_friction * delta_time > 0) {
+      if (current_velocity_side + current_horizontal_friction * delta_time > 0) {
         current_velocity_side = 0;
       }
       else {
-        current_velocity_side += horizontal_friction * delta_time;
+        current_velocity_side += current_horizontal_friction * delta_time;
       }
     }
     else {
@@ -702,7 +716,7 @@ void calculate_player_speed() {
     }
   }
 
-  current_velocity_forward = Clamp(current_velocity_forward, -now_max_horizontal_speed, now_max_horizontal_speed);
-  current_velocity_side = Clamp(current_velocity_side, -now_max_horizontal_speed, now_max_horizontal_speed);
+  current_velocity_forward = Clamp(current_velocity_forward, -current_max_horizontal_speed, current_max_horizontal_speed);
+  current_velocity_side = Clamp(current_velocity_side, -current_max_horizontal_speed, current_max_horizontal_speed);
 
 }

@@ -89,10 +89,18 @@ namespace global {
   inline float max_walk_horizontal_speed = 3.0f;
   inline float max_run_horizontal_speed = 4.0f;
 
-  inline float now_max_horizontal_speed = max_walk_horizontal_speed;
+  inline float current_max_horizontal_speed = max_walk_horizontal_speed;
 
-  inline float horizontal_acceleration = 25.0f;
+  inline float horizontal_acceleration = 22.0f;
+  inline float run_horizontal_acceleration = 30.0f;
   inline float horizontal_friction = 18.0f;
+  inline float air_horizontal_acceleration = 0.8f;
+  inline float air_run_horizontal_acceleration = 2.0f;
+  inline float air_horizontal_friction = 8.0f;
+
+  inline float current_horizontal_acceleration = horizontal_acceleration;
+  inline float current_horizontal_friction = horizontal_friction;
+
   inline float current_velocity_forward = 0.0f;
   inline float current_velocity_side = 0.0f;
 
