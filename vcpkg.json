@@ -9,15 +9,6 @@
     "name" : "cryptopp",
     "version>=" : "2025-12-01"
   }, {
-    "name" : "sdl3",
-    "version>=" : "3.4.0"
-  }, {
-    "name" : "sdl3-ttf",
-    "version>=" : "3.2.2#1"
-  }, {
-    "name" : "sdl3-image",
-    "version>=" : "3.4.0"
-  }, {
     "name" : "glfw3",
     "version>=" : "3.4#1"
   }, {

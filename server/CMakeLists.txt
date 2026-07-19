@@ -20,7 +20,7 @@ add_executable(server
 )
 
 target_link_options(server PRIVATE
-        -static
+        #-static
         -static-libgcc
         -static-libstdc++
 )
